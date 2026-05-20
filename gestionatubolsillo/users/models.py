@@ -38,6 +38,7 @@ class User(AbstractUser):
     categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default='ejecutivo')
 
     #Roles admin, inspector, inspector_parte_trabajo, user
+    #No tengo muy claro esta parte, ya que no se si hay existencia de roles o es indiferente
     role = AbstractUser.choices = [
         ('admin', 'Admin'), 
         ('inspector', 'Inspector'), 
