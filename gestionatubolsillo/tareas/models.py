@@ -11,10 +11,14 @@ class Tarea(models.Model):
         ('terminada', 'Terminada'),
         ('borrada', 'Borrada')
     ]
+    #Si solo hay 2 tipos, normal y urgente, podría usarse un booleano
+    #Si no se pretende escalar, debe eliminarse
+    """
     TIPO_CHOICES = [
         ('normal','Normal'),
         ('urgente','Urgente')
     ]
+    """
 
     TIPO_ASOCIACION_CHOICES = [
         ('empresa', 'Asociada a todos los usuarios de una empresa'),
@@ -31,8 +35,9 @@ class Tarea(models.Model):
     #Un usuario puede tener varias tareas y una tarea puede ser asignada a varios usuarios
     usuarios_asignados = models.ManyToManyField('users.User', related_name='tareas_asignadas')
     estado = models.CharField(max_length=20, choices=Estado_CHOICES, default='pendiente')
-    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='normal')
+    #tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='normal')
     tipo_asociacion = models.CharField(max_length=20, choices=TIPO_ASOCIACION_CHOICES, default='usuario')
+    es_urgente = models.BooleanField(default=False)
 
     def get_usuarios_asociados(self):
         if self.tipo_asociacion == 'usuario':
