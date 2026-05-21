@@ -1,0 +1,28 @@
+from django.shortcuts import HttpResponse, redirect
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
+from django.contrib import messages
+from django.urls import reverse
+from django.template import loader
+
+# Create your views here.
+def login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth_login(request, user)
+            #Redirigir al inicio
+            return redirect(reverse('home'))
+        else:
+            # Credenciales inválidas, mostrar mensaje de error
+            messages.error(request, "Credenciales inválidas. Por favor, inténtalo de nuevo.", extra_tags='error')
+            return redirect('/login')
+    else:
+        template = loader.get_template('account/login.html')
+        context = {}
+        user = request.user
+        if user.is_authenticated:
+            return redirect(reverse('home'))
+        return HttpResponse(template.render(context, request))
