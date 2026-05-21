@@ -1,0 +1,137 @@
+.faqHeader {
+    font-size: 27px;
+    margin: 20px;
+}
+
+.panel-heading [data-toggle="collapse"]:after {
+    
+    float: right;
+    color: #F58723;
+    font-size: 18px;
+    line-height: 22px;
+   
+}
+
+.panel-heading [data-toggle="collapse"].collapsed:after {
+
+    color: #454444;
+}
+
+.formlogin{
+    display:none;
+    z-index:1000;
+    position: fixed; 
+    background-color:#ffffff;
+    right:10px;
+    top:110px;
+    border:1px solid #efefef;
+    padding:10px;
+}
+
+
+@keyframes desaparecer
+{
+0%		{bottom: 0px;}
+80%		{bottom: 0px;}
+100%		{bottom: -50px;}
+}
+ 
+@-webkit-keyframes desaparecer /* Safari and Chrome */
+{
+0%		{bottom: 0px;}
+80%		{bottom: 0px;}
+100%		{bottom: -50px;}
+}
+ 
+@keyframes aparecer
+{
+0%		{bottom: -38px;}
+10%		{bottom: 0px;}
+90%		{bottom: 0px;}
+100%		{bottom: -38px;}
+}
+ 
+@-webkit-keyframes aparecer /* Safari and Chrome */
+{
+0%		{bottom: -38px;}
+10%		{bottom: 0px;}
+90%		{bottom: 0px;}
+100%		{bottom: -38px;}
+}
+#cookiesms1:target {
+    display: none;
+}
+.cookiesms{	
+	width:100%;
+	height:49px;
+	margin:0 auto;
+	padding-left:1%;
+        padding-top:5px;
+        font-size: 0.9em;
+	clear:both;
+        font-weight: strong;
+    color: #333;
+    bottom:0px;
+    position:fixed;
+    left: 0px;
+    background-color: #FFF;
+    opacity:0.7;
+    filter:alpha(opacity=70); /* For IE8 and earlier */
+    transition: bottom 1s;
+    -webkit-transition:bottom 1s; /* Safari */
+    -webkit-box-shadow: 3px -3px 1px rgba(50, 50, 50, 0.56);
+    -moz-box-shadow:    3px -3px 1px rgba(50, 50, 50, 0.56);
+    box-shadow:         3px -3px 1px rgba(50, 50, 50, 0.56);
+    z-index:999999999;
+}
+ 
+.cookiesms:hover{
+    bottom:0px;
+}
+.cookies2{
+    background-color: #FFF;
+    display:inline;
+    opacity:0.95;
+    filter:alpha(opacity=95);
+    position:absolute; 
+    left:1%; 
+    top:-30px;
+    font-size:15px;
+    height:30px;
+    padding-left:25px;
+    padding-right:25px;
+    -webkit-border-top-right-radius: 15px;
+    -webkit-border-top-left-radius: 15px;
+    -moz-border-radius-topright: 15px;
+    -moz-border-radius-topleft: 15px;
+    border-top-right-radius: 15px;
+    border-top-left-radius: 15px;
+    -webkit-box-shadow: 3px -3px 1px rgba(50, 50, 50, 0.56);
+    -moz-box-shadow:    3px -3px 1px rgba(50, 50, 50, 0.56);
+    box-shadow:         3px -3px 1px rgba(50, 50, 50, 0.56);
+}
+.lopd{
+    padding-top:25px;
+    font-size:12px;
+    color:#333;
+}
+/*
+     FILE ARCHIVED ON 03:51:26 Aug 06, 2016 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 10:14:59 May 21, 2026.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+*/
+/*
+playback timings (ms):
+  captures_list: 0.574
+  exclusion.robots: 0.05
+  exclusion.robots.policy: 0.038
+  esindex: 0.009
+  cdx.remote: 86.928
+  LoadShardBlock: 188.445 (3)
+  PetaboxLoader3.resolve: 85.528 (3)
+  PetaboxLoader3.datanode: 116.685 (4)
+  load_resource: 50.181
+*/

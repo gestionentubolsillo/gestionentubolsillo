@@ -8,51 +8,60 @@
     <title>Gestiona tu bolsillo</title>
 
     <!-- ALL CSS -->
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="https:://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <!--Revisar link href="{% static 'css/style.css' %}" rel="stylesheet"-->
-    <!--Revisar script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" 
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" 
+    crossorigin="anonymous"></script>
+    <!--TO-REFACTOR: Cambiar los css de la waybackmachine a archivos locales actualizados-->
+    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/estilo.css">
+    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/animate.css">
+    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/swiper.css">
+    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/owl.carousel.css">
+    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/owl.theme.css">
+    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/magnific-popup.css">
+    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/styles/style-blue.css">
+    <!--TO-DO: Implementar archivo css-->
+    <link href="{% static 'css/menu.css' %}" rel="stylesheet">
+    <!--Google Fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+    <!--MDB-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/css/mdb.min.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="#">Gestiona tu bolsillo</a>
-            <button aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbarNav" data-bs-toggle="collapse" type="button">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Acerca de</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Contacto</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Preguntas frecuentes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Política de privacidad</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Acceder</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <img alt="..." class="d-block w-100" src="{% static 'images/gestionatubolsillo.png' %}">
-            <div class="carousel-caption d-none d-md-block">
-                <h5>Gestiona tu bolsillo</h5>
-                <p>Partes de trabajo, Informes de inspección / supervisión, Partes de averías / incidencias, Informes de acudas, Cuadrantes de Tareas , listados de control de trabajos realizados... esto y mucho más en la palma de tu mano</p>
-            </div>
-        </div>
-    </div>
+    {% include "navbar.html" %}
+    <!--Inicio-->
+    <section id="inicio" class="clearfix" data-scroll-index="0">
+        {% include "home/home_inicio.html" %}
+    <!---Get started-->
+    <section id="get-started" class="clearfix" data-scroll-index="1">
+        {% include "home/getStarted.html" %}
+    </section>
+    <!--Features-->
+    <section id="features" class="clearfix" data-scroll-index="2">
+        {% include "home/home_features.html" %}
+    </section>
+    <!--FaQ-->
+    <section id="faq" class="clearfix" data-scroll-index="3">
+        {% include "home/FaQ.html" %}
+    <section>
+    <!--Footer-->
+    {% include "footer.html" %}
 
+    <!-- JS Files-->
+    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/scrollIt.js"></script>
+    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/wow.min.js"></script>
+    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/swiper.min.js"></script>
+    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/custom.js"></script>
+    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/owl.carousel.min.js"></script>
+    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/jquery.magnific-popup.min.js"></script>
+    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/jquery.stellar.min.js"></script>
+    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/jquery.particleground.min.js"></script>
+    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/jquery.easing.1.3.js"></script>
 </body>
 </html>
