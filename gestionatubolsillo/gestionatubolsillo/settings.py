@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'almacen',
     'home',
     'backoffice',
+    'authentication',
     #3rd party auth apps
     'allauth',
     'allauth.account',

@@ -81,9 +81,20 @@
                         </ul>
                     </div>
                 {% endif %}
+                {% if not request.user.is_authenticated %}
+                    <div class="collapse navbar-collapse justify-content end" id="navbarSupportedContent">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/login">Iniciar sesión</a>
+                            </li>
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </nav>
+    {% block body %}
+    {% endblock %}
 </body>
 </html>
 
