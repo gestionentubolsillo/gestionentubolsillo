@@ -29,6 +29,8 @@ class User(AbstractUser):
 
     # You can add additional fields here if needed
     direccion = models.CharField(max_length=255, blank=True, null=True)
+    provincia = models.CharField(max_length=100)
+    municipio = models.CharField(max_length=100)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     nif = models.CharField(max_length=20, blank=True, null=True)
 
@@ -37,14 +39,8 @@ class User(AbstractUser):
     #delegacion = ForeignKey(delegaciones models.delegacionID)
     categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default='ejecutivo')
 
-    #Roles admin, inspector, inspector_parte_trabajo, user
-    #No tengo muy claro esta parte, ya que no se si hay existencia de roles o es indiferente
-    role = AbstractUser.choices = [
-        ('admin', 'Admin'), 
-        ('inspector', 'Inspector'), 
-        ('inspector_parte_trabajo', 'Inspector Parte Trabajo'), 
-        ('user', 'User')
-    ]
+    esInspector = models.BooleanField(default=False)
+    esInspector_parteTrabajo = models.BooleanField(default=False)
     has_login_access = models.BooleanField(default=True)
     has_dashboard_access = models.BooleanField(default=False)
     # Permisos de usuario para cada sección del sistema
@@ -66,5 +62,17 @@ class User(AbstractUser):
     permisos_informes = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
     permisos_empresas = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
     permisos_configuracion = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
+    empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='empresa')
+    always_track_GPS = models.BooleanField(default=False)
+    precio_hora = models.FloatField(default=0.)
+    comentarios = models.TextField(blank=True,null=True)
 
 
+def can_access_backoffice(user:User)-> bool:
+    return user.has_login_access
+
+def can_view_users(user:User)-> bool:
+    return user.permisos_usuario == 'view_only' or user.permisos_usuario == 'create_modify'
+
+def can_CRUD_users(user:User)-> bool:
+    return user.permisos_usuario == 'create_modify'
