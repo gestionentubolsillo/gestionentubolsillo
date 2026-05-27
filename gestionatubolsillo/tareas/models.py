@@ -12,33 +12,16 @@ class Tarea(models.Model):
         ('terminada', 'Terminada'),
         ('borrada', 'Borrada')
     ]
-    #Si solo hay 2 tipos, normal y urgente, podría usarse un booleano
-    #Si no se pretende escalar, debe eliminarse
-    """
-    TIPO_CHOICES = [
-        ('normal','Normal'),
-        ('urgente','Urgente')
-    ]
-    """
-
-    TIPO_ASOCIACION_CHOICES = [
-        ('empresa', 'Asociada a todos los usuarios de una empresa'),
-        ('usuario', 'Asociada a usuario particular')
-    ]
 
     texto = models.CharField(max_length=255)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
-    #Relacion N:N con el modelo Empresa.
-    #Una tarea puede estar asociada a la totalidad de los usuarios de una empresa o de varias empresas
-    empresas_asociadas = models.ManyToManyField('empresas.Empresa', related_name='tareas_asociadas')
 
-    #Relacion N:N con el modelo User
-    #Un usuario puede tener varias tareas y una tarea puede ser asignada a varios usuarios
-    usuarios_asignados = models.ManyToManyField('users.User', related_name='tareas_asignadas')
     estado = models.CharField(max_length=20, choices=Estado_CHOICES, default='pendiente')
-    #tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='normal')
-    tipo_asociacion = models.CharField(max_length=20, choices=TIPO_ASOCIACION_CHOICES, default='usuario')
+
     es_urgente = models.BooleanField(default=False)
+    usuario_creador = models.ForeignKey('users.User',on_delete=models.CASCADE,related_name='creador')
+    #REFACTORED- Eliminado relaciones N:N con Empresa y User
+    usuario_asignado = models.ForeignKey('users.User',on_delete=models.CASCADE,related_name='asignado')
 
     def get_usuarios_asociados(self):
         if self.tipo_asociacion == 'usuario':
@@ -47,3 +30,9 @@ class Tarea(models.Model):
             return User.objects.filter(empresa__in=self.empresas_asociadas.all(),is_active=True).distinct()
         return User.objects.none()
 
+
+def can_view_tareas(user:User)-> bool:
+    return user.permisos_tareas == 'view_only' or user.permisos_tareas == 'create_modify'
+
+def can_CRUD_tareas(user:User)->bool:
+    return user.permisos_tareas == 'create_modify'
