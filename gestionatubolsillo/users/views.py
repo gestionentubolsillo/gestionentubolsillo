@@ -3,14 +3,15 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import User, can_access_backoffice, can_view_users, can_CRUD_users
 from django.core.paginator import Paginator
 from django.template import loader
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.contrib import messages
 from empresas.models import Empresa
 # Create your views here.
 
 MIN_CHARS_PASSWORD = 8
+DEFAULT_PAGINATION_USERS = 25
 
-def validate_user(request,
+def validate_user(request : HttpRequest,
                   usuario,password,nombre,apellidos,
                   provincia,municipio,empresa)->bool:
     errors = False
@@ -42,7 +43,7 @@ def validate_user(request,
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
-def create_user(request):
+def create_user(request:HttpRequest):
     if request.method == 'POST':
         usuario = request.POST.get('username','')
         password = request.POST.get('password', '')
@@ -96,12 +97,13 @@ def create_user(request):
 
 @login_required
 @user_passes_test(can_access_backoffice)
-def lista_users(request):
+def lista_users(request:HttpRequest):
     usuario : User = request.user
     empresa_de_usuario :Empresa = usuario.empresa
 
     n_pagina = request.GET.get('page', 1)
-    n_usuarios = request.GET.get('n_users', 25)
+    global DEFAULT_PAGINATION_USERS
+    n_usuarios = request.GET.get('n_users', DEFAULT_PAGINATION_USERS)
     filtro_empresa = request.GET.get('empresa',empresa_de_usuario.EmpresaID)
 
     lista_usuarios = User.objects.filter(
@@ -122,7 +124,7 @@ def lista_users(request):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_users)
-def user_details(request,user_id):
+def user_details(request:HttpRequest,user_id):
     user = User.objects.filter(id=user_id).first()
     if not user:
         messages.error(request,"El usuario no existe",extra_tags='error')
@@ -133,7 +135,7 @@ def user_details(request,user_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
-def edit_user(request,user_id):
+def edit_user(request:HttpRequest,user_id):
     user = User.objects.filter(id=user_id).first()
     if request.method == 'POST':
         usuario = request.POST.get('username','')
@@ -194,7 +196,7 @@ def edit_user(request,user_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
-def delete_user(request,user_id):
+def delete_user(request:HttpRequest,user_id):
     user = User.objects.filter(id=user_id).first()
     user.delete()
     messages.success(request,"El usuario ha sido eliminado correctamente",extra_tags='success')
@@ -203,7 +205,7 @@ def delete_user(request,user_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
-def alter_user_permissions(request,user_id):
+def alter_user_permissions(request:HttpRequest,user_id):
     user = User.objects.filter(id=user_id).first()
     if request.method == 'POST':
         p_almacen = request.POST.get('p_almacen','no_access')
