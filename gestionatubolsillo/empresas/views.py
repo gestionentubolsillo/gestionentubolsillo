@@ -35,7 +35,7 @@ def create_empresa(request:HttpRequest):
         empresa.paquete = paquete
         empresa.save()
         return redirect('backoffice/empresas')
-    if request.method == 'GET':
+    elif request.method == 'GET':
         template = loader.get_template('form.html')
         context = {}
         return HttpResponse(template.render(context,request))
