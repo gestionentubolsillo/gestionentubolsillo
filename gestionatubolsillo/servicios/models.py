@@ -30,9 +30,8 @@ class Servicio(models.Model):
     mail_de_contacto = models.EmailField(blank=True, null=True)
 
     #Relacion N:1 con el modelo Empresa
-    empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='servicios')
-    #Relacion N:N con el modelo cliente
-    clientes = models.ManyToManyField('clientes.Cliente', related_name='servicios')
+    empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='empresa')
+    
 
     def __str__(self):
         return self.nombre

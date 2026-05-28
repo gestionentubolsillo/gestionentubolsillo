@@ -72,6 +72,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'clientes.middleware.ClientSessionMiddleware'
 ]
 
 ROOT_URLCONF = 'gestionatubolsillo.urls'
@@ -155,6 +156,7 @@ AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
+    'clientes.auth_backends.ClientBackend',
 )
 
 SITE_ID = 1
