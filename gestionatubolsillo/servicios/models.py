@@ -1,5 +1,6 @@
 from django.db import models
 from multiselectfield import MultiSelectField
+from users.models import User
 
 # Create your models here.
 
@@ -30,8 +31,15 @@ class Servicio(models.Model):
     mail_de_contacto = models.EmailField(blank=True, null=True)
 
     #Relacion N:1 con el modelo Empresa
-    empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='empresa')
+    empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='servicio')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
     
 
     def __str__(self):
         return self.nombre
+
+def can_view_servicios(user:User)->bool:
+    return user.permisos_servicios_NFC == 'view_only' or user.permisos_servicios_NFC == 'create_modify'
+
+def can_CRUD_servicios(user:User)->bool:
+    return user.permisos_servicios_NFC == 'create_modify'
