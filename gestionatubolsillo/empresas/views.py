@@ -39,7 +39,6 @@ def create_empresa(request:HttpRequest):
         template = loader.get_template('form.html')
         context = {}
         return HttpResponse(template.render(context,request))
-    pass
 
 @login_required
 @user_passes_test(can_access_backoffice)
