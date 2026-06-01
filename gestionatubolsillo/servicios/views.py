@@ -78,6 +78,7 @@ def create_servicio(request:HttpRequest):
             template = loader.get_template('form.html')
             context = {}
             return HttpResponse(template.render(context,request))
+        empresa = Empresa.objects.filter(id=empresa_id).first()
         servicio = Servicio()
         servicio.nombre = nombre
         servicio.descripcion = descripcion
@@ -87,7 +88,7 @@ def create_servicio(request:HttpRequest):
         servicio.precio_por_hora = precio_hora
         servicio.is_active = is_active
         servicio.es_exterior = es_exterior
-        servicio.empresa
+        servicio.empresa = empresa
         servicio.mail_de_contacto = mail
         servicio.requiere_gps = requiere_gps
         servicio.fecha_creacion = created_at
@@ -108,7 +109,43 @@ def create_servicio(request:HttpRequest):
 @user_passes_test(can_CRUD_servicios)
 def edit_servicio(request:HttpRequest,servicio_id):
     if request.method == 'POST':
-        pass
+        nombre = request.POST.get('nombre','')
+        descripcion = request.POST.get('descripcion','')
+        mail = request.POST.get('mail','')
+        dias_semana = request.POST.getlist('dias_semana')
+        hora_inicio = request.POST.get('hora_inicio','')
+        hora_fin = request.POST.get('hora_fin','')
+        precio_hora = request.POST.get('precio_hora',0.)
+        is_active = request.POST.get('is_active')=='on'
+        es_exterior = request.POST.get('es_exterior')=='on'
+        requiere_gps = request.POST.get('gps_on')=='on'
+        clientes_ids = request.POST.getlist('clientes_ids')
+        empresa_id = request.POST.get('empresa_id','')
+        errors = validate_servicio(request,nombre,dias_semana,hora_inicio,hora_fin,clientes_ids,empresa_id)
+        if errors:
+            template = loader.get_template('form.html')
+            context = {}
+            return HttpResponse(template.render(context,request))
+        empresa = Empresa.objects.filter(id=empresa_id).first()
+        servicio = Servicio.objects.filter(id=servicio_id).first()
+        servicio.nombre = nombre
+        servicio.descripcion = descripcion
+        servicio.dias_semana = dias_semana
+        servicio.hora_inicio = hora_inicio
+        servicio.hora_fin = hora_fin
+        servicio.precio_por_hora = precio_hora
+        servicio.is_active = is_active
+        servicio.es_exterior = es_exterior
+        servicio.empresa = empresa
+        servicio.mail_de_contacto = mail
+        servicio.requiere_gps = requiere_gps
+        servicio.save()
+
+        #Relacion N:N con el modelo Cliente
+        clientes = Cliente.objects.filter(id__in = clientes_ids)
+        servicio.clientes.set(clientes)
+
+        return redirect('backoffice/servicios')
     elif request.method == 'GET':
         template = loader.get_template('form.html')
         context = {}
