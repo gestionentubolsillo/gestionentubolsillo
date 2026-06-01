@@ -1,4 +1,5 @@
 from django.db import models
+from users.models import User
 
 # Create your models here.
 
@@ -69,5 +70,33 @@ class Informe_Acuda(Parte):
     #1 central receptora recibe N informes de acuda
     central = models.ForeignKey('centrales.Central', on_delete=models.SET_NULL,null=True,blank=True)
 
+
+#Parece que solo hay funcionalidad de vista de informes en general, no parece que haya opcion de crear/modificar
+def can_view_informes(user:User)->bool:
+    return user.permisos_informes in ['view_only','create_modify']
+
+#Resto de informes si tienen opcion
+def can_view_parte_trabajo(user:User)->bool:
+    return user.permisos_partes_trabajo in ['view_only','create_modify']
+def can_CRUD_parte_trabajo(user:User)->bool:
+    return user.permisos_partes_trabajo == 'create_modify'
+
+def can_view_parte_inspeccion(user:User)->bool:
+    return user.permisos_partes_inspeccion in ['view_only','create_modify']
+
+def can_CRUD_parte_inspeccion(user:User)->bool:
+    return user.permisos_partes_inspeccion == 'create_modify'
+
+def can_view_parte_incidencia(user:User)->bool:
+    return user.permisos_partes_incidencias in ['view_only','create_modify']
+
+def can_CRUD_parte_incidencia(user:User)->bool:
+    return user.permisos_partes_incidencias == 'create_modify'
+
+def can_view_acuda(user:User)->bool:
+    return user.permisos_informes_acuda in ['view_only','create_modify']
+
+def can_CRUD_acuda(user:User)->bool:
+    return user.permisos_informes_acuda == 'create_modify'
 
 
