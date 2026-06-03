@@ -12,6 +12,8 @@ class Parte(models.Model):
     usuario_creador = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='%(class)s_creados')
     #1 cliente tiene asociado N partes
     cliente = models.ForeignKey('clientes.Cliente', on_delete=models.CASCADE, related_name='%(class)s_clientes')
+    #1 empresa tiene N partes
+    empresa = models.ForeignKey('empresas.Empresa',on_delete=models.CASCADE,related_name='%(class)s_empresas')
 
 
     fecha_finalizacion = models.DateTimeField(blank=True, null=True)

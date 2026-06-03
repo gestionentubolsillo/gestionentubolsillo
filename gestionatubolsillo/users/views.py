@@ -87,6 +87,7 @@ def create_user(request:HttpRequest):
                 precio_hora = precio_hora,
                 comentarios = comentarios
             )
+            user.set_password(password)
             user.save()
             return redirect('/backoffice/users')
     elif request.method == 'GET':

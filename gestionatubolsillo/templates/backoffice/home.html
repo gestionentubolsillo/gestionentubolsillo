@@ -1,0 +1,110 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+  <!-- MAIN -->
+  <main id="main">
+    <div class="main-content">
+
+      <!-- Fecha -->
+      <p class="text-muted small mb-3">
+        <i class="bi bi-calendar3 me-1"></i> Miércoles, 3 de junio de 2026
+      </p>
+
+      <!-- KPIs -->
+       <!--TO-DO: Ocultar esta seccion si el usuario no tiene acceso al dashboard-->
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:#fef9c3;">
+              <i class="bi bi-lightbulb" style="color:#ca8a04;"></i>
+            </div>
+            <div>
+              <div class="kpi-value">0</div>
+              <div class="kpi-label">Sugerencias hoy</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:#eff6ff;">
+              <i class="bi bi-file-earmark-text" style="color:#3b82f6;"></i>
+            </div>
+            <div>
+              <div class="kpi-value">0</div>
+              <div class="kpi-label">Partes enviados hoy</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:#fef2f2;">
+              <i class="bi bi-exclamation-triangle" style="color:#ef4444;"></i>
+            </div>
+            <div>
+              <div class="kpi-value">0</div>
+              <div class="kpi-label">Incidencias hoy</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:#f0fdf4;">
+              <i class="bi bi-clipboard-data" style="color:#16a34a;"></i>
+            </div>
+            <div>
+              <div class="kpi-value">0</div>
+              <div class="kpi-label">Informes Acuda hoy</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mapa -->
+      <div class="block-card mb-4">
+        <div class="block-header">
+          <i class="bi bi-geo-alt text-primary"></i> Localización de usuarios
+          <small>Tiempo real</small>
+        </div>
+        <div class="block-body">
+          <div class="map-ph">
+            <i class="bi bi-map"></i>
+            <p>Aquí irá el mapa de Google Maps</p>
+            <p>Integra tu API key de Google Maps para mostrar la ubicación de los usuarios</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloques inferiores -->
+      <div class="row g-3">
+        <div class="col-12 col-lg-6">
+          <div class="block-card h-100">
+            <div class="block-header">
+              <i class="bi bi-clock-history text-primary"></i> Total de horas por mes
+              <small>Por trabajador</small>
+            </div>
+            <div class="block-body">
+              <div class="empty-ph">
+                <i class="bi bi-bar-chart-line"></i>
+                <p>Sin datos todavía</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-6">
+          <div class="block-card h-100">
+            <div class="block-header">
+              <i class="bi bi-clipboard-check text-primary"></i> Total de informes
+            </div>
+            <div class="block-body">
+              <div class="empty-ph">
+                <i class="bi bi-graph-up"></i>
+                <p>Sin datos todavía</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+{% endblock body %}

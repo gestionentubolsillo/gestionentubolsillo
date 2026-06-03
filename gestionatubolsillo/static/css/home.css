@@ -1,0 +1,39 @@
+body { scroll-behavior: smooth; }
+
+    /* Navbar */
+    .navbar { background-color: #0f1d35 !important; }
+    .navbar-brand span { color: #f59e0b; }
+    .nav-link { color: rgba(255,255,255,0.7) !important; }
+    .nav-link:hover { color: #fff !important; }
+    .btn-nav-cta { background: #3b82f6; color: #fff; border-radius: 8px; padding: 0.4rem 1.1rem; font-size: 0.875rem; }
+    .btn-nav-cta:hover { background: #60a5fa; color: #fff; }
+
+    /* Hero */
+    #inicio { background: linear-gradient(145deg, #0f1d35 0%, #1a2f52 60%, #1e3a6e 100%); min-height: 100vh; padding-top: 72px; }
+
+    /* Carousel móvil hero */
+    .hero-carousel .carousel-inner { border-radius: 20px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+    .hero-carousel .carousel-item { background: #1a2f52; aspect-ratio: 9/16; max-height: 480px; display: flex; align-items: center; justify-content: center; border-radius: 20px; }
+    .hero-carousel .carousel-item img { object-fit: cover; height: 100%; width: 100%; border-radius: 20px; }
+
+    /* Placeholder slides */
+    .slide-ph { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; color: rgba(255,255,255,0.3); }
+    .slide-ph i { font-size: 3rem; }
+    .slide-ph p { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; margin: 0; }
+
+    /* Quiénes somos */
+    #quienes-somos { background-color: #f8f9fb; }
+    .feature-card { border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.75rem; background: #fff; height: 100%; }
+    .feature-icon { width: 48px; height: 48px; background: #eff6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+    .feature-icon i { font-size: 1.4rem; color: #3b82f6; }
+
+    /* FAQ */
+    #preguntas .accordion-button:not(.collapsed) { background-color: #eff6ff; color: #1e3a6e; box-shadow: none; }
+    #preguntas .accordion-button:focus { box-shadow: none; }
+    #preguntas .accordion-item { border-radius: 12px !important; overflow: hidden; margin-bottom: 0.6rem; border: 1px solid #e2e8f0; }
+
+    /* Footer */
+    footer { background-color: #0f1d35; }
+    footer .footer-brand span { color: #f59e0b; }
+    footer a { color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.2s; }
+    footer a:hover { color: #fff; }

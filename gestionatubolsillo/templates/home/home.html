@@ -18,14 +18,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" 
     crossorigin="anonymous"></script>
-    <!--TO-REFACTOR: Cambiar los css de la waybackmachine a archivos locales actualizados-->
-    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/estilo.css">
-    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/animate.css">
-    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/swiper.css">
-    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/owl.carousel.css">
-    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/owl.theme.css">
-    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/magnific-popup.css">
-    <link type="text/css" rel="stylesheet" media="screen" href="https://web.archive.org/web/20160119071842im_/http://www.gestionentubolsillo.com/css/styles/style-blue.css">
+    <link href="{% static 'css/home.css'%}" rel="stylesheet">
     <!--TO-DO: Implementar archivo css-->
     <link href="{% static 'css/menu.css' %}" rel="stylesheet">
     <!--Google Fonts-->
@@ -36,32 +29,19 @@
 <body>
     {% include "navbar.html" %}
     <!--Inicio-->
-    <section id="inicio" class="clearfix" data-scroll-index="0">
+    <section id="inicio" class="d-flex align-items-center" data-scroll-index="0">
         {% include "home/home_inicio.html" %}
-    <!---Get started-->
-    <section id="get-started" class="clearfix" data-scroll-index="1">
+    </section>
+    <!--Get started-->
+    <section id="get-started" class="d-flex align-items-center" data-scroll-index="1">
         {% include "home/getStarted.html" %}
     </section>
-    <!--Features-->
-    <section id="features" class="clearfix" data-scroll-index="2">
-        {% include "home/home_features.html" %}
-    </section>
     <!--FaQ-->
-    <section id="faq" class="clearfix" data-scroll-index="3">
-        {% include "home/FaQ.html" %}
-    <section>
+    <section id="faq" class="d-flex align-items-center" data-scroll-index="2">
+        {%  include "home/FaQ.html" %}
+    </section>
+
     <!--Footer-->
     {% include "footer.html" %}
-
-    <!-- JS Files-->
-    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/scrollIt.js"></script>
-    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/wow.min.js"></script>
-    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/swiper.min.js"></script>
-    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/custom.js"></script>
-    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/owl.carousel.min.js"></script>
-    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/jquery.magnific-popup.min.js"></script>
-    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/jquery.stellar.min.js"></script>
-    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/jquery.particleground.min.js"></script>
-    <script type="text/javascript" src="https://web.archive.org/web/20160119071842js_/http://www.gestionentubolsillo.com/js/jquery.easing.1.3.js"></script>
 </body>
 </html>
