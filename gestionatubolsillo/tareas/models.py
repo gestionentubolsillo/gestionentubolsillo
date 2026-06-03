@@ -19,9 +19,9 @@ class Tarea(models.Model):
     estado = models.CharField(max_length=20, choices=Estado_CHOICES, default='pendiente')
 
     es_urgente = models.BooleanField(default=False)
-    usuario_creador = models.ForeignKey('users.User',on_delete=models.CASCADE,related_name='creador')
+    usuario_creador = models.ForeignKey('users.User',on_delete=models.CASCADE,related_name='tareas_creadas')
     #REFACTORED- Eliminado relaciones N:N con Empresa y User
-    usuario_asignado = models.ForeignKey('users.User',on_delete=models.CASCADE,related_name='asignado')
+    usuario_asignado = models.ForeignKey('users.User',on_delete=models.CASCADE,related_name='tareas_asignadas')
 
     def get_usuarios_asociados(self):
         if self.tipo_asociacion == 'usuario':

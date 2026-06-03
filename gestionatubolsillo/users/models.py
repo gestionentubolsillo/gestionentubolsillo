@@ -62,10 +62,11 @@ class User(AbstractUser):
     permisos_informes = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
     permisos_empresas = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
     permisos_configuracion = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='empresa')
+    empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='usuarios', null=True, blank=True)
     always_track_GPS = models.BooleanField(default=False)
     precio_hora = models.FloatField(default=0.)
     comentarios = models.TextField(blank=True,null=True)
+    is_admin = models.BooleanField(default=False)
 
 
 def can_access_backoffice(user:User)-> bool:

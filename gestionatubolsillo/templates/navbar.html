@@ -21,6 +21,9 @@
     crossorigin="anonymous"></script>
     <!--TO-DO: Implementar archivo css-->
     <link href="{% static 'css/menu.css' %}" rel="stylesheet">
+    <link href="{% static 'css/home.css' %}" rel="stylesheet">
+    <link href="{% static 'css/backoffice.css' %}" rel="stylesheet">
+    
     <!--Google Fonts-->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
     <!--MDB-->
@@ -28,10 +31,10 @@
 </head>
 <body>
     <!--Navbar-->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <!--Logica de sesion del usuario-->
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="/">
                 <img alt="Gestiona tu bolsillo" style="width:75px; height:100%;" src="{% static 'img/logo.png' %}"
                 style="font-family: sans-serif;"><span style="color: white">Gestiona tu Bolsillo</span>
             </a>
@@ -45,24 +48,24 @@
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
                         <!--Logica redirige a pagina principal dependiendo del tipo de usuario autenticado-->
-                        <a class="nav-link" href="#inicio">Inicio</a>
+                        <a class="nav-link" href="/#inicio">Inicio</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#get-started">Acerca de</a>
+                        <a class="nav-link" href="/#get-started">Acerca de</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#contact">Contacto</a>
+                        <a class="nav-link" href="/#contact">Contacto</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#faq">Preguntas frecuentes</a>
+                        <a class="nav-link" href="/#faq">Preguntas frecuentes</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#legal">Política de privacidad</a>
+                        <a class="nav-link" href="/#legal">Política de privacidad</a>
                     </li>
 
                     <li class="nav-item active">
                         <!--Logica solo debe mostrar si el usuario esta autenticado y puede acceder al backoffice-->
-                        <a class="nav-link" href="#">Backoffice</a>
+                        <a class="nav-link" href="/backoffice">Backoffice</a>
                     </li>
                 </ul>
                 <!--Logica para mostrar opciones de usuario autenticado-->

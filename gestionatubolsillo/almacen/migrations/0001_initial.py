@@ -12,15 +12,15 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Central',
+            name='Almacen_Item',
             fields=[
-                ('CentralID', models.AutoField(primary_key=True, serialize=False)),
+                ('AlmacenID', models.AutoField(primary_key=True, serialize=False)),
                 ('nombre', models.CharField(max_length=200)),
-                ('telefono', models.CharField(blank=True, max_length=20)),
-                ('mail', models.EmailField(blank=True, max_length=254)),
-                ('persona_de_contacto', models.CharField(blank=True, max_length=200)),
-                ('observaciones', models.TextField(blank=True)),
+                ('descripcion', models.TextField(blank=True)),
+                ('stock', models.IntegerField(default=0)),
+                ('precio_unitario', models.DecimalField(decimal_places=2, default=0.0, max_digits=10)),
                 ('fecha_creacion', models.DateTimeField(auto_now_add=True)),
+                ('proveedor', models.CharField(blank=True, max_length=200)),
             ],
         ),
     ]

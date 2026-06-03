@@ -1,83 +1,77 @@
-<div>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="section-header text-center">
-                    <h2 class="title">Preguntas frecuentes</h2>
-                    <br>
-                    <p class="subheadline">Si tiene alguna otra pregunta, no dude en ponerse en contacto con nosotros.</p>
-                </div>
-                <div class="panel-group" id="accordion">
-                    <div class="faqHeader">Pregunas generales</div>
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse1" class="accordion-toggle">
-                                    ¿Qué es Gestiona tu bolsillo?</a>
-                            </h4>
-                        </div>
-                        <div id="collapse1" class="panel-collapse collapse in">
-                            <div class="panel-body">
-                                Gestiona tu bolsillo es una plataforma de gestión enfocada a empresas de servicios, seguridad, mantenimiento, etc. que necesitan un control detallado de los trabajos que realizan en movilidad.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse2" class="accordion-toggle collapsed">
-                                    ¿Qué necesitan los operarios para usar la plataforma?</a>
-                            </h4>
-                        </div>
-                        <div id="collapse2" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                Solo necesitan un dispositivo con conexión a Internet, ya sea móvil, tablet u ordenador, pues toda la información se almacena en la nube y es accesible desde cualquier dispositivo. se envía en tiempo real.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse3" class="accordion-toggle collapsed">
-                                    ¿Qué tipo de informes se pueden enviar?</a>
-                            </h4>
-                        </div>
-                        <div id="collapse3" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                Se pueden enviar informes de acuda, partes de trabajo, partes de inspección y partes de incidencias. Todo ello con la posibilidad de adjuntar fotos, firmas, etc.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse4" class="accordion-toggle collapsed">
-                                    ¿Cómo puedo usar Gestiona tu bolsillo?</a>
-                            </h4>
-                        </div>
-                        <div id="collapse4" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                Para usar Gestiona tu bolsillo, solo necesitas registrarte en nuestra plataforma y crear una cuenta. Una vez que hayas creado tu cuenta, podrás acceder a todas las funcionalidades de la plataforma y empezar a gestionar tus trabajos de manera eficiente.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse5" class="accordion-toggle collapsed">
-                                    ¿Se ajusta a las necesidades de mi empresa?</a>
-                            </h4>
-                        </div>
-                        <div id="collapse5" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                Sí, nuestra plataforma está en constante evolución y se adapta a las necesidades de los usuarios. Si tu empresa necesita algo en concreto, no dudes en hablar con nosotros.
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="container py-4">
+
+      <div class="text-center mb-5">
+        <p class="text-uppercase fw-semibold mb-2" style="color:#3b82f6;font-size:.75rem;letter-spacing:.1em;">FAQ</p>
+        <h2 class="display-6 fw-bold">Preguntas frecuentes</h2>
+        <p class="text-muted fs-5 mx-auto" style="max-width:540px;">Todo lo que necesitas saber antes de empezar. Si tienes más dudas, escríbenos.</p>
+      </div>
+
+      <div class="accordion mx-auto" id="faqAccordion" style="max-width:720px;">
+
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+              ¿Cómo puedo empezar a usar la aplicación?
+            </button>
+          </h2>
+          <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">
+              El primer acceso lo crea el administrador de tu empresa. Recibirás un correo con tus credenciales y podrás acceder tanto desde la web como desde la app móvil. No necesitas instalar nada adicional.
             </div>
+          </div>
         </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+              ¿Los datos de mi empresa están seguros?
+            </button>
+          </h2>
+          <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">
+              Sí. Toda la información se almacena cifrada en servidores seguros. Cumplimos con el RGPD y realizamos copias de seguridad automáticas diarias. Ningún dato se comparte con terceros.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+              ¿Puedo tener varios usuarios con distintos permisos?
+            </button>
+          </h2>
+          <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">
+              Sí. El administrador puede crear tantos usuarios como necesite y asignar permisos granulares por módulo: facturación, clientes, empleados, informes, etc. Cada empleado solo verá lo que le corresponde.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+              ¿Funciona la app sin conexión a internet?
+            </button>
+          </h2>
+          <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">
+              La consulta de datos recientes está disponible en modo sin conexión. Las acciones que implican guardar o sincronizar información requieren conexión y se actualizarán automáticamente cuando vuelvas a conectarte.
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+              ¿Cómo puedo contactar con soporte?
+            </button>
+          </h2>
+          <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body text-muted">
+              Puedes escribirnos a <strong>soporte@gestionatubolsillo.es</strong> o usar el formulario de contacto en la sección inferior de esta página. Nuestro equipo responde en menos de 24 horas en días laborables.
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
-
-
-</div>

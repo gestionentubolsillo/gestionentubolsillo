@@ -14,7 +14,7 @@ class Empresa(models.Model):
     EmpresaID = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255)
     paquete = models.CharField(max_length=20, choices=PAQUETES_CHOICES, default=None)
-    usuario_creador = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='creador')
+    usuario_creador = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='empresas_creadas')
 
 
 def can_view_empresas(user:User)-> bool:
