@@ -21,23 +21,25 @@ def validate_empresa(request:HttpRequest,nombre,paquete)->bool:
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_empresas)
 def create_empresa(request:HttpRequest):
+    user:User = request.user
     if request.method == 'POST':
         nombre = request.POST.get('name','')
         paquete = request.POST.get('paquete','')
         errors = validate_empresa(request,nombre,paquete)
         if errors:
-            template = loader.get_template('form.html')
-            context = {}
+            template = loader.get_template('empresas/form.html')
+            context = {'action':'create'}
             return HttpResponse(template.render(context,request))
 
         empresa = Empresa()
         empresa.nombre = nombre
         empresa.paquete = paquete
+        empresa.usuario_creador = user
         empresa.save()
-        return redirect('backoffice/empresas')
+        return redirect('/backoffice/empresas')
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
-        context = {}
+        template = loader.get_template('empresas/form.html')
+        context = {'action':'create'}
         return HttpResponse(template.render(context,request))
 
 @login_required
@@ -46,10 +48,10 @@ def create_empresa(request:HttpRequest):
 def list_empresas(request:HttpRequest):
     #Listar todas las empresas creadas por el usuario mas la empresa a la que pertenece
     user:User = request.user
-    empresa_usuario = user.empresa
+    empresa_usuario:Empresa = user.empresa
     list_empresas = Empresa.objects.filter(
-        creador_id = user.UserID
-    )
+        usuario_creador_id = user.UserID
+    ).exclude(EmpresaID=empresa_usuario.EmpresaID)
 
     n_pagina = request.GET.get('page', 1)
     global DEFAULT_PAGINATION_EMPRESAS
@@ -65,13 +67,13 @@ def list_empresas(request:HttpRequest):
         'page': n_pagina,
         'n_empresas':n_empresas+1,
     }
-    return render(request,'list.html',context)
+    return render(request,'empresas/list.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_empresas)
 def details_empresa(request,empresa_id):
-    empresa = Empresa.objects.filter(id=empresa_id).first()
+    empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
     if not empresa:
         messages.error(request,"La empresa no existe",extra_tags='error')
         return redirect('backoffice/empresas')
@@ -79,27 +81,28 @@ def details_empresa(request,empresa_id):
         'empresa':empresa,
         'action':'view'
     }
-    return render(request,'form.html',context)
+    return render(request,'empresas/form.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_empresas)
 def edit_empresa(request : HttpRequest,empresa_id):
-    empresa = Empresa.objects.filter(id=empresa_id).first()
+    empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
     if request.method == 'POST':
         nombre = request.POST.get('nombre','')
         paquete = request.POST.get('paquete','')
         errors = validate_empresa(request,nombre,paquete)
         if errors:
-            return redirect('backoffice/empresas/edit/'+str(empresa.EmpresaID))
+            return redirect('/backoffice/empresas/edit/'+str(empresa.EmpresaID))
         empresa.nombre = nombre
         empresa.paquete = paquete
         empresa.save()
-        return redirect('backoffice/empresas/'+str(empresa.EmpresaID))
+        return redirect('/backoffice/empresas/'+str(empresa.EmpresaID))
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
+        template = loader.get_template('empresas/form.html')
         context = {
-            'empresa': empresa
+            'empresa': empresa,
+            'action': 'edit'
         }
         return HttpResponse(template.render(context,request))
     
@@ -108,7 +111,7 @@ def edit_empresa(request : HttpRequest,empresa_id):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_empresas)
 def delete_empresa(request:HttpRequest,empresa_id):
-    empresa = Empresa.objects.filter(id=empresa_id).first()
+    empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
     empresa.delete()
     messages.success(request,"La empresa se ha eliminado con éxito",extra_tags='success')
-    return redirect('backoffice/empresas')
+    return redirect('/backoffice/empresas')

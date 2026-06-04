@@ -1,6 +1,9 @@
 <!--SIDE-BAR-->
 {% load static %}
+{% block head %}
 <link href="{% static 'css/home.css'%}" rel="stylesheet">
+{% endblock head %}
+
 <aside id="sidebar">
     <a class="sidebar-brand" href="#">Gestión en tu <span>Bolsillo</span></a>
     <nav>
@@ -17,7 +20,7 @@
       <div class="sidebar-group">
         <p class="sidebar-label">Módulos</p>
         {% if  user.permisos_empresas != 'no_access' %}
-            <a href="#" class="sidebar-link"> Empresas</a>
+            <a href="/backoffice/empresas" class="sidebar-link"> Empresas</a>
         {% endif %}
         {% if user.permisos_clientes != 'no_access'%}
             <a href="#" class="sidebar-link">Clientes</a>
