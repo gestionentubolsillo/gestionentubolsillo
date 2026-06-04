@@ -1,0 +1,136 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+    {% if action == 'create' %}
+        <div class="main-content">
+        <div class="form-card">
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">Nueva empresa</span>
+            </div>
+ 
+            <div class="form-card-body">
+                <form method="post" action="/backoffice/empresas/create" id="form-empresa">
+                    {% csrf_token %}
+ 
+                    <div class="mb-3">
+                        <label class="form-label" for="nombre_empresa">
+                          Nombre de la empresa <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="name" name="name" class="form-control form-control-sm" placeholder="Ej: Empresa Ejemplo S.L." required/>
+                    </div>
+ 
+                    <div class="mb-3">
+                        <label class="form-label" for="paquete">
+                            Paquete <span class="text-danger">*</span>
+                        </label>
+                        <select id="paquete" name="paquete" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona un paquete...</option>
+                            <option value="seguridad">Seguridad</option>
+                            <option value="auxiliares">Auxiliares</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="transportes">Transportes</option>
+                        </select>
+                    </div>
+ 
+                </form>
+            </div>
+ 
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="form-empresa" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>Crear empresa
+                </button>
+            </div>
+ 
+        </div>
+        </div>
+    {% endif %}
+    {% if action == 'edit' %}
+        <div class="main-content">
+        <div class="form-card">
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">Editar empresa</span>
+            </div>
+ 
+            <div class="form-card-body">
+                <form method="post" action="/backoffice/empresas/edit/{{empresa.EmpresaID}}" id="form-empresa">
+                    {% csrf_token %}
+ 
+                    <div class="mb-3">
+                        <label class="form-label" for="nombre_empresa">
+                          Nombre de la empresa <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="name" name="name" class="form-control form-control-sm" placeholder="Ej: Empresa Ejemplo S.L." value="{{empresa.name}}" required/>
+                    </div>
+ 
+                    <div class="mb-3">
+                        <label class="form-label" for="paquete">
+                            Paquete <span class="text-danger">*</span>
+                        </label>
+                        <select id="paquete" name="paquete" class="form-select form-select-sm" required>
+                            <option value="" disabled >Selecciona un paquete...</option>
+                            <option value="seguridad" {% if  empresa.paquete == 'seguridad'%}selected{% endif %}>Seguridad</option>
+                            <option value="auxiliares" {% if  empresa.paquete == 'auxiliares'%}selected{% endif %}>Auxiliares</option>
+                            <option value="mantenimiento"{% if  empresa.paquete == 'mantenimiento'%}selected{% endif %}>Mantenimiento</option>
+                            <option value="transportes"{% if  empresa.paquete == 'transportes'%}selected{% endif %}>Transportes</option>
+                        </select>
+                    </div>
+ 
+                </form>
+            </div>
+ 
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="form-empresa" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>Editar
+                </button>
+            </div>
+ 
+        </div>
+        </div>
+    {% endif %}
+    {% if action == 'view' %}
+    <!--Listado de usuarios de la empresa, preguntar-->
+    <div class="main-content">
+        <div class="form-card">
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">Detalles empresa</span>
+            </div>
+ 
+            <div class="form-card-body">
+                    <div class="mb-3">
+                        <p class="form-label">Nombre de la empresa</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ empresa.nombre }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Paquete</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ empresa.get_paquete_display }}</p>
+                    </div>
+ 
+            </div>
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+            </div>
+ 
+ 
+        </div>
+    </div>
+    
+    {% endif %}
+    
+</main>
+{% endblock body %}

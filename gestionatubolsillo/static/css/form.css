@@ -1,0 +1,76 @@
+.form-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+ 
+    .form-card-header {
+      padding: 1.1rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+ 
+    .form-card-header .form-card-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #1e293b;
+      margin: 0;
+    }
+ 
+    .form-card-header .form-card-subtitle {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin: 0;
+      margin-left: auto;
+    }
+ 
+    .form-card-body { padding: 1.5rem; }
+ 
+    .form-card-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+ 
+    /* Campos en modo view */
+    .form-control:disabled,
+    .form-select:disabled {
+      background: #f8fafc;
+      color: #475569;
+      border-color: #e2e8f0;
+      cursor: default;
+      opacity: 1;
+    }
+ 
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 0.35rem;
+    }
+ 
+    /* Badge modo */
+    .mode-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+    }
+ 
+    /* Separador de sección dentro del form */
+    .form-section-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 1rem;
+      margin-top: 0.5rem;
+    }
