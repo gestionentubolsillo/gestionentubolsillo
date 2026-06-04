@@ -24,7 +24,7 @@ def validate_client(request:HttpRequest,nombre,provincia,municipio,empresa_id)->
     if provincia == '' or municipio == '':
         messages.error(request,"Debe indicar provincia y municipio al que pertenece",extra_tags='error')
         errors = True
-    empresa = Empresa.objects.filter(id=empresa_id).first()
+    empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
     if empresa is None:
         messages.error(request,"Debe indicar una empresa válida",extra_tags='error')
         errors = True
@@ -64,12 +64,14 @@ def list_clientes(request:HttpRequest):
         'n_clients':n_clientes
     }
 
-    return render(request,'backoffice/list.html',context)
+    return render(request,'clientes/list.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_clientes)
 def create_client(request:HttpRequest):
+    user:User = request.user
+    empresas = Empresa.objects.filter(usuario_creador_id=user.UserID)
     if request.method == 'POST':
         nombre = request.POST.get('nombre','')
         mail = request.POST.get('mail','')
@@ -83,11 +85,14 @@ def create_client(request:HttpRequest):
         errors = validate_client(request,nombre,provincia,municipio,empresa_id)
 
         if errors:
-            template = loader.get_template('form.html')
-            context = {}
+            template = loader.get_template('clientes/form.html')
+            context = {
+            'action':'create',
+            'empresas':empresas
+            }
             return HttpResponse(template.render(context,request))
 
-        empresa = Empresa.objects.filter(id=empresa_id).first()
+        empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
         cliente = Cliente()
         cliente.nombre = nombre
         cliente.email = mail
@@ -99,11 +104,15 @@ def create_client(request:HttpRequest):
         cliente.empresa = empresa
         cliente.fecha_creacion = created_at
         cliente.save()
-        return redirect('backoffice/clientes')
+        return redirect('/backoffice/clientes')
 
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
-        context = {}
+        template = loader.get_template('clientes/form.html')
+        
+        context = {
+            'action':'create',
+            'empresas':empresas
+        }
         return HttpResponse(template.render(context,request))
 
 
@@ -111,7 +120,7 @@ def create_client(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_clientes)
 def edit_client(request:HttpRequest,client_id):
-    cliente = Cliente.objects.filter(id=client_id).first()
+    cliente = Cliente.objects.filter(ClienteID=client_id).first()
     if request.method == 'POST':
         nombre = request.POST.get('nombre','')
         mail = request.POST.get('mail','')
@@ -124,9 +133,9 @@ def edit_client(request:HttpRequest,client_id):
         errors = validate_client(request,nombre,provincia,municipio,empresa_id)
 
         if errors:
-            return redirect('backoffice/clientes/edit/'+str(client_id))
+            return redirect('/backoffice/clientes/edit/'+str(client_id))
 
-        empresa = Empresa.objects.filter(id=empresa_id).first()
+        empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
         cliente.nombre = nombre
         cliente.email = mail
         cliente.persona_contacto = contacto
@@ -136,11 +145,14 @@ def edit_client(request:HttpRequest,client_id):
         cliente.telefono = telefono
         cliente.empresa = empresa
         cliente.save()
-        return redirect('backoffice/clientes/'+str(client_id))
+        return redirect('/backoffice/clientes/'+str(client_id))
     
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
-        context = {}
+        template = loader.get_template('clientes/form.html')
+        context = {
+            'action':'edit',
+            'cliente':cliente
+            }
         return HttpResponse(template.render(context,request))
 
 @login_required
@@ -150,12 +162,12 @@ def client_details(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
     if not cliente:
         messages.error(request,"El cliente no existe",extra_tags='error')
-        return redirect('backoffice/clientes')
+        return redirect('/backoffice/clientes')
     context = {
         'cliente':cliente,
         'action':'view'
     }
-    return render(request,'form.html',context)
+    return render(request,'clientes/form.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -164,7 +176,7 @@ def delete_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
     cliente.delete()
     messages.success(request,"El cliente ha sido eliminado con éxito",extra_tags='success')
-    return redirect('backoffice/clientes')
+    return redirect('/backoffice/clientes')
 
 @login_required
 @user_passes_test(can_access_backoffice)
