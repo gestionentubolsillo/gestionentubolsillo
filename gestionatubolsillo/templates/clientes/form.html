@@ -105,7 +105,7 @@
             </div>
  
             <div class="form-card-body">
-                <form method="post" action="/backoffice/clientes/create" id="form-cliente">
+                <form method="post" action="/backoffice/clientes/edit/{{cliente.ClienteID}}" id="form-cliente">
                     {% csrf_token %}
  
                     <div class="mb-3">
