@@ -46,6 +46,8 @@ def validate_user_client(request:HttpRequest,username,password)->bool:
 @user_passes_test(can_view_clientes)
 def list_clientes(request:HttpRequest):
     user:User = request.user
+    #TODO: Cambiar a recibir filtro por empresa
+    empresas = Empresa.objects.filter(usuario_creador_id=user.UserID)
     empresa:Empresa = user.empresa
     n_pagina = request.GET.get('page', 1)
     global DEFAULT_PAGINATION_CLIENTS
@@ -61,7 +63,9 @@ def list_clientes(request:HttpRequest):
         'clientes':page_obj,
         'page_obj':page_obj,
         'page':n_pagina,
-        'n_clients':n_clientes
+        'n_clients':n_clientes,
+        'empresas':empresas,
+        'filtro_empresa':filtro_empresa
     }
 
     return render(request,'clientes/list.html',context)
@@ -121,6 +125,8 @@ def create_client(request:HttpRequest):
 @user_passes_test(can_CRUD_clientes)
 def edit_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
+    user:User = request.user
+    empresas = Empresa.objects.filter(usuario_creador_id=user.UserID)
     if request.method == 'POST':
         nombre = request.POST.get('nombre','')
         mail = request.POST.get('mail','')
@@ -151,7 +157,8 @@ def edit_client(request:HttpRequest,client_id):
         template = loader.get_template('clientes/form.html')
         context = {
             'action':'edit',
-            'cliente':cliente
+            'cliente':cliente,
+            'empresas':empresas
             }
         return HttpResponse(template.render(context,request))
 
@@ -159,7 +166,7 @@ def edit_client(request:HttpRequest,client_id):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_clientes)
 def client_details(request:HttpRequest,client_id):
-    cliente = Cliente.objects.filter(id=client_id).first()
+    cliente = Cliente.objects.filter(ClienteID=client_id).first()
     if not cliente:
         messages.error(request,"El cliente no existe",extra_tags='error')
         return redirect('/backoffice/clientes')

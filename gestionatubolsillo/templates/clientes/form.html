@@ -64,6 +64,12 @@
                         <input type="text" id="municipio" name="municipio" class="form-control form-control-sm" placeholder="Ej: Estepa" required/>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label" for="telefono">
+                          Teléfono
+                        </label>
+                        <input type="text" id="telefono" name="telefono" class="form-control form-control-sm" placeholder="Ej: 9000000" value="{{cliente.telefono}}"/>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label" for="empresa">
                             Empresa <span class="text-danger">*</span>
                         </label>
@@ -151,13 +157,19 @@
                         <input type="text" id="municipio" name="municipio" class="form-control form-control-sm" placeholder="Ej: Estepa" value="{{cliente.municipio}}" required/>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label" for="telefono">
+                          Teléfono
+                        </label>
+                        <input type="text" id="telefono" name="telefono" class="form-control form-control-sm" placeholder="Ej: 9000000" value="{{cliente.telefono}}"/>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label" for="empresa">
                             Empresa <span class="text-danger">*</span>
                         </label>
                         <select id="empresa" name="empresa" class="form-select form-select-sm" required>
-                            <option value="" disabled selected>Selecciona una empresa...</option>
+                            <option value="" disabled>Selecciona una empresa...</option>
                             {% for empresa in  empresas%}
-                                <option value="{{empresa.EmpresaID}}">{{empresa.nombre}}</option>
+                                <option value="{{empresa.EmpresaID}}"{% if cliente.empresa.EmpresaID == empresa.EmpresaID %} selected {% endif %}>{{empresa.nombre}} </option>
                             {% endfor %}
                         </select>
                     </div> 
@@ -169,7 +181,7 @@
                     <i class="bi bi-arrow-left me-1"></i>Volver
                 </a>
                 <button type="submit" form="form-cliente" class="btn btn-primary btn-sm">
-                    <i class="bi bi-check-lg me-1"></i>Crear Cliente
+                    <i class="bi bi-check-lg me-1"></i>Editar
                 </button>
             </div>
  
@@ -180,21 +192,52 @@
     <!--Listado de usuarios de la empresa, preguntar-->
     <div class="main-content">
         <div class="form-card">
+            
  
             <div class="form-card-header">
                 <i class="bi bi-building text-primary"></i>
-                <span class="form-card-title">Detalles empresa</span>
+                <span class="form-card-title">Detalles cliente</span>
             </div>
  
             <div class="form-card-body">
                     <div class="mb-3">
-                        <p class="form-label">Nombre de la empresa</p>
-                        <p class="form-control form-control-sm bg-light mb-0">{{ empresa.nombre }}</p>
+                        <p class="form-label">Nombre del cliente</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ cliente.nombre }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Paquete</p>
-                        <p class="form-control form-control-sm bg-light mb-0">{{ empresa.get_paquete_display }}</p>
+                        <p class="form-label">Correo Electrónico</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ cliente.email }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Persona de contacto</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ cliente.persona_contacto }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Dirección</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ cliente.direccion }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Provincia</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ cliente.provincia }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Municipio</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ cliente.municipio }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Teléfono</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ cliente.telefono }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Empresa</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ cliente.empresa.nombre }}</p>
                     </div>
  
             </div>
