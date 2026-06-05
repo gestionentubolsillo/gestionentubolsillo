@@ -1,0 +1,351 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+    {% if action == 'create' %}
+        <div class="main-content">
+        <div class="form-card">
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">Nuevo Servicio</span>
+            </div>
+ 
+            <div class="form-card-body">
+                <form method="post" action="/backoffice/servicios/create" id="form-servicio">
+                    {% csrf_token %}
+ 
+                    <div class="mb-3">
+                        <label class="form-label" for="nombre_servicio">
+                          Nombre del servicio <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="nombre" name="nombre" class="form-control form-control-sm" placeholder="Ej: Cliente Ejemplo" required/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="descripcion">
+                          Descripción
+                        </label>
+                        <input type="text" id="descripcion" name="descripcion" class="form-control form-control-sm" placeholder="Ej: Cliente Ejemplo" required/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="email">
+                          Correo Electrónico
+                        </label>
+                        <input type="text" id="mail" name="mail" class="form-control form-control-sm" placeholder="Ej: example@mail.com"/>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label class="form-label" for="dias">
+                            Dias a la semana <span class="text-danger">*</span>
+                        </label>
+                        <!--TODO: Cambiar para que al seleccionar aparezca tipo bloque con cruz para eliminar del bloque-->
+                        <select id="dias_semana" name="dias_semana" class="form-select form-select-sm" required multiple>
+                            {% for dia_valor,dia_etiqueta in  dias_choices%}
+                                <option value="{{dia_valor}}">{{dia_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="hora_inicio">
+                          Hora inicio del servicio
+                        </label>
+                        <input type="time" id="hora_inicio" name="hora_inicio" class="form-control form-control-sm"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="hora_fin">
+                          Hora finalización del servicio
+                        </label>
+                        <input type="time" id="hora_fin" name="hora_fin" class="form-control form-control-sm"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="precio_hora">
+                          Precio por hora (en €)
+                        </label>
+                        <input type="number" step="0.01" id="precio_hora" name="precio_hora" class="form-control form-control-sm" placeholder="Ej: 00.00"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="is_active">
+                          Activo
+                        </label>
+                        <input type="checkbox" id="is_active" name="is_active" class="form-check-input" checked/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="gps_on">
+                          Obligatorio GPS
+                        </label>
+                        <input type="checkbox" id="gps_on" name="gps_on" class="form-check-input"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="tipo_servicio">
+                            Tipo de Servicio
+                        </label>
+                        <select id="es_exterior" name="es_exterior" class="form-select form-select-sm">
+                                <option value="0">Interior</option>
+                                <option value="1" selected>Exterior</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="empresa">
+                            Empresa <span class="text-danger">*</span>
+                        </label>
+                        <select id="empresa_id" name="empresa_id" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona una empresa...</option>
+                            {% for empresa in  empresas%}
+                                <option value="{{empresa.EmpresaID}}">{{empresa.nombre}} </option>
+                            {% endfor %}
+                        </select>
+                    </div> 
+
+
+
+
+                    
+
+                </form>
+            </div>
+ 
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="form-servicio" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>Crear Servicio
+                </button>
+            </div>
+ 
+        </div>
+        </div>
+    {% endif %}
+    {% if action == 'edit' %}
+        <div class="main-content">
+        <div class="form-card">
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">Editar Servicio</span>
+            </div>
+ 
+            <div class="form-card-body">
+                <form method="post" action="/backoffice/servicios/edit/{{servicio.ServicioID}}" id="form-servicio">
+                    {% csrf_token %}
+ 
+                    <div class="mb-3">
+                        <label class="form-label" for="nombre_servicio">
+                          Nombre del servicio <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="nombre" name="nombre" class="form-control form-control-sm" placeholder="Ej: Cliente Ejemplo" required value="{{servicio.nombre}}"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="descripcion">
+                          Descripción
+                        </label>
+                        <input type="text" id="descripcion" name="descripcion" class="form-control form-control-sm" placeholder="Ej: Cliente Ejemplo" required value="{{servicio.descripcion}}"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="email">
+                          Correo Electrónico
+                        </label>
+                        <input type="text" id="mail" name="mail" class="form-control form-control-sm" placeholder="Ej: example@mail.com" value="{{servicio.mail_de_contacto}}"/>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label class="form-label" for="dias">
+                            Dias a la semana <span class="text-danger">*</span>
+                        </label>
+                        <!--TODO: Cambiar para que al seleccionar aparezca tipo bloque con cruz para eliminar del bloque-->
+                        <select id="dias_semana" name="dias_semana" class="form-select form-select-sm" required multiple>
+                            {% for dia_valor,dia_etiqueta in  dias_choices%}
+                                <option value="{{dia_valor}}" {% if dia_valor in servicio.dias_semana %}selected{% endif %}>{{dia_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="hora_inicio">
+                          Hora inicio del servicio
+                        </label>
+                        <input type="time" id="hora_inicio" name="hora_inicio" class="form-control form-control-sm" value="{{servicio.hora_inicio|time:'H:i'}}"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="hora_fin">
+                          Hora finalización del servicio
+                        </label>
+                        <input type="time" id="hora_fin" name="hora_fin" class="form-control form-control-sm" value="{{servicio.hora_fin|time:'H:i'}}"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="precio_hora">
+                          Precio por hora (en €)
+                        </label>
+                        <input type="number" step="0.01" id="precio_hora" name="precio_hora" class="form-control form-control-sm" placeholder="Ej: 00.00" value="{{servicio.precio_por_hora}}"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="is_active">
+                          Activo
+                        </label>
+                        <input type="checkbox" id="is_active" name="is_active" class="form-check-input" {% if servicio.is_active %}checked{% endif %} />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="gps_on">
+                          Obligatorio GPS
+                        </label>
+                        <input type="checkbox" id="gps_on" name="gps_on" class="form-check-input" {% if servicio.requiere_gps %}checked{% endif %} />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="tipo_servicio">
+                            Tipo de Servicio
+                        </label>
+                        <select id="es_exterior" name="es_exterior" class="form-select form-select-sm">
+                                <option value="0" {% if not servicio.es_exterior %}selected{% endif %}>Interior</option>
+                                <option value="1" {% if servicio.es_exterior %}selected{% endif %}>Exterior</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="empresa">
+                            Empresa <span class="text-danger">*</span>
+                        </label>
+                        <select id="empresa_id" name="empresa_id" class="form-select form-select-sm" required>
+                            <option value="" disabled>Selecciona una empresa...</option>
+                            {% for empresa in  empresas%}
+                                <option value="{{empresa.EmpresaID}}" {% if servicio.empresa.EmpresaID == empresa.EmpresaID %}selected{% endif %}>{{empresa.nombre}} </option>
+                            {% endfor %}
+                        </select>
+                    </div> 
+
+
+
+
+                    
+
+                </form>
+            </div>
+ 
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="form-servicio" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>Editar
+                </button>
+            </div>
+ 
+        </div>
+        </div>
+    {% endif %}
+    {% if action == 'view' %}
+    <!--Listado de usuarios de la empresa, preguntar-->
+    <div class="main-content">
+        <div class="form-card">
+            
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">Detalles Servicio</span>
+            </div>
+ 
+            <div class="form-card-body">
+                    <div class="mb-3">
+                        <p class="form-label">Nombre del servicio</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ servicio.nombre }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Descripción</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ servicio.descripcion }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Correo Electrónico</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ servicio.mail_de_contacto }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Dias a la semana</p>
+                        {% for dia_valor,dia_etiqueta in dias_choices  %}
+                            {% if dia_valor in  servicio.dias_semana%}
+                                <p class="form-control form-control-sm bg-light mb-0">{{ dia_etiqueta }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Hora inicio del servicio</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ servicio.hora_inicio|time:'H:i'}}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Hora finalización del servicio</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ servicio.hora_fin|time:'H:i'}}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Precio por hora (en €)</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ servicio.precio_por_hora }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Activo</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {% if  servicio.is_active %}
+                                El Servicio está activo
+                            {% else %}
+                                El Servicio no está activo
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Obligatorio GPS</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {% if  servicio.requiere_gps %}
+                                El Servicio requiere del uso de GPS para su funcionamiento
+                            {% else %}
+                                El Servicio no requiere del uso de GPS para su funcionamiento
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Tipo de Servicio</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {% if servicio.es_exterior %}
+                                Servicio de Exterior
+                            {% else %}
+                                Servicio de Interior
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Empresa</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ servicio.empresa.nombre }}</p>
+                    </div>
+ 
+            </div>
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+            </div>
+ 
+ 
+        </div>
+    </div>
+    
+    {% endif %}
+    
+</main>
+
+<script>
+</script>
+{% endblock body %}
