@@ -89,7 +89,7 @@ def details_empresa(request,empresa_id):
 def edit_empresa(request : HttpRequest,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
     if request.method == 'POST':
-        nombre = request.POST.get('nombre','')
+        nombre = request.POST.get('name','')
         paquete = request.POST.get('paquete','')
         errors = validate_empresa(request,nombre,paquete)
         if errors:
