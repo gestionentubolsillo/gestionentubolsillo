@@ -41,7 +41,7 @@ def list_almacen(request: HttpRequest):
         'page':n_pagina,
         'n_almacen_items':n_almacen_items
     }
-    return render(request,'list.html',context)
+    return render(request,'almacen/list.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -57,7 +57,7 @@ def create_almacen_item(request: HttpRequest):
         errors = validate_almacen_item(request,nombre,stock,precio_unitario)
         if errors:
             template = loader.get_template('form.html')
-            context = {}
+            context = {'action':'create'}
             return HttpResponse(template.render(context,request))
         almacen_item = Almacen_Item()
         almacen_item.nombre = nombre
@@ -68,10 +68,10 @@ def create_almacen_item(request: HttpRequest):
         almacen_item.usuario_creador = request.user
         almacen_item.fecha_creacion = created_at
         almacen_item.save()
-        return redirect('backoffice/almacen')
+        return redirect('/backoffice/almacen')
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
-        context = {}
+        template = loader.get_template('almacen/form.html')
+        context = {'action':'create'}
         return HttpResponse(template.render(context,request))
 
 @login_required
@@ -87,8 +87,11 @@ def edit_almacen_item(request: HttpRequest, item_id):
         proveedor = request.POST.get('proveedor','')
         errors = validate_almacen_item(request,nombre,stock,precio_unitario)
         if errors:
-            template = loader.get_template('form.html')
-            context = {}
+            template = loader.get_template('almacen/form.html')
+            context = {
+            'almacen_item': almacen_item,
+            'action':'edit'
+        }
             return HttpResponse(template.render(context,request))
         almacen_item.nombre = nombre
         almacen_item.descripcion = descripcion
@@ -96,13 +99,13 @@ def edit_almacen_item(request: HttpRequest, item_id):
         almacen_item.precio_unitario = precio_unitario
         almacen_item.proveedor = proveedor
         almacen_item.save()
-        return redirect('backoffice/almacen')
+        return redirect('/backoffice/almacen')
     elif request.method == 'GET':
         context = {
             'almacen_item': almacen_item,
             'action':'edit'
         }
-        template = loader.get_template('form.html')
+        template = loader.get_template('almacen/form.html')
         return HttpResponse(template.render(context,request))
 
 @login_required
@@ -112,7 +115,7 @@ def delete_almacen_item(request: HttpRequest, item_id):
     almacen_item = Almacen_Item.objects.filter(AlmacenID=item_id).first()
     almacen_item.delete()
     messages.success(request,"Item de almacén eliminado correctamente",extra_tags='success')
-    return redirect('backoffice/almacen')
+    return redirect('/backoffice/almacen')
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -121,9 +124,9 @@ def almacen_item_details(request: HttpRequest, item_id):
     almacen_item = Almacen_Item.objects.filter(AlmacenID=item_id).first()
     if not almacen_item:
         messages.error(request,"El item de almacén no existe",extra_tags='error')
-        return redirect('backoffice/almacen')
+        return redirect('/backoffice/almacen')
     context = {
         'almacen_item': almacen_item,
         'action':'view'
     }
-    return render(request,'form.html',context)
+    return render(request,'almacen/form.html',context)

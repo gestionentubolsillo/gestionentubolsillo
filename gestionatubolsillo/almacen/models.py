@@ -1,5 +1,6 @@
 from django.db import models
 from users.models import User
+from decimal import Decimal
 
 # Create your models here.
 
@@ -15,6 +16,8 @@ class Almacen_Item(models.Model):
 
     usuario_creador = models.ForeignKey('users.User', on_delete=models.SET_NULL,related_name='almacen_items_creados',null=True)
 
+    def get_precio_total(self)->Decimal:
+        return self.stock * self.precio_unitario
 
 def can_view_almacen(user: User)->bool:
     return user.permisos_almacen == 'view_only' or user.permisos_almacen == 'create_modify'
