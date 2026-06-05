@@ -1,5 +1,5 @@
 from django.shortcuts import redirect
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as auth_login
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
@@ -59,3 +59,11 @@ def login_cli(request:HttpRequest):
         if user is not None:
             return redirect(reverse('home'))
         return HttpResponse(template.render(context, request))       
+
+
+def logout_view(request:HttpRequest):
+    logout(request)
+    return redirect('/')
+
+def logout_cli(request:HttpRequest):
+    pass
