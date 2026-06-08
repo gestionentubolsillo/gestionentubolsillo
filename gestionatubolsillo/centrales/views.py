@@ -36,7 +36,7 @@ def list_centrales(request: HttpRequest):
         'page':n_pagina,
         'n_centrales':n_centrales
     }
-    return render(request,'list.html',context)
+    return render(request,'centrales/list.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -54,7 +54,7 @@ def create_central(request: HttpRequest):
          
         if errors:
             template = loader.get_template('form.html')
-            context = {}
+            context = {'action':'create'}
             return HttpResponse(template.render(context,request))
          
         central = Central()
@@ -67,18 +67,18 @@ def create_central(request: HttpRequest):
         central.fecha_creacion = created_at
         central.save()
 
-        return redirect('backoffice/centrales')
+        return redirect('/backoffice/centrales')
     
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
-        context = {}
+        template = loader.get_template('centrales/form.html')
+        context = {'action':'create'}
         return HttpResponse(template.render(context,request))
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_centrales)
 def edit_central(request: HttpRequest, central_id):
-    central = Central.objects.filter(id=central_id).first()
+    central = Central.objects.filter(CentralID=central_id).first()
     if request.method == 'POST':
         nombre = request.POST.get('nombre','')
         telefono = request.POST.get('telefono','')
@@ -87,8 +87,11 @@ def edit_central(request: HttpRequest, central_id):
         observaciones = request.POST.get('observaciones','')
         errors = validate_central(request,nombre)
         if errors:
-            template = loader.get_template('form.html')
-            context = {'central': central}
+            template = loader.get_template('centrales/form.html')
+            context = {
+            'action':'edit',
+            'central': central
+            }
             return HttpResponse(template.render(context,request))
         central.nombre = nombre
         central.telefono = telefono
@@ -96,31 +99,34 @@ def edit_central(request: HttpRequest, central_id):
         central.persona_de_contacto = persona_de_contacto
         central.observaciones = observaciones
         central.save()
-        return redirect('backoffice/centrales')
+        return redirect('/backoffice/centrales')
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
-        context = {'central': central}
+        template = loader.get_template('centrales/form.html')
+        context = {
+            'action':'edit',
+            'central': central
+            }
         return HttpResponse(template.render(context,request))
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_centrales)
 def delete_central(request: HttpRequest, central_id):
-    central = Central.objects.filter(id=central_id).first()
+    central = Central.objects.filter(CentralID=central_id).first()
     central.delete()
     messages.success(request,"Central receptora eliminada correctamente",extra_tags='success')
-    return redirect('backoffice/centrales')
+    return redirect('/backoffice/centrales')
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_centrales)
 def central_details(request: HttpRequest, central_id):
-    central = Central.objects.filter(id=central_id).first()
+    central = Central.objects.filter(CentralID=central_id).first()
     if not central:
         messages.error(request,"La central receptora no existe",extra_tags='error')
-        return redirect('backoffice/centrales')
+        return redirect('/backoffice/centrales')
     context = {
         'central': central,
         'action':'view'
     }
-    return render(request,'form.html',context)
+    return render(request,'centrales/form.html',context)
