@@ -10,7 +10,7 @@
       <div class="sidebar-group">
         <p class="sidebar-label">Principal</p>
         {% if  user.has_dashboard_access%}
-            <a href="#" class="sidebar-link active"> Dashboard</a>
+            <a href="/backoffice" class="sidebar-link active"> Dashboard</a>
         {% endif %}
         {% if user.permisos_usuario != 'no_access' %}
             <a href="#" class="sidebar-link"> Usuarios</a>
@@ -33,7 +33,7 @@
         {% endif %}
         
         {% if user.permisos_centrales != 'no_access' %}
-            <a href="#" class="sidebar-link"> Centrales Receptoras</a>
+            <a href="/backoffice/centrales" class="sidebar-link"> Centrales Receptoras</a>
         {% endif %}
         {% if user.permisos_medios != 'no_access' %}
             <a href="#" class="sidebar-link"> Medios Auxiliares</a>
