@@ -35,8 +35,8 @@
         {% if user.permisos_centrales != 'no_access' %}
             <a href="/backoffice/centrales" class="sidebar-link"> Centrales Receptoras</a>
         {% endif %}
-        {% if user.permisos_medios != 'no_access' %}
-            <a href="#" class="sidebar-link"> Medios Auxiliares</a>
+        {% if user.permisos_medios_auxiliares != 'no_access' %}
+            <a href="/backoffice/medios_auxiliares" class="sidebar-link"> Medios Auxiliares</a>
         {% endif %}
         <a href="#" class="sidebar-link"> Delegaciones</a>
         {% if  user.permisos_servicios_NFC != 'no_access'%}
