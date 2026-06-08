@@ -33,7 +33,7 @@ def list_delegaciones(request: HttpRequest):
         'page':n_pagina,
         'n_delegaciones':n_delegaciones
     }
-    return render(request,'list.html',context)
+    return render(request,'delegaciones/list.html',context)
 
 def create_delegacion(request: HttpRequest):
     if request.method == 'POST':
@@ -43,18 +43,18 @@ def create_delegacion(request: HttpRequest):
         errors = validate_delegacion(request,nombre)
         if errors:
             template = loader.get_template('form.html')
-            context = {}
+            context = {'action':'create'}
             return HttpResponse(template.render(context,request))
         delegacion = Delegacion()
         delegacion.nombre = nombre
         delegacion.usuario_creador = user
         delegacion.fecha_creacion = created_at
         delegacion.save()
-        return redirect('backoffice/delegaciones')
+        return redirect('/backoffice/delegaciones')
     
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
-        context = {}
+        template = loader.get_template('delegaciones/form.html')
+        context = {'action':'create'}
         return HttpResponse(template.render(context,request))
     
 @login_required
@@ -63,7 +63,7 @@ def delete_delegacion(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
     delegacion.delete()
     messages.success(request, 'La delegación ha sido borrada exitosamente.',extra_tags='success')
-    return redirect('backoffice/delegaciones')
+    return redirect('/backoffice/delegaciones')
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -73,19 +73,35 @@ def edit_delegacion(request: HttpRequest, delegacion_id):
         nombre = request.POST.get('nombre','')
         errors = validate_delegacion(request,nombre)
         if errors:
-            template = loader.get_template('form.html')
+            template = loader.get_template('delegaciones/form.html')
             context = {
-                'delegacion':delegacion
+                'delegacion':delegacion,
+                'action':'edit'
             }
             return HttpResponse(template.render(context,request))
         delegacion.nombre = nombre
         delegacion.save()
         messages.success(request, 'La delegación ha sido actualizada exitosamente.',extra_tags='success')
-        return redirect('backoffice/delegaciones')
+        return redirect('/backoffice/delegaciones')
     
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
+        template = loader.get_template('delegaciones/form.html')
         context = {
-            'delegacion':delegacion
-        }
+                'delegacion':delegacion,
+                'action':'edit'
+            }
         return HttpResponse(template.render(context,request))
+    
+
+@login_required
+@user_passes_test(can_access_backoffice)
+def delegacion_details(request: HttpRequest, delegacion_id):
+    delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
+    if not delegacion:
+        messages.error(request,"La delegación no existe",extra_tags='error')
+        return redirect('/backoffice/delegaciones')
+    context={
+        'delegacion':delegacion,
+        'action':'view'
+    }
+    return render(request,'delegaciones/form.html',context)

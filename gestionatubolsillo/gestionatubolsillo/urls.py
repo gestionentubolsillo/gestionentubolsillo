@@ -31,4 +31,5 @@ urlpatterns = [
     path('', include('authentication.urls')),
     path('', include('centrales.urls')),
     path('', include('mediosaux.urls')),
+    path('',include('delegaciones.urls')),
 ]
