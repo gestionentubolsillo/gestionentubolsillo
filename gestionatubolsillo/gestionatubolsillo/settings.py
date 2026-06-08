@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'backoffice',
     'authentication',
     'centrales',
+    'mediosaux',
     #3rd party auth apps
     'allauth',
     'allauth.account',

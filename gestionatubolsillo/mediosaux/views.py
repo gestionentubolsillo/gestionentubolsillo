@@ -35,7 +35,7 @@ def list_medios_auxiliares(request:HttpRequest):
         'page':n_pagina,
         'n_medios_auxiliares':n_medios_auxiliares
     }
-    return render(request,'list.html',context)
+    return render(request,'mediosaux/list.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -46,30 +46,30 @@ def create_medio_auxiliar(request:HttpRequest):
         nombre = request.POST.get('nombre','')
         errors = validate_medio_auxiliar(request,nombre)
         if errors:
-            template = loader.get_template('form.html')
-            context = {}
+            template = loader.get_template('mediosaux/form.html')
+            context = {'action':'create'}
             return HttpResponse(template.render(context,request))
         medio_auxiliar = MedioAuxiliar()
         medio_auxiliar.nombre = nombre
         medio_auxiliar.fecha_creacion = created_at
         medio_auxiliar.usuario_creador = request.user
         medio_auxiliar.save()
-        return redirect('backoffice/medios_auxiliares')
+        return redirect('/backoffice/medios_auxiliares')
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
-        context = {}
+        template = loader.get_template('mediosaux/form.html')
+        context = {'action':'create'}
         return HttpResponse(template.render(context,request))
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_medios_auxiliares)
 def edit_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
-    medio_auxiliar = MedioAuxiliar.objects.filter(id=medio_auxiliar_id).first()
+    medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     if request.method == 'POST':
         nombre = request.POST.get('nombre','')
         errors = validate_medio_auxiliar(request,nombre)
         if errors:
-            template = loader.get_template('form.html')
+            template = loader.get_template('mediosaux/form.html')
             context = {
                 'medio_auxiliar': medio_auxiliar,
                 'action':'edit'
@@ -77,9 +77,9 @@ def edit_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
             return HttpResponse(template.render(context,request))
         medio_auxiliar.nombre = nombre
         medio_auxiliar.save()
-        return redirect('backoffice/medios_auxiliares')
+        return redirect('/backoffice/medios_auxiliares')
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
+        template = loader.get_template('mediosaux/form.html')
         context = {
             'medio_auxiliar': medio_auxiliar,
             'action':'edit'
@@ -90,21 +90,21 @@ def edit_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_medios_auxiliares)
 def delete_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
-    medio_auxiliar = MedioAuxiliar.objects.filter(id=medio_auxiliar_id).first()
+    medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     medio_auxiliar.delete()
     messages.success(request,"Medio auxiliar eliminado correctamente",extra_tags='success')
-    return redirect('backoffice/medios_auxiliares')
+    return redirect('/backoffice/medios_auxiliares')
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_medios_auxiliares)
 def medio_auxiliar_details(request:HttpRequest, medio_auxiliar_id):
-    medio_auxiliar = MedioAuxiliar.objects.filter(id=medio_auxiliar_id).first()
+    medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     if not medio_auxiliar:
         messages.error(request,"El medio auxiliar no existe",extra_tags='error')
-        return redirect('backoffice/medios_auxiliares')
+        return redirect('/backoffice/medios_auxiliares')
     context = {
         'medio_auxiliar': medio_auxiliar,
         'action':'view'
     }
-    return render(request,'form.html',context)
+    return render(request,'mediosaux/form.html',context)
