@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'authentication',
     'centrales',
     'mediosaux',
+    'delegaciones',
     #3rd party auth apps
     'allauth',
     'allauth.account',
