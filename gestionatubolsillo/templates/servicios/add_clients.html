@@ -1,0 +1,51 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+            <div class="main-content">
+        <div class="form-card">
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">{% if action == 'add' %}Añadir Clientes {% elif action == 'remove' %}Eliminar Clientes{% endif %}</span>
+            </div>
+ 
+            <div class="form-card-body">
+                <form method="post" {% if action == 'add' %}"/backoffice/servicios/{{servicio.ServicioID}}/clientes/add" {% elif action == 'remove' %}"/backoffice/servicios/{{servicio.ServicioID}}/clientes/remove"{% endif %} id="form-servicio-clientes">
+                    {% csrf_token %}
+ 
+                    <div class="mb-3">
+                        <label class="form-label" for="clientes">
+                            Clientes <span class="text-danger">*</span>
+                        </label>
+                        <select id="clientes_ids" name="clientes_ids" class="form-select form-select-sm" required multiple>
+                            {% for cliente in  clientes%}
+                                <option value="{{cliente.ClienteID}}">
+                                    {{cliente.nombre}} 
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div> 
+
+
+
+
+                    
+
+                </form>
+            </div>
+ 
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="form-servicio-clientes" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>{% if action == 'add' %}Añadir Clientes{% elif action == 'remove' %}Eliminar Clientes{% endif %} 
+                </button>
+            </div>
+ 
+        </div>
+        </div>
+</main>
+
+{% endblock body %}

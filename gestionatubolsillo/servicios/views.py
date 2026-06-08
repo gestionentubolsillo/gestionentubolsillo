@@ -10,8 +10,10 @@ from django.template import loader
 from .models import Servicio, can_view_servicios, can_CRUD_servicios
 from clientes.models import Cliente
 from decimal import Decimal
+from django.db.models.manager import BaseManager
 
 DEFAULT_PAGINATION_SERVICIOS = 25
+DEFAULT_PAGINATION_SERVICIOS_CLIENTES = 25
 # Create your views here.
 
 def validate_servicio(request:HttpRequest,nombre,
@@ -26,6 +28,22 @@ def validate_servicio(request:HttpRequest,nombre,
         errors = True
     if not empresa:
         messages.error(request,"Debe indicar la empresa que proporciona el servicio",extra_tags='error')
+        errors = True
+    return errors
+
+
+def validate_clientes_servicio(request:HttpRequest, clientes_ids,allowed_clients_to_add:BaseManager[Cliente])->bool:
+    errors = False
+    if not clientes_ids:
+        messages.error(request, "Debe seleccionar al menos un cliente", extra_tags='error')
+        errors = True
+    clientes = Cliente.objects.filter(ClienteID__in=clientes_ids)
+    if not clientes:
+        messages.error(request, "No se ha podido encontrar ningún cliente", extra_tags='error')
+        errors = True
+    clientes_no_permitidos = clientes.difference(allowed_clients_to_add)
+    if clientes_no_permitidos.exists():
+        messages.error(request, "No puede añadir clientes no autorizados a este servicio", extra_tags='error')
         errors = True
     return errors
 
@@ -171,10 +189,22 @@ def servicio_details(request:HttpRequest,servicio_id):
     if not servicio:
         messages.error(request,"El servicio no existe",extra_tags='error')
         return redirect('/backoffice/servicios')
+    
+    #Paginacion de clientes
+    n_pagina = request.GET.get('page', 1)
+    global DEFAULT_PAGINATION_SERVICIOS_CLIENTES
+    n_clientes = request.GET.get('n_clientes', DEFAULT_PAGINATION_SERVICIOS_CLIENTES)
+    lista_clientes = servicio.clientes.all()
+    paginacion = Paginator(lista_clientes,n_clientes)
+    page_obj = paginacion.get_page(n_pagina)
     context = {
         'servicio':servicio,
         'dias_choices':dias_choices,
-        'action':'view'
+        'action':'view',
+        'clientes':page_obj,
+        'page_obj':page_obj,
+        'page':n_pagina,
+        'n_clientes':n_clientes,
     }
     return render(request,'servicios/form.html',context)
 
@@ -182,7 +212,51 @@ def servicio_details(request:HttpRequest,servicio_id):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_servicios)
 def delete_servicio(request:HttpRequest,servicio_id):
-    servicio = Servicio.objects.filter(id=servicio_id).first()
+    servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
     servicio.delete()
     messages.success(request,"El servicio ha sido eliminado con éxito",extra_tags='success')
     return redirect('/backoffice/servicios')
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_CRUD_servicios)
+def add_clientes_to_servicio(request:HttpRequest,servicio_id):
+    servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
+    empresa:Empresa = servicio.empresa
+    allowed_clients_to_add = Cliente.objects.filter(empresa=empresa)
+    if request.method == 'POST':
+        clientes_ids = request.POST.getlist('clientes_ids')
+        
+        errors = validate_clientes_servicio(request,clientes_ids, allowed_clients_to_add)
+        if errors:
+            template = loader.get_template('servicios/add_clients.html')
+            context = {'clientes':allowed_clients_to_add, 'action':'add', 'servicio':servicio}
+            return HttpResponse(template.render(context,request))
+        
+        clientes = Cliente.objects.filter(ClienteID__in=clientes_ids)
+        servicio.clientes.add(*clientes)
+        return redirect('/backoffice/servicios/'+str(servicio_id))
+    elif request.method == 'GET':
+        template = loader.get_template('servicios/add_clients.html')
+        context = {'clientes':allowed_clients_to_add, 'action':'add'}
+        return HttpResponse(template.render(context,request))
+    
+def remove_clientes_to_servicio(request:HttpRequest,servicio_id):
+    servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
+    clientes_de_servicio:BaseManager[Cliente] = servicio.clientes.all()
+    if request.method == 'POST':
+        clientes_ids = request.POST.getlist('clientes_ids')
+        
+        errors = validate_clientes_servicio(request,clientes_ids, clientes_de_servicio)
+        if errors:
+            template = loader.get_template('servicios/add_clients.html')
+            context = {'clientes':clientes_de_servicio, 'action':'remove'}
+            return HttpResponse(template.render(context,request))
+        
+        clientes = Cliente.objects.filter(ClienteID__in=clientes_ids)
+        servicio.clientes.remove(*clientes)
+        return redirect('/backoffice/servicios/'+str(servicio_id))
+    elif request.method == 'GET':
+        template = loader.get_template('servicios/add_clients.html')
+        context = {'clientes':clientes_de_servicio, 'action':'remove','servicio':servicio}
+        return HttpResponse(template.render(context,request))
