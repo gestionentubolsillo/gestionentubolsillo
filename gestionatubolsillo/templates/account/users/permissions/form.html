@@ -1,0 +1,408 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+    {% if action == 'edit' %}
+        <div class="main-content">
+        <div class="form-card">
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">Editar Permisos de Usuario</span>
+            </div>
+ 
+            <div class="form-card-body">
+                <form method="post" action="/backoffice/users/permissions/edit/{{usuario.UserID}}" id="form-user">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_trabajo_self">
+                            Puede Acceder al Backoffice
+                        </label>
+                        <input type="checkbox" id="p_login" name="p_login" {% if  usuario.has_login_access%}checked{% endif %} class="form-check-input">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_trabajo_self">
+                            Puede Acceder al Dashboard
+                        </label>
+                        <input type="checkbox" id="p_dashboard" name="p_dashboard" {% if  usuario.has_dashboard_access%}checked{% endif %} class="form-check-input">
+                    </div>
+ 
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_user">
+                            Permisos sobre Usuarios
+                        </label>
+                        <select id="p_usuario" name="p_usuario" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_usuario == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_config">
+                            Permisos sobre Configuración
+                        </label>
+                        <select id="p_config" name="p_config" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_configuracion == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_empresa">
+                            Permisos sobre Empresas
+                        </label>
+                        <select id="p_empresas" name="p_empresas" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_empresas == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_cliente">
+                            Permisos sobre Clientes
+                        </label>
+                        <select id="p_clientes" name="p_clientes" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_clientes == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_service">
+                            Permisos sobre Servicios
+                        </label>
+                        <select id="p_servicio_NFC" name="p_servicio_NFC" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_servicios_NFC == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_almacen">
+                            Permisos sobre Almacén
+                        </label>
+                        <select id="p_almacen" name="p_almacen" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_almacen == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_central">
+                            Permisos sobre Centrales Receptoras
+                        </label>
+                        <select id="p_central" name="p_central" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_central_receptora == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_medios">
+                            Permisos sobre Medios Auxiliares
+                        </label>
+                        <select id="p_medio_aux" name="p_medio_aux" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_medios_auxiliares == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_manten">
+                            Permisos sobre Mantenimientos
+                        </label>
+                        <select id="p_mantenimiento" name="p_mantenimiento" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_mantenimientos == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_tarea">
+                            Permisos sobre Tareas
+                        </label>
+                        <select id="p_tareas" name="p_tareas" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_tareas == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_suggest">
+                            Permisos sobre Sugerencias
+                        </label>
+                        <select id="p_sugerencias" name="p_sugerencias" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_sugerencias == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_informe">
+                            Permisos sobre Informes
+                        </label>
+                        <select id="p_informes" name="p_informes" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_informes == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_trabajo">
+                            Permisos sobre Informes de Trabajo
+                        </label>
+                        <select id="p_parte_trabajo" name="p_parte_trabajo" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_partes_trabajo == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_trabajo_self">
+                            Puede acceder a sus propios Informes de Trabajo
+                        </label>
+                        <input type="checkbox" id="p_view_self_trabajo" name="p_view_self_trabajo" {% if  usuario.can_view_own_partes_trabajo%}checked{% endif %} class="form-check-input">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_acuda">
+                            Permisos sobre Informes de Acuda
+                        </label>
+                        <select id="p_acuda" name="p_acuda" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_informes_acuda == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_incidencia">
+                            Permisos sobre Informes de Incidencia
+                        </label>
+                        <select id="p_parte_incidencia" name="p_parte_incidencia" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_partes_incidencias == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="perm_inspect">
+                            Permisos sobre Informes de Inspección
+                        </label>
+                        <select id="p_parte_inspeccion" name="p_parte_inspeccion" class="form-select form-select-sm" required>
+                            {% for perm_value, perm_etiqueta in  choices%}
+                                <option value="{{perm_value}}" {% if usuario.permisos_partes_inspeccion == perm_value %}selected{% endif %}>{{perm_etiqueta}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+
+
+
+
+                
+                </form>
+            </div>
+ 
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="form-user" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>Editar
+                </button>
+            </div>
+ 
+        </div>
+        </div>
+    {% endif %}
+    {% if action == 'view' %}
+    <!--Listado de usuarios de la empresa, preguntar-->
+    <div class="main-content">
+        <div class="form-card">
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">Permisos de Usuario</span>
+            </div>
+
+            <div class="form-card-body">
+                    <div class="mb-3">
+                        <p class="form-label">Puede Acceder al Backoffice</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {% if usuario.has_login_access %}
+                                El usuario tiene acceso al Backoffice
+                            {% else %}
+                                El usuario no tiene acceso al Backoffice
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Puede Acceder al Dashboard</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {% if usuario.has_dashboard_access %}
+                                El usuario tiene acceso al Dashboard
+                            {% else %}
+                                El usuario no tiene acceso al Dashboard
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Usuarios</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_usuario_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Configuración</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_configuracion_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Empresas</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_empresas_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Clientes</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_clientes_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Servicios</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_servicios_NFC_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Almacén</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_almacen_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Centrales Receptoras</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_central_receptora_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Medios Auxiliares</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_medios_auxiliares_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Mantenimientos</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_mantenimientos_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Tareas</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_tareas_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Sugerencias</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_sugerencias_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Informes</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_informes_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Informes de Trabajo</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_partes_trabajo_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Puede acceder a sus propios Informes de Trabajo</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {% if usuario.can_view_own_partes_trabajo %}
+                                El usuario tiene acceso a sus propios informes de trabajo
+                            {% else %}
+                            El usuario no tiene acceso a sus propios informes de trabajo
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Informes de Acuda</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_informes_acuda_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Informes de Incidencia</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_partes_incidencias_display}}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Permisos sobre Informes de Inspección</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {{usuario.get_permisos_informes_display}}
+                        </p>
+                    </div>
+
+ 
+            </div>
+ 
+
+            </div>
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+            </div>
+ 
+ 
+        </div>
+    </div>
+    
+    {% endif %}
+</main>
+{% endblock body %}

@@ -46,6 +46,10 @@
           <th>Usuario</th>
           <th>Nombre</th>
           <th>Apellidos</th>
+          <th>Cuadrantes</th>
+          <th>Tareas</th>
+          <th>Servicios</th>
+          <th>Permisos</th>
           <!-- Columna acciones: siempre la última -->
           <th class="text-end">Acciones</th>
         </tr>
@@ -56,6 +60,23 @@
           <td class="fw-medium">{{usuario.username}}</td>
           <td class="text-muted">{{usuario.first_name}}</td>
           <td class="text-muted">{{usuario.last_name}}</td>
+          <td class="text-muted">Ver cuadrantes de usuario </td>
+          <td class="text-muted">Ver tareas de usuario </td>
+          <td class="text-muted">Ver servicios de usuario </td>
+          <td class="text-muted"> 
+            <!-- Ver: permiso view_only o create_modify -->
+              {% if user.permisos_usuario in 'view_only,create_modify' %}
+                <a href="/backoffice/users/permissions/{{usuario.UserID}}" class="action-btn" title="Ver">
+                    <i class="bi bi-eye"></i>
+                </a>
+              {% endif %}
+              {% if  user.permisos_usuario == 'create_modify'%}
+                                <a href="/backoffice/users/permissions/edit/{{usuario.UserID}}" class="action-btn" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                </a>
+              {% endif %}
+          </td>
+
           <td class="text-end">
             <div class="d-flex gap-1 justify-content-end">
 

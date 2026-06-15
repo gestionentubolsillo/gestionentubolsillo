@@ -7,5 +7,6 @@ urlpatterns = [
     path('backoffice/users/<int:user_id>',views.user_details),
     path('backoffice/users/edit/<int:user_id>',views.edit_user),
     path('backoffice/users/delete/<int:user_id>',views.delete_user),
-    path('backoffice/users/permissions/<int:user_id>',views.alter_user_permissions),
+    path('backoffice/users/permissions/edit/<int:user_id>',views.alter_user_permissions),
+    path('backoffice/users/permissions/<int:user_id>',views.view_user_permissions)
 ]

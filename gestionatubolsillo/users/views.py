@@ -303,7 +303,8 @@ def alter_user_permissions(request:HttpRequest,user_id):
         template = loader.get_template('account/users/permissions/form.html')
         context = {
             'usuario':user,
-            'action':'edit'
+            'action':'edit',
+            'choices':User.PERMISSIONS_CHOICES
         }
         return HttpResponse(template.render(context,request))
     
