@@ -6,5 +6,7 @@ urlpatterns = [
     path('backoffice/clientes/create', views.create_client),
     path('backoffice/clientes/<int:client_id>',views.client_details),
     path('backoffice/clientes/edit/<int:client_id>',views.edit_client),
-    path('backoffice/clientes/delete/<int:client_id>', views.delete_client)
+    path('backoffice/clientes/delete/<int:client_id>', views.delete_client),
+    path('backoffice/clientes/<int:client_id>/servicios/add',views.add_servicios_to_cliente),
+    path('backoffice/clientes/<int:client_id>/servicios/remove',views.remove_servicios_to_cliente)
 ]

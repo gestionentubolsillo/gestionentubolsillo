@@ -1,0 +1,51 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+            <div class="main-content">
+        <div class="form-card">
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">{% if action == 'add' %}Añadir Servicios {% elif action == 'remove' %}Eliminar Servicios{% endif %}</span>
+            </div>
+ 
+            <div class="form-card-body">
+                <form method="post" {% if action == 'add' %}"/backoffice/clientes/{{cliente.ClienteID}}/servicios/add" {% elif action == 'remove' %}"/backoffice/clientes/{{cliente.ClienteID}}/servicios/remove"{% endif %} id="form-servicio-clientes">
+                    {% csrf_token %}
+ 
+                    <div class="mb-3">
+                        <label class="form-label" for="clientes">
+                            Servicios <span class="text-danger">*</span>
+                        </label>
+                        <select id="servicios_ids" name="servicios_ids" class="form-select form-select-sm" required multiple>
+                            {% for servicio in  servicios%}
+                                <option value="{{servicio.ServicioID}}">
+                                    {{servicio.nombre}} 
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div> 
+
+
+
+
+                    
+
+                </form>
+            </div>
+ 
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="form-servicio-clientes" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>{% if action == 'add' %}Añadir Servicios{% elif action == 'remove' %}Eliminar Servicios{% endif %} 
+                </button>
+            </div>
+ 
+        </div>
+        </div>
+</main>
+
+{% endblock body %}
