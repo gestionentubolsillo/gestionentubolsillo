@@ -87,7 +87,7 @@ def create_servicio(request:HttpRequest):
         dias_semana = request.POST.getlist('dias_semana')
         hora_inicio = request.POST.get('hora_inicio','')
         hora_fin = request.POST.get('hora_fin','')
-        precio_hora = Decimal(request.POST.get('precio_hora',0.))
+        precio_hora = Decimal(request.POST.get('precio_hora') or 0.)
         is_active = request.POST.get('is_active')=='on'
         es_exterior = bool(int(request.POST.get('es_exterior',1)))
         requiere_gps = request.POST.get('gps_on')=='on'
