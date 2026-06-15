@@ -4,7 +4,6 @@ psycopg2==2.9.12
 Pillow==12.2.0
 django-allauth==65.16.1
 django-multiselectfield==1.0.1
-django-bootstrap5==26.2
 
 #Config
 python-dotenv==1.2.2
