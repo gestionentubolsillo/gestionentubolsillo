@@ -6,13 +6,14 @@ from django.template import loader
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.contrib import messages
 from empresas.models import Empresa
+from decimal import Decimal
 # Create your views here.
 
 MIN_CHARS_PASSWORD = 8
 DEFAULT_PAGINATION_USERS = 25
 
 def validate_user(request : HttpRequest,
-                  usuario,password,nombre,apellidos,
+                  usuario,password,confirm_password,nombre,apellidos,
                   provincia,municipio,empresa)->bool:
     errors = False
     global MIN_CHARS_PASSWORD
@@ -21,6 +22,9 @@ def validate_user(request : HttpRequest,
         errors = True
     if password == '':
         messages.error(request,"La contraseña no puede estar vacía",extra_tags='error')
+        errors = True
+    if password != confirm_password:
+        messages.error(request,"Las contraseñas no coinciden",extra_tags='error')
         errors = True
     if len(password) < MIN_CHARS_PASSWORD:
         messages.error(request,f"La contraseña debe tener al menos {MIN_CHARS_PASSWORD} caracteres",extra_tags='error')
@@ -34,19 +38,46 @@ def validate_user(request : HttpRequest,
     if municipio == '':
         messages.error(request,"Debe indicar el municipio al que pertenece",extra_tags='error')
         errors = True
-    empresa_exists = Empresa.objects.filter(id=empresa).first()
+    empresa_exists = Empresa.objects.filter(EmpresaID=empresa).first()
     if not empresa_exists:
         messages.error(request,"El usuario debe estar asociado a una empresa",extra_tags='error')
         errors = True
     return errors
 
+def validate_user_edit(request : HttpRequest,
+                  usuario,nombre,apellidos,
+                  provincia,municipio,empresa)->bool:
+    errors = False
+    if usuario == '':
+        messages.error(request,"El nombre de usuario no puede estar vacío", extra_tags='error')
+        errors = True
+    if nombre == '' or apellidos == '':
+        messages.error(request,"El nombre o apellidos no pueden estar vacíos",extra_tags='error')
+        errors = True
+    if provincia == '':
+        messages.error(request,"Debe indicar la provincia a la que pertenece",extra_tags='error')
+        errors = True
+    if municipio == '':
+        messages.error(request,"Debe indicar el municipio al que pertenece",extra_tags='error')
+        errors = True
+    empresa_exists = Empresa.objects.filter(EmpresaID=empresa).first()
+    if not empresa_exists:
+        messages.error(request,"El usuario debe estar asociado a una empresa",extra_tags='error')
+        errors = True
+    return errors
+
+
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
 def create_user(request:HttpRequest):
+    logged_user:User = request.user
+    empresas = Empresa.objects.filter(usuario_creador_id=logged_user.UserID)
+    categorias = User._meta.get_field('categoria').choices
     if request.method == 'POST':
         usuario = request.POST.get('username','')
         password = request.POST.get('password', '')
+        confirm_password = request.POST.get('password_confirm','')
         nombre = request.POST.get('nombre','')
         apellidos = request.POST.get('apellidos','')
         mail = request.POST.get('mail','')
@@ -60,15 +91,22 @@ def create_user(request:HttpRequest):
         check_es_inspector_de_trabajo = request.POST.get('es_inspector_trabajo') == 'on'
         delegacion = request.POST.get('delegacion','')
         categoria = request.POST.get('categoria','ejecutivo')
-        precio_hora = request.POST.get('precio_hora', 0.)
+        precio_hora = Decimal(request.POST.get('precio_hora') or 0.)
         always_track_gps = request.POST.get('track_gps') == 'on'
         comentarios = request.POST.get('comentarios','')
 
-        errors = validate_user(request,usuario,password,nombre,apellidos,provincia,municipio, empresa)
-        user_empresa = Empresa.objects.filter(id=empresa).first()
+        errors = validate_user(request,usuario,password,confirm_password,nombre,apellidos,provincia,municipio, empresa)
+        user_empresa = Empresa.objects.filter(EmpresaID=empresa).first()
 
-        if not errors:
-            user = User.objects.create_user(
+        if errors:
+            template = loader.get_template('account/users/form.html')
+            context = {
+                'action':'create',
+                'empresas':empresas,
+                'categorias_choices':categorias
+            }
+            return HttpResponse(template.render(context,request))
+        user = User.objects.create_user(
                 username=usuario,
                 password=password,
                 first_name = nombre,
@@ -86,18 +124,23 @@ def create_user(request:HttpRequest):
                 categoria = categoria,
                 precio_hora = precio_hora,
                 comentarios = comentarios
-            )
-            user.set_password(password)
-            user.save()
-            return redirect('/backoffice/users')
+        )
+        user.set_password(password)
+        user.save()
+        return redirect('/backoffice/users')
     elif request.method == 'GET':
-        template = loader.get_template('create_form.html')
-        context = {}
+        template = loader.get_template('account/users/form.html')
+        context = {
+            'action':'create',
+            'empresas':empresas,
+            'categorias_choices':categorias
+        }
         return HttpResponse(template.render(context,request))
 
 
 @login_required
 @user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_users)
 def lista_users(request:HttpRequest):
     usuario : User = request.user
     empresa_de_usuario :Empresa = usuario.empresa
@@ -120,27 +163,30 @@ def lista_users(request:HttpRequest):
         'page': n_pagina,
         'n_users':n_usuarios
     }
-    return render(request,'list.html', context)
+    return render(request,'account/users/list.html', context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_users)
 def user_details(request:HttpRequest,user_id):
-    user = User.objects.filter(id=user_id).first()
+    user = User.objects.filter(UserID=user_id).first()
     if not user:
         messages.error(request,"El usuario no existe",extra_tags='error')
         return redirect('/backoffice/users')
-    template = loader.get_template('crud_form.html')
-    pass
+    context = {'action':'view','usuario':user}
+    return render(request,'account/users/form.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
 def edit_user(request:HttpRequest,user_id):
-    user = User.objects.filter(id=user_id).first()
+    user = User.objects.filter(UserID=user_id).first()
+    logged_user:User = request.user
+    empresas = Empresa.objects.filter(usuario_creador_id=logged_user.UserID)
+    categorias = User._meta.get_field('categoria').choices
+    #Password formulario a parte de reseteo de password, no debe ser editado por usuario
     if request.method == 'POST':
         usuario = request.POST.get('username','')
-        password = request.POST.get('password', '')
         nombre = request.POST.get('nombre','')
         apellidos = request.POST.get('apellidos','')
         mail = request.POST.get('mail','')
@@ -158,14 +204,13 @@ def edit_user(request:HttpRequest,user_id):
         always_track_gps = request.POST.get('track_gps') == 'on'
         comentarios = request.POST.get('comentarios','')
 
-        errors = validate_user(request,usuario,password,nombre,apellidos,provincia,municipio, empresa)
-        user_empresa = Empresa.objects.filter(id=empresa).first()
+        errors = validate_user_edit(request,usuario,nombre,apellidos,provincia,municipio, empresa)
+        user_empresa = Empresa.objects.filter(EmpresaID=empresa).first()
 
         if errors:
             return redirect("/backoffice/users/edit/"+str(user.UserID))
         
         user.username = usuario
-        user.password = password
         user.first_name = nombre
         user.last_name = apellidos
         user.email = mail
@@ -184,9 +229,12 @@ def edit_user(request:HttpRequest,user_id):
         user.save()
         return redirect("/backoffice/users/"+str(user.UserID))
     elif request.method == 'GET':
-        template = loader.get_template('crud_form.html')
+        template = loader.get_template('account/users/form.html')
         context = {
-            'user':user
+            'usuario':user,
+            'action':'edit',
+            'categorias_choices':categorias,
+            'empresas':empresas
         }
         return HttpResponse(template.render(context,request))
 
@@ -198,7 +246,7 @@ def edit_user(request:HttpRequest,user_id):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
 def delete_user(request:HttpRequest,user_id):
-    user = User.objects.filter(id=user_id).first()
+    user = User.objects.filter(UserID=user_id).first()
     user.delete()
     messages.success(request,"El usuario ha sido eliminado correctamente",extra_tags='success')
     return redirect('/backoffice/users')
@@ -207,7 +255,7 @@ def delete_user(request:HttpRequest,user_id):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
 def alter_user_permissions(request:HttpRequest,user_id):
-    user = User.objects.filter(id=user_id).first()
+    user = User.objects.filter(UserID=user_id).first()
     if request.method == 'POST':
         p_almacen = request.POST.get('p_almacen','no_access')
         p_central = request.POST.get('p_central','no_access')
@@ -252,8 +300,20 @@ def alter_user_permissions(request:HttpRequest,user_id):
         return redirect("/backoffice/users")
 
     elif request.method == 'GET':
-        template = loader.get_template('perms_form.html')
+        template = loader.get_template('account/users/permissions/form.html')
         context = {
-            'user':user
+            'usuario':user,
+            'action':'edit'
         }
         return HttpResponse(template.render(context,request))
+    
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_users)
+def view_user_permissions(request:HttpRequest,user_id):
+    user = User.objects.filter(UserID=user_id).first()
+    if not user:
+        messages.error(request,"El usuario no existe",extra_tags='error')
+        return redirect('/backoffice/users')
+    context = {'action':'view','usuario':user}
+    return render(request,'account/users/permissions/form.html',context)
