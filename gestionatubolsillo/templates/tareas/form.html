@@ -83,18 +83,34 @@
  
             <div class="form-card-header">
                 <i class="bi bi-building text-primary"></i>
-                <span class="form-card-title">Detalles tarea</span>
+                <span class="form-card-title">Detalles Tarea</span>
             </div>
  
             <div class="form-card-body">
                     <div class="mb-3">
-                        <p class="form-label">Nombre de la tarea</p>
-                        <p class="form-control form-control-sm bg-light mb-0">{{ tarea.nombre }}</p>
+                        <p class="form-label">Descripción</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ tarea.texto }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Paquete</p>
-                        <p class="form-control form-control-sm bg-light mb-0">{{ tarea.get_paquete_display }}</p>
+                        <p class="form-label">Tipo</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {% if tarea.es_urgente %}
+                                Urgente
+                            {% else %}
+                                Normal
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Usuario Asignado</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ tarea.usuario_asignado }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Estado</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ tarea.get_estado_display }}</p>
                     </div>
  
             </div>
