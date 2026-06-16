@@ -35,7 +35,6 @@ class User(AbstractUser):
     nif = models.CharField(max_length=20, blank=True, null=True)
 
     #Campos que necesitan la implementación de otros modelos para su funcionamiento
-    #empresa = ForeignKey(empresas models.empresaID)
     #delegacion = ForeignKey(delegaciones models.delegacionID)
     categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default='ejecutivo')
 
@@ -67,6 +66,10 @@ class User(AbstractUser):
     precio_hora = models.FloatField(default=0.)
     comentarios = models.TextField(blank=True,null=True)
     is_admin = models.BooleanField(default=False)
+
+    #Relacion N:N el modelo servicio
+    servicios = models.ManyToManyField('servicios.Servicio', related_name='users')
+    delegacion = models.ForeignKey('delegaciones.Delegacion', on_delete=models.SET_NULL,related_name='usuarios', null=True, blank=True)
 
 
 def can_access_backoffice(user:User)-> bool:

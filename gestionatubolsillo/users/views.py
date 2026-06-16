@@ -7,10 +7,14 @@ from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.contrib import messages
 from empresas.models import Empresa
 from decimal import Decimal
+from servicios.models import can_CRUD_servicios, Servicio
+from django.views.decorators.http import require_POST
+from django.db.models.manager import BaseManager
 # Create your views here.
 
 MIN_CHARS_PASSWORD = 8
 DEFAULT_PAGINATION_USERS = 25
+DEFAULT_PAGINATION_USER_SERVICES = 25
 
 def validate_user(request : HttpRequest,
                   usuario,password,confirm_password,nombre,apellidos,
@@ -66,6 +70,14 @@ def validate_user_edit(request : HttpRequest,
         errors = True
     return errors
 
+def validate_services_of_user(request:HttpRequest,user:User,servicios:BaseManager[Servicio])->bool:
+    empresa : Empresa = user.empresa
+    errors = False
+    servicios_de_diferente_empresa = servicios.exclude(empresa=empresa)
+    if servicios_de_diferente_empresa.exists():
+        messages.error(request,"Los servicios deben pertenecer a la misma empresa que el usuario para ser asignados",extra_tags='error')
+        errors = True
+    return errors
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -318,3 +330,75 @@ def view_user_permissions(request:HttpRequest,user_id):
         return redirect('/backoffice/users')
     context = {'action':'view','usuario':user}
     return render(request,'account/users/permissions/form.html',context)
+
+
+"""Logica de Relacion Usuario y Servicio
+N usuarios tienen asignados N servicios
+TODO: Preguntar si para hacer la asignación se necesita tener permisos sobre los servicios
+TODO: Asignar servicios mediante formulario
+TODO: Poder asignar un servicio, todos o solo los activos
+TODO: Poder listar servicios mediante lista
+TODO: Poder eliminar servicios del usuario
+"""
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_CRUD_users)
+def assign_services_to_user(request:HttpRequest,user_id):
+    user = User.objects.filter(UserID=user_id).first()
+    if request.method == 'POST':
+        servicios_ids = request.POST.getlist('servicios_ids')
+        servicios = Servicio.objects.filter(ServicioID__in=servicios_ids)
+        errors = validate_services_of_user(request,user,servicios)
+        if errors:
+            template = loader.get_template('account/users/services/form.html')
+            allowed_servicios = Servicio.objects.filter(empresa=user.empresa)
+            context = {'servicios':allowed_servicios,'usuario':user}
+            return HttpResponse(template.render(context,request))
+        
+        user.servicios.add(*servicios)
+        return redirect(f"/backoffice/users/{str(user_id)}/services")
+
+    if request.method == 'GET':
+        template = loader.get_template('account/users/services/form.html')
+        allowed_servicios = Servicio.objects.filter(empresa=user.empresa)
+        context = {'servicios':allowed_servicios,'usuario':user}
+        return HttpResponse(template.render(context,request))
+
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_users)
+def list_services_of_user(request:HttpRequest,user_id):
+    user = User.objects.filter(UserID=user_id).first()
+    n_pagina = request.GET.get('page', 1)
+    global DEFAULT_PAGINATION_USER_SERVICES
+    n_services = request.GET.get('n_services', DEFAULT_PAGINATION_USER_SERVICES)
+
+    servicios = Servicio.objects.filter(users=user)
+
+    paginacion = Paginator(servicios, n_services)
+    page_obj = paginacion.get_page(n_pagina)
+
+    context = {
+        'usuario':user,
+        'servicios': page_obj,
+        'page_obj': page_obj,
+        'page': n_pagina,
+        'n_services':n_services
+    }
+    return render(request,'account/users/services/list.html', context)
+
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_CRUD_users)
+@require_POST
+def remove_services_to_user(request:HttpRequest,user_id):
+    user = User.objects.filter(UserID=user_id).first()
+    servicios_ids = request.POST.getlist('servicios_ids')
+    servicios = Servicio.objects.filter(ServicioID__in=servicios_ids)
+    errors = validate_services_of_user(request,user,servicios)
+    if errors:
+            return redirect(f"/backoffice/users/{str(user_id)}/services")
+    user.servicios.remove(*servicios)
+    return redirect(f"/backoffice/users/{str(user_id)}/services")
