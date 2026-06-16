@@ -18,13 +18,26 @@ def validate_tarea(request:HttpRequest,texto)->bool:
         messages.error(request,"Debe indicar descripcion de la tarea",extra_tags='error')
     return errors
 
+def create_bulk_tareas(texto, es_urgente, created_at, usuario_creador, usuarios):
+    Tarea.objects.bulk_create(
+                [Tarea(
+                    texto=texto,
+                    estado='pendiente',
+                    es_urgente=es_urgente,
+                    fecha_creacion = created_at,
+                    usuario_creador = usuario_creador,
+                    usuario_asignado = u_asignado
+
+                ) for u_asignado in usuarios]
+            )
+
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_tareas)
 def list_tareas(request:HttpRequest):
     user : User = request.user
     list_tareas = Tarea.objects.filter(
-        creador_id = user.UserID
+        usuario_creador_id = user.UserID
     )
     n_pagina = request.GET.get('page',1)
     global DEFAULT_PAGINATION_TAREAS
@@ -38,81 +51,68 @@ def list_tareas(request:HttpRequest):
         'page':n_pagina,
         'n_tareas':n_tareas
     }
-    return render(request,'list.html',context)
+    return render(request,'tareas/list.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_tareas)
 def create_tarea(request:HttpRequest):
     user:User = request.user
+    users_allowed = User.objects.filter(empresa__usuario_creador=user)
+    empresas = Empresa.objects.filter(usuario_creador=user)
+    context = {'action':'create','empresas':empresas,'usuarios':users_allowed}
     if request.method == 'POST':
         es_urgente = request.POST.get('is_urgent','Normal') == 'Urgente'
         texto = request.POST.get('texto','')
 
         errors = validate_tarea(request,texto)
         if errors:
-            template = loader.get_template('form.html')
-            context = {}
+            template = loader.get_template('tareas/form.html')
             return HttpResponse(template.render(context,request))
-
         
         created_at = now()
-        #Checkear multiples checkbox para saber a que empresas se asignan las tareas
-        #Cada checkbox debe tener un valor tipo empresa_<ID>
-        empresas_marcadas_ids = [ int(key.split('_')[1]) for key in request.POST if key.startswith('empresa_')]
-        if empresas_marcadas_ids:
-            users = User.objects.filter(empresa_id__in=empresas_marcadas_ids).distinct()
-            tareas = Tarea.objects.bulk_create(
-                [Tarea(
-                    texto=texto,
-                    estado='pendiente',
-                    es_urgente=es_urgente,
-                    fecha_creacion = created_at,
-                    usuario_creador = user,
-                    usuario_asignado = u_asignado
 
-                ) for u_asignado in users]
-            )
+        empresas_ids = [eid for eid in request.POST.getlist('empresas_ids') if eid]
+        listas_usuarios_ids = [luid for luid in request.POST.getlist('listas_ids') if luid] 
+        if empresas_ids:
+            users = User.objects.filter(empresa_id__in=empresas_ids).distinct()
+            create_bulk_tareas(texto=texto,es_urgente=es_urgente,created_at=created_at,usuario_creador=user,usuarios=users)
+
+        elif listas_usuarios_ids:
+            #TODO: Implementar clase lista de usuarios para poder asignar usuarios repetidamente en bloque
+            #Funcionalidad pensada para tareas que requieren repetirse cada cierto tiempo
+            pass                   
         else:
-            user_asigned_id :int = request.POST.get('user_id')
-            user_asigned = User.objects.filter(id=user_asigned_id)
-            if not user_asigned:
+            users_asigned_id :int = [uid for uid in request.POST.getlist('users_id') if uid]
+            users_asigned = User.objects.filter(UserID__in=users_asigned_id)
+            if not users_asigned:
                 messages.error(request,"Debe indicar un usuario válido",extra_tags='error')
-                template = loader.get_template('form.html')
-                context = {}
+                template = loader.get_template('tareas/form.html')
                 return HttpResponse(template.render(context,request))
-
-            tarea = Tarea()
-            tarea.es_urgente = es_urgente
-            tarea.estado = 'pendiente'
-            tarea.texto = texto
-            tarea.fecha_creacion = created_at
-            tarea.usuario_creador = user
-            tarea.usuario_asignado = user_asigned
-            tarea.save()
-        return redirect('backoffice/tareas')
+            create_bulk_tareas(texto=texto,es_urgente=es_urgente,created_at=created_at,usuario_creador=user,usuarios=users_asigned)  
+        return redirect('/backoffice/tareas')
+    
     elif request.method == 'GET':
-        template = loader.get_template('form.html')
-        context = {}
+        template = loader.get_template('tareas/form.html')
         return HttpResponse(template.render(context,request))
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_tareas)
 def delete_tarea(request:HttpRequest,tarea_id):
-    tarea = Tarea.objects.filter(id=tarea_id).first()
+    tarea = Tarea.objects.filter(TareaID=tarea_id).first()
     tarea.delete()
     messages.success(request,"La tarea se ha eliminado con éxito",extra_tags='success')
-    return redirect('backoffice/tareas')
+    return redirect('/backoffice/tareas')
 
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_tareas)
 def change_state_tarea(request:HttpRequest,tarea_id):
-    tarea = Tarea.objects.filter(id=tarea_id).first()
+    tarea = Tarea.objects.filter(TareaID=tarea_id).first()
     estado = request.POST.get('estado','pendiente')
     tarea.estado = estado
     tarea.save()
     messages.success(request,"Se acaba de actualizar la tarea correspondiente",extra_tags='success')
-    return redirect('backoffice/tareas')
+    return redirect('/backoffice/tareas')
