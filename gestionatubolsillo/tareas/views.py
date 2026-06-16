@@ -31,6 +31,12 @@ def create_bulk_tareas(texto, es_urgente, created_at, usuario_creador, usuarios)
                 ) for u_asignado in usuarios]
             )
 
+
+"""TODO: Filtrar por Usuario
+    Filtrar por rango de fechas
+    Filtar estado
+"""
+
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_tareas)
