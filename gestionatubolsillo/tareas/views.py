@@ -116,3 +116,17 @@ def change_state_tarea(request:HttpRequest,tarea_id):
     tarea.save()
     messages.success(request,"Se acaba de actualizar la tarea correspondiente",extra_tags='success')
     return redirect('/backoffice/tareas')
+
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_tareas)
+def details_tarea(request:HttpRequest,tarea_id):
+    tarea = Tarea.objects.filter(TareaID=tarea_id).first()
+    if not tarea:
+        messages.error(request,"La tarea no existe",extra_tags='error')
+        return redirect('/backoffice/tareas')
+    template = loader.get_template('tareas/form.html')
+    context = {'action': 'view','tarea': tarea}
+
+    return HttpResponse(template.render(context,request))
