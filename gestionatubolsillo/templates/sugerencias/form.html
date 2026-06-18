@@ -1,0 +1,142 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+    {% if action == 'create' %}
+        <div class="main-content">
+        <div class="form-card">
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">Nueva Tarea</span>
+            </div>
+ 
+            <div class="form-card-body">
+                <form method="post" action="/backoffice/tareas/create" id="form-tarea">
+                    {% csrf_token %}
+ 
+                    <div class="mb-3">
+                        <label class="form-label" for="nombre_tarea">
+                          Descripción <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="texto" name="texto" class="form-control form-control-sm" placeholder="Ej: tarea Ejemplo S.L." required/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="nombre_tarea">
+                          Tipo
+                        </label>
+                        <select id="tipo" name="is_urgent" class="form-select form-select-sm">
+                            <option value="Normal" selected>Normal</option>
+                            <option value="Urgente">Urgente</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="nombre_tarea">
+                          Usuarios Asignados
+                        </label>
+                        <select id="users_id" name="users_id" class="form-select form-select-sm" multiple>
+                            <option value="" selected>Selecciona un usuario...</option>
+                            {% for usuario in  usuarios%}
+                                <option value="{{usuario.UserID}}">{{usuario.username}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="empresa">
+                            Asignar a todos los usuarios de las Empresas
+                        </label>
+                        <select id="empresas_ids" name="empresas_ids" class="form-select form-select-sm" multiple>
+                            <option value="" selected>Selecciona una empresa...</option>
+                            {% for empresa in  empresas%}
+                                <option value="{{empresa.EmpresaID}}">{{empresa.nombre}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="empresa">
+                            Asignar a todos los usuarios de las Listas
+                        </label>
+                        <select id="listas_ids" name="listas_ids" class="form-select form-select-sm" multiple>
+                            <option value="" selected>Selecciona una lista...</option>
+                            {% for listado in  listados%}
+                                <option value="{{listado.id}}">{{listado.nombre}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    
+ 
+                    
+ 
+                </form>
+            </div>
+ 
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="form-tarea" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>Crear tarea
+                </button>
+            </div>
+ 
+        </div>
+        </div>
+    {% endif %}
+
+    {% if action == 'view' %}
+    <!--Listado de usuarios de la tarea, preguntar-->
+    <div class="main-content">
+        <div class="form-card">
+ 
+            <div class="form-card-header">
+                <i class="bi bi-building text-primary"></i>
+                <span class="form-card-title">Detalles Tarea</span>
+            </div>
+ 
+            <div class="form-card-body">
+                    <div class="mb-3">
+                        <p class="form-label">Descripción</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ tarea.texto }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Tipo</p>
+                        <p class="form-control form-control-sm bg-light mb-0">
+                            {% if tarea.es_urgente %}
+                                Urgente
+                            {% else %}
+                                Normal
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Usuario Asignado</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ tarea.usuario_asignado }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="form-label">Estado</p>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ tarea.get_estado_display }}</p>
+                    </div>
+ 
+            </div>
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+            </div>
+ 
+ 
+        </div>
+    </div>
+    
+    {% endif %}
+    
+</main>
+{% endblock body %}
