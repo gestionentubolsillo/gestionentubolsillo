@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'partes',
     'servicios',
     'tareas',
+    'sugerencias',
     'almacen',
     'home',
     'backoffice',
