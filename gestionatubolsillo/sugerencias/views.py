@@ -47,7 +47,7 @@ def list_sugerencias(request: HttpRequest):
         'n_pagina': n_pagina,
         'n_sugerencias': n_sugerencias
     }
-    return render(request,'list.html', context)
+    return render(request,'sugerencias/list.html', context)
 
 #Listado de sugerencias creadas por el usuario, independientemente de si tiene acceso al backoffice
 @login_required
@@ -69,7 +69,7 @@ def list_own_sugerencias(request: HttpRequest):
         'n_pagina': n_pagina,
         'n_sugerencias': n_sugerencias
     }
-    return render(request,'list.html', context)
+    return render(request,'sugerencias/list.html', context)
 
 #No es necesario acceder al backoffice para crear sugerencias
 @login_required
