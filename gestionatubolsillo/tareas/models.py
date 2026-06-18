@@ -32,6 +32,11 @@ class Tarea(models.Model):
         return User.objects.none()
 
 
+
+class ListadoUsers(models.Model):
+    nombre = models.CharField(max_length=20)
+    usuarios = models.ManyToManyField('users.User',related_name='listados')
+
 def can_view_tareas(user:User)-> bool:
     return user.permisos_tareas == 'view_only' or user.permisos_tareas == 'create_modify'
 
