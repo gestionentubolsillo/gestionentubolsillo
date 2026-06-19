@@ -3,87 +3,20 @@ from django.http import HttpRequest,HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from users.models import can_access_backoffice, User
 from .models import Sugerencia, can_view_sugerencias, can_CRUD_sugerencias
-from django.core.paginator import Paginator
+
 from django.template import loader
 from django.contrib import messages
 from empresas.models import Empresa
 from django.utils.timezone import now
-from django.db.models.manager import BaseManager
 
-DEFAULT_PAGINATION_SUGERENCIAS = 25
+from .filters import filtra_sugerencias
+from .paginators import paginate_sugerencias
+from .validators import validate_sugerencia
+from .builders import build_sugerencia
+
+
 
 # Create your views here.
-
-def validate_sugerencia(request:HttpRequest, texto, usuario_referente_id)->bool:
-    errors = False
-    user_ref = User.objects.filter(UserID=usuario_referente_id).first()
-    if texto == '':
-        messages.error(request, 'El texto de la sugerencia no puede estar vacío.',extra_tags='error')
-        errors = True
-    if not user_ref:
-        messages.error(request, 'El usuario referente no es válido.',extra_tags='error')
-        errors = True
-    return errors
-
-def paginate_sugerencias(request:HttpRequest,sugerencias:BaseManager[Sugerencia]):
-    choices = Sugerencia._meta.get_field('estado').choices
-    user:User = request.user
-    empresas = Empresa.objects.filter(usuario_creador=user)
-    #TOREFACTOR: Solo seleccionar los usuarios que pertenecen a una misma cuenta
-    users = User.objects.all()
-    n_pagina = request.GET.get('page', 1)
-    global DEFAULT_PAGINATION_SUGERENCIAS
-    n_sugerencias = request.GET.get('n_sugerencias', DEFAULT_PAGINATION_SUGERENCIAS)
-    paginator = Paginator(sugerencias, n_sugerencias)
-    page_obj = paginator.get_page(n_pagina)
-    context = {
-        'sugerencias': page_obj,
-        'page_obj': page_obj,
-        'n_pagina': n_pagina,
-        'n_sugerencias': n_sugerencias,
-        'estados':choices,
-        'empresas':empresas,
-        'usuarios':users
-    }
-    return context
-
-def filtra_sugerencias(request:HttpRequest,filter_only_self=False)->tuple[dict,dict]:
-    user:User = request.user
-    empresa:Empresa = user.empresa
-    filtros = {'empresa':empresa}
-    exclusiones = {}
-
-    user_creador_id = request.GET.get('usuario_creador_id')
-    if filter_only_self:
-        filtros['usuario_creador'] = user
-    elif user_creador_id:
-        user = User.objects.filter(UserID=user_creador_id).first()
-        filtros['usuario_creador'] = user
-
-    estado = request.GET.get('estado')
-    if estado:
-        filtros['estado']=estado
-    else:
-        exclusiones['estado']= 'borrada'
-
-    id_empresa = request.GET.get('empresa_id')
-    if id_empresa:
-        empresa = Empresa.objects.filter(EmpresaID=id_empresa).first()
-        filtros['empresa']=empresa
-
-    fecha_inicio = request.GET.get('fecha_inicio')
-    fecha_fin = request.GET.get('fecha_fin')
-    if fecha_inicio:
-        filtros['fecha_creacion__gte'] = fecha_inicio
-    if fecha_fin:
-        filtros['fecha_creacion__lte'] = fecha_fin
-
-    user_ref_id = request.GET.get('user_ref_id')
-    if user_ref_id:
-        user = User.objects.filter(UserID=user_ref_id).first()
-        filtros['usuario_referente']=user
-
-    return filtros, exclusiones
 
 #unico servicio de backoffice es el listado de sugerencias y la opcion de cambiar su estado
 @login_required
@@ -115,27 +48,28 @@ def create_sugerencia(request:HttpRequest):
     allowed_users = User.objects.all()
     template = loader.get_template('sugerencias/form.html')
     context = {'action':'create','usuarios':allowed_users}
+
     if request.method == 'POST':
+        
         created_at = now()
         texto = request.POST.get('texto','')
         departamento = request.POST.get('departamento')
         usuario_referente_id = request.POST.get('user_ref_id')
+
+
         errors = validate_sugerencia(request,texto,usuario_referente_id)
         if errors:
             return HttpResponse(template.render(context,request))
-        if departamento == '':
-            departamento = 'Sin Departamento'
+        
         user_ref = User.objects.filter(UserID=usuario_referente_id).first()
-        empresa : Empresa = user_ref.empresa
-        sugerencia = Sugerencia()
-        sugerencia.texto = texto
-        sugerencia.departamento = departamento
-        sugerencia.usuario_creador = user
-        sugerencia.usuario_referente = user_ref
-        sugerencia.empresa = empresa
-        sugerencia.fecha_creacion = created_at
-        sugerencia.estado = 'pendiente'
-        sugerencia.save()
+        build_sugerencia(
+            data={
+                'texto':texto,
+                'departamento':departamento,
+                'usuario_creador':user,
+                'usuario_referente':user_ref
+            },fecha_creacion=created_at
+        )
         return redirect('/backoffice/sugerencias')
     elif request.method == 'GET':
         return HttpResponse(template.render(context,request))
