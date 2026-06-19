@@ -18,7 +18,7 @@ DEFAULT_PAGINATION_PARTES = 25
 def dashboard_informes(request:HttpRequest):
     #Vista que lista los diferentes enlaces para consulta de los diferentes tipos de informe
     context = {}
-    return render(request,'list_general.html',context)
+    return render(request,'informes/list_general.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)

@@ -1,7 +1,18 @@
 from django.db import models
 from users.models import User
+from datetime import datetime, timedelta
 
 # Create your models here.
+
+DIAS_WEEKDAY = {
+        'lunes':0,
+        'martes':1,
+        'miercoles':2,
+        'jueves':3,
+        'viernes':4,
+        'sabado':5,
+        'domingo':6
+    }
 
 class Parte(models.Model):
     #Clase Abstracta para los diferentes tipos de documentos
@@ -33,6 +44,38 @@ class Parte_Trabajo(Parte):
     #1 servicio tiene asociado N partes de trabajo
     servicio = models.ForeignKey('servicios.Servicio', on_delete=models.CASCADE, related_name='partes_servicio')
     observaciones = models.TextField(blank=True, null=True)
+    horas_calculadas = models.FloatField(null=True, blank=True, editable=False)
+
+
+
+    def _calcular_horas(self)->float:
+        if not self.fecha_finalizacion or not self.servicio:
+            return 0.
+        if not self.servicio.hora_inicio or not self.servicio.hora_fin:
+            return 0.
+        fecha_inicio = self.fecha_creacion.date()
+        fecha_fin = self.fecha_finalizacion.date()
+        total_dias = (fecha_fin - fecha_inicio).days + 1
+        semanas_completas, dias_restantes = divmod(total_dias, 7)
+
+        horas_servicio = (
+        datetime.combine(fecha_inicio, self.servicio.hora_fin) -
+        datetime.combine(fecha_inicio, self.servicio.hora_inicio)
+        ).total_seconds() / 3600
+
+        global DIAS_WEEKDAY
+        dias_activos = [DIAS_WEEKDAY[d] for d in self.servicio.dias_semana]
+
+        total = 0.
+        primer_dia = fecha_inicio.weekday()
+        for dia in dias_activos:
+            apariciones = semanas_completas
+            if (dia - primer_dia) % 7 < dias_restantes:
+                apariciones += 1
+            total += apariciones * horas_servicio
+
+        return total
+
 
 class Linea_Parte_Trabajo(models.Model):
     LineaParteTrabajoID = models.AutoField(primary_key=True)
