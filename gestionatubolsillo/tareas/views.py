@@ -12,6 +12,10 @@ from django.db.models import Count
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from .validators import validate_query_filters, QueryFilterData, parse_datetime
+from .paginators import paginate_tareas, paginate_listados
+from .filters import filtra_tareas
+
 # Create your views here.
 
 DEFAULT_PAGINATION_TAREAS = 25
@@ -47,78 +51,29 @@ def create_bulk_tareas(texto, es_urgente, created_at, usuario_creador, usuarios)
                 ) for u_asignado in usuarios]
             )
 
-def validate_query_filters(request:HttpRequest,fecha_inicio,fecha_fin,estado,usuario,urgencia)->bool:
-    errors = False
-    choices = Tarea._meta.get_field('estado').choices
-    user :User|None = None
-    if usuario != '':
-        user = User.objects.filter(UserID=usuario).first()
-    query_between_dates_exists = (fecha_inicio is not None and fecha_inicio != '') and (fecha_fin is not None and fecha_fin != '')
-    if query_between_dates_exists and fecha_fin < fecha_inicio:
-        messages.error(request,"La fecha de fin debe ser posterior a la fecha de inicio de la búsqueda", extra_tags='error')
-        errors = True
-    if estado != '' and estado not in [choice[0] for choice in choices]:
-        messages.error(request, "El estado debe ser uno de los posibles estados de una tarea",extra_tags='error')
-        errors = True
-    if usuario != '' and user is None:
-        messages.error(request,"Debe indicar un usuario válido",extra_tags='error')
-        errors = True
-    if urgencia and not str(urgencia).isnumeric():
-        messages.error(request,"Debe indicar un valor válido de urgencia de la tarea",extra_tags='error')
-        errors = True
-    return errors
 
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_tareas)
 def list_tareas(request:HttpRequest):
-    user : User = request.user
-    
-    usuarios = User.objects.filter(tareas_asignadas__usuario_creador=user).distinct()
-    choices = Tarea._meta.get_field('estado').choices
 
-    fecha_inicio = request.GET.get('fecha_inicio')
-    fecha_fin = request.GET.get('fecha_fin')
-    estado = request.GET.get('estado')
-    usuario = request.GET.get('usuario')
-    urgencia = request.GET.get('urgencia')
+    data:QueryFilterData = {
+        'usuario_id': request.GET.get('usuario'),
+        'fecha_inicio': parse_datetime(request.GET.get('fecha_inicio')),
+        'fecha_fin': parse_datetime(request.GET.get('fecha_fin')),
+        'estado': request.GET.get('estado'),
+        'es_urgente': request.GET.get('urgencia')
 
-    filtros = {'usuario_creador_id':user.UserID}
-
-    errors = validate_query_filters(request,fecha_inicio,fecha_fin,estado,usuario,urgencia)
-
-    if not errors:
-
-        if fecha_inicio:
-            filtros['fecha_creacion__gte'] = fecha_inicio
-        if fecha_fin:
-            filtros['fecha_creacion__lte'] = fecha_fin
-        if estado:
-            filtros['estado'] = estado
-        if usuario:
-            filtros['usuario_asignado_id'] = usuario
-        if urgencia:
-            filtros['es_urgente'] = bool(int(urgencia))
-
-    list_tareas = Tarea.objects.filter(
-        **filtros
-    )
-
-    n_pagina = request.GET.get('page',1)
-    global DEFAULT_PAGINATION_TAREAS
-    n_tareas = request.GET.get('n_tareas', DEFAULT_PAGINATION_TAREAS)
-    paginacion = Paginator(list_tareas,n_tareas)
-    page_obj = paginacion.get_page(n_pagina)
-
-    context = {
-        'tareas' : page_obj,
-        'page_obj': page_obj,
-        'page':n_pagina,
-        'n_tareas':n_tareas,
-        'usuarios':usuarios,
-        'estados':choices
     }
+
+    errors = validate_query_filters(request,data=data)
+
+    filtros, exclusiones = filtra_tareas(request,errors)
+    list_tareas = Tarea.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
+
+    context = paginate_tareas(request,list_tareas)
+
     return render(request,'tareas/list.html',context)
 
 @login_required
@@ -249,17 +204,6 @@ def edit_list_usuarios(request:HttpRequest,lista_id):
 @user_passes_test(can_view_tareas)
 def lista_listados_de_usuarios(request:HttpRequest):
     listas = ListadoUsers.objects.all().annotate(num_users=Count('usuarios',distinct=True))
-    n_pagina = request.GET.get('page',1)
-    global DEFAULT_PAGINATION_LISTADOS
-    n_listas = request.GET.get('n_listas', DEFAULT_PAGINATION_LISTADOS)
-    paginacion = Paginator(listas,n_listas)
-    page_obj = paginacion.get_page(n_pagina)
-
-    context = {
-        'listados' : page_obj,
-        'page_obj': page_obj,
-        'page':n_pagina,
-        'n_listas':n_listas
-    }
+    context = paginate_listados(request,listas)
     return render(request,'tareas/list_users/list.html',context)
 
