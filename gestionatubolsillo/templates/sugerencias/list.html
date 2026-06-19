@@ -11,13 +11,13 @@
   <div class="list-toolbar">
     <span class="list-title">
       <i class="bi bi-building me-1 text-primary"></i>
-      Tareas
+      Sugerencias
     </span>
 
     <!-- Búsqueda por nombre -->
-    <form method="get" action="" class="search-box mb-0 d-flex gap-2">
+    <form method="get" action="" class="search-box mb-0 d-flex gap-2 ">
       <i class="bi bi-search"></i>
-      <select name="usuario" class="form-select form-select-sm" style="min-width: 160px;">
+      <select name="usuario_creador_id" class="form-select form-select-sm" style="min-width: 160px;">
         <option value="" selected>Filtro por usuario...</option>
         {% for usuario in  usuarios%}
           <option value="{{usuario.UserID}}">{{usuario.username}}</option>
@@ -41,25 +41,36 @@
           <option value="{{valor}}">{{etiqueta}}</option>
         {% endfor %}
       </select>
-      <select name="urgencia" class="form-select form-select-sm" style="min-width: 160px;">
-        <option value="" selected>Filtro por urgencia...</option>
-        <option value="0">Normal</option>
-        <option value="1">Urgente</option>
+      <select name="user_ref_id" class="form-select form-select-sm" style="min-width: 160px;">
+        <option value="" selected>Filtro por referente...</option>
+        {% for usuario in  usuarios%}
+          <option value="{{usuario.UserID}}">{{usuario.username}}</option>
+        {% endfor %}
+      </select>
+      <select name="empresa_id" class="form-select form-select-sm" style="min-width: 160px;">
+        <option value="" selected>Filtro por empresa...</option>
+        {% for empresa in  empresas%}
+          <option value="{{empresa.EmpresaID}}">{{empresa.nombre}}</option>
+        {% endfor %}
       </select>
       <button type="submit" class="btn btn-primary btn-sm">
             <i class="bi bi-search"></i>
         </button>
     </form>
     <!-- Botón ver listados - mostrar solo si tiene permiso minimo de vista-->
-     {% if  user.permisos_tareas in 'view_only,create_modify'%}
-        <a href="/backoffice/tareas/listados" class="btn btn-primary btn-sm ms-auto">
-            <i class="bi bi-plus-lg me-1"></i> Ver Listados
+     {% if  user.permisos_sugerencias in 'view_only,create_modify'%}
+        <a href="/backoffice/sugerencias" class="btn btn-primary btn-sm ms-auto">
+            <i class="bi bi-plus-lg me-1"></i> Ver Todas
+        </a>
+
+        <a href="/backoffice/sugerencias/self" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Ver Propias
         </a>
      {% endif %}
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
-    {% if user.permisos_tareas == 'create_modify' %}
-        <a href="/backoffice/tareas/create" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i> Nueva Tarea
+    {% if user.permisos_sugerencias == 'create_modify' %}
+        <a href="/backoffice/sugerencias/create" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Nueva Sugerencia
         </a>
     {% endif %}
   </div>
@@ -71,68 +82,60 @@
         <tr>
           <!-- Añade o quita columnas según el modelo -->
           <th>Fecha</th>
-          <th>Usuario Asignado</th>
-          <th>Tarea</th>
+          <th>Usuario</th><!--Usuario creador de la sugerencia-->
+          <th>Departamento</th>
+          <th>Referente al usuario</th><!--Usuario al que va dirigida la sugerencia-->
+          <th>Sugerencia</th>
           <th>Estado</th>
-          <th>Tipo</th>
           <!-- Columna acciones: siempre la última -->
           <th class="text-end">Acciones</th>
         </tr>
       </thead>
       <tbody>
 
-        <!-- Visualizacion del resto de tareas -->
-        {% for tarea in tareas %}
+        <!-- Visualizacion del resto de sugerencias -->
+        {% for sugerencia in sugerencias %}
         <tr>
-          <td class="fw-medium">{{tarea.fecha_creacion}}</td>
-          <td class="text-muted">{{tarea.usuario_asignado}}</td>
-          <td class="text-muted">{{tarea.texto}}</td>
-          <td class="text-muted">{{tarea.estado}}</td>
-          <td class="text-muted">
-            {% if tarea.es_urgente %}
-              Urgente
-            {% else %}
-              Normal
-            {% endif %}
-          </td>
+          <td class="fw-medium">{{sugerencia.fecha_creacion}}</td>
+          <td class="text-muted">{{sugerencia.usuario_creador}}</td>
+          <td class="text-muted">{{sugerencia.departamento}}</td>
+          <td class="text-muted">{{sugerencia.usuario_referente}}</td>
+          <td class="text-muted">{{sugerencia.texto}}</td>
+          <td class="text-muted">{{sugerencia.get_estado_display}}</td>
           <td class="text-end">
             <div class="d-flex gap-1 justify-content-end">
 
               <!-- Ver: permiso view_only o create_modify -->
-              {% if user.permisos_tareas in 'view_only,create_modify' %}
-                <a href="/backoffice/tareas/{{tarea.TareaID}}" class="action-btn" title="Ver">
+              {% if user.permisos_sugerencias in 'view_only,create_modify' %}
+                <a href="/backoffice/sugerencias/{{sugerencia.SugerenciaID}}" class="action-btn" title="Ver">
                     <i class="bi bi-eye"></i>
                 </a>
               {% endif %}
 
-              <!-- Editar: solo create_modify -->
-              {% if user.permisos_tareas == 'create_modify' %}
-                <a href="/backoffice/tareas/edit/{{tarea.TareaID}}" class="action-btn" title="Editar">
-                    <i class="bi bi-pencil"></i>
-                </a>
+              {% if user.permisos_sugerencias == 'create_modify' %}
 
               <!-- Eliminar: solo create_modify -->
                 <button class="action-btn delete" title="Eliminar"
-                      data-bs-toggle="modal" data-bs-target="#deleteModal-{{tarea.TareaID}}">
+                      data-bs-toggle="modal" data-bs-target="#deleteModal-{{sugerencia.SugerenciaID}}">
                     <i class="bi bi-trash"></i>
                 </button>
                 <!-- MODAL CONFIRMACIÓN ELIMINAR -->
-                <div class="modal fade" id="deleteModal-{{tarea.TareaID}}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal fade" id="deleteModal-{{sugerencia.SugerenciaID}}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content" style="border-radius:14px;border:none;">
                             <div class="modal-header border-0 pb-0">
                                 <h5 class="modal-title fw-bold" id="deleteModalLabel">
-                                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Eliminar Tarea
+                                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Eliminar sugerencia
                                 </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body text-muted" style="font-size:.9rem;">
-                                    ¿Estás seguro de que quieres eliminar la Tarea <strong>{{tarea.nombre}}</strong>? Esta acción no se puede deshacer.
+                                    ¿Estás seguro de que quieres eliminar la sugerencia <strong>{{sugerencia.texto}}</strong>? Esta acción no se puede deshacer.
                             </div>
                             <div class="modal-footer border-0 pt-0">
                                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
                                 <!-- Apunta al endpoint de borrado con el id del objeto -->
-                                <a href="/backoffice/tareas/{{tarea.TareaID}}/delete" class="btn btn-danger btn-sm">Eliminar</a>
+                                <a href="/backoffice/sugerencias/{{sugerencia.SugerenciaID}}/delete" class="btn btn-danger btn-sm">Eliminar</a>
                             </div>
                         </div>
                     </div>
