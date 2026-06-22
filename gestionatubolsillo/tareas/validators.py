@@ -49,3 +49,30 @@ def validate_query_filters(request:HttpRequest,data:QueryFilterData)->bool:
         errors = True
 
     return errors
+
+
+def validate_tarea(request:HttpRequest,texto)->bool:
+    errors = False
+    if texto=='':
+        messages.error(request,"Debe indicar descripcion de la tarea",extra_tags='error')
+        errors = True
+    return errors
+
+def validate_list_users(request:HttpRequest,nombre,list_users)->bool:
+    errors = False
+    if nombre == '':
+        messages.error(request,"Debe indicar un nombre identificativo a la lista de usuarios", extra_tags='error')
+        errors = True
+    if list_users == '':
+        messages.error(request,"Debe indicar al menos 1 usuario para crear la lista de usuarios", extra_tags='error')
+        errors = True
+    return errors
+
+def validate_users_assigned(request:HttpRequest)->bool:
+    errors = False
+    users_asigned_id :int = [uid for uid in request.POST.getlist('users_id') if uid]
+    users_asigned = User.objects.filter(UserID__in=users_asigned_id)
+    if not users_asigned:
+        messages.error(request,"Debe indicar un usuario válido",extra_tags='error')
+        errors = True
+    return errors
