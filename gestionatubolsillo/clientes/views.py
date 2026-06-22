@@ -11,79 +11,26 @@ from servicios.models import Servicio, can_CRUD_servicios
 from django.utils.timezone import now
 from empresas.models import Empresa
 from django.db.models.manager import BaseManager
+from enum import Enum
+
+from .filters import filtra_clientes
+from .paginators import paginate_clientes, paginate_servicios_de_cliente
+from .builders import build_cliente
+from .validators import validate_client, validate_user_client,validate_servicios_cliente
 
 # Create your views here.
-DEFAULT_PAGINATION_CLIENTS = 25
-MIN_CHARS_PASSWORD = 8
 DEFAULT_PAGINATION_USER_CLI = 25
-DEFAULT_PAGINATION_CLIENT_SERVICES = 10
 #Por un lado esta la creacion de organizaciones cliente y por otro, los usuarios tipo cliente asignados a la organizacion
 
-def validate_client(request:HttpRequest,nombre,provincia,municipio,empresa_id)->bool:
-    errors = False
-    if nombre == '':
-        messages.error(request,"Debe proporcionarle un nombre al cliente", extra_tags='error')
-        errors = True
-    if provincia == '' or municipio == '':
-        messages.error(request,"Debe indicar provincia y municipio al que pertenece",extra_tags='error')
-        errors = True
-    empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
-    if empresa is None:
-        messages.error(request,"Debe indicar una empresa válida",extra_tags='error')
-        errors = True
-    return errors
-
-def validate_user_client(request:HttpRequest,username,password)->bool:
-    errors = False
-    if username == '' or password == '':
-        messages.error(request,"Debe rellenar credenciales de nombre de usuario y contraseña",extra_tags='error')
-        errors = True
-    global MIN_CHARS_PASSWORD
-    if len(password) < MIN_CHARS_PASSWORD:
-        messages.error(request,f"La contraseña debe tener al menos {MIN_CHARS_PASSWORD} caracteres",extra_tags='error')
-        errors = True
-    return errors
-
-def validate_servicios_cliente(request:HttpRequest,servicios_ids,allowed_services_to_add:BaseManager[Servicio])->bool:
-    errors = False
-    if not servicios_ids:
-        messages.error(request, "Debe seleccionar al menos un servicio", extra_tags='error')
-        errors = True
-    servicios = Servicio.objects.filter(ServicioID__in=servicios_ids)
-    if not servicios:
-        messages.error(request, "No se ha podido encontrar ningún servicio", extra_tags='error')
-        errors = True
-    servicios_no_permitidos = servicios.difference(allowed_services_to_add)
-    if servicios_no_permitidos.exists():
-        messages.error(request, "No puede añadir servicios no autorizados a este cliente", extra_tags='error')
-        errors = True
-    return errors
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_clientes)
 def list_clientes(request:HttpRequest):
-    user:User = request.user
-    empresas = Empresa.objects.filter(usuario_creador_id=user.UserID)
-    empresa:Empresa = user.empresa
-    n_pagina = request.GET.get('page', 1)
-    global DEFAULT_PAGINATION_CLIENTS
-    n_clientes = request.GET.get('n_clients', DEFAULT_PAGINATION_CLIENTS)
-    filtro_empresa = request.GET.get('empresa',empresa.EmpresaID)
 
-    lista_clientes = Cliente.objects.filter(empresa_id = filtro_empresa)
-
-    paginacion = Paginator(lista_clientes,n_clientes)
-    page_obj = paginacion.get_page(n_pagina)
-
-    context = {
-        'clientes':page_obj,
-        'page_obj':page_obj,
-        'page':n_pagina,
-        'n_clients':n_clientes,
-        'empresas':empresas,
-        'filtro_empresa':filtro_empresa
-    }
+    filtros, exclusiones = filtra_clientes(request)
+    lista_clientes = Cliente.objects.filter(**filtros).exclude(**exclusiones).order_by('ClienteID')
+    context = paginate_clientes(request,lista_clientes)
 
     return render(request,'clientes/list.html',context)
 
@@ -91,50 +38,7 @@ def list_clientes(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_clientes)
 def create_client(request:HttpRequest):
-    user:User = request.user
-    empresas = Empresa.objects.filter(usuario_creador_id=user.UserID)
-    if request.method == 'POST':
-        nombre = request.POST.get('nombre','')
-        mail = request.POST.get('mail','')
-        contacto = request.POST.get('contacto','')
-        direccion = request.POST.get('direccion','')
-        provincia = request.POST.get('provincia','')
-        municipio = request.POST.get('municipio','')
-        telefono = request.POST.get('telefono','')
-        empresa_id = request.POST.get('empresa','')
-        created_at = now()
-        errors = validate_client(request,nombre,provincia,municipio,empresa_id)
-
-        if errors:
-            template = loader.get_template('clientes/form.html')
-            context = {
-            'action':'create',
-            'empresas':empresas
-            }
-            return HttpResponse(template.render(context,request))
-
-        empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
-        cliente = Cliente()
-        cliente.nombre = nombre
-        cliente.email = mail
-        cliente.persona_contacto = contacto
-        cliente.direccion = direccion
-        cliente.provincia = provincia
-        cliente.municipio = municipio
-        cliente.telefono = telefono
-        cliente.empresa = empresa
-        cliente.fecha_creacion = created_at
-        cliente.save()
-        return redirect('/backoffice/clientes')
-
-    elif request.method == 'GET':
-        template = loader.get_template('clientes/form.html')
-        
-        context = {
-            'action':'create',
-            'empresas':empresas
-        }
-        return HttpResponse(template.render(context,request))
+    return _create_or_modify_cliente(request)
 
 
 @login_required
@@ -142,42 +46,7 @@ def create_client(request:HttpRequest):
 @user_passes_test(can_CRUD_clientes)
 def edit_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
-    user:User = request.user
-    empresas = Empresa.objects.filter(usuario_creador_id=user.UserID)
-    if request.method == 'POST':
-        nombre = request.POST.get('nombre','')
-        mail = request.POST.get('mail','')
-        contacto = request.POST.get('contacto','')
-        direccion = request.POST.get('direccion','')
-        provincia = request.POST.get('provincia','')
-        municipio = request.POST.get('municipio','')
-        telefono = request.POST.get('telefono','')
-        empresa_id = request.POST.get('empresa','')
-        errors = validate_client(request,nombre,provincia,municipio,empresa_id)
-
-        if errors:
-            return redirect('/backoffice/clientes/edit/'+str(client_id))
-
-        empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
-        cliente.nombre = nombre
-        cliente.email = mail
-        cliente.persona_contacto = contacto
-        cliente.direccion = direccion
-        cliente.provincia = provincia
-        cliente.municipio = municipio
-        cliente.telefono = telefono
-        cliente.empresa = empresa
-        cliente.save()
-        return redirect('/backoffice/clientes/'+str(client_id))
-    
-    elif request.method == 'GET':
-        template = loader.get_template('clientes/form.html')
-        context = {
-            'action':'edit',
-            'cliente':cliente,
-            'empresas':empresas
-            }
-        return HttpResponse(template.render(context,request))
+    return _create_or_modify_cliente(request,cliente)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -187,22 +56,7 @@ def client_details(request:HttpRequest,client_id):
     if not cliente:
         messages.error(request,"El cliente no existe",extra_tags='error')
         return redirect('/backoffice/clientes')
-    #Paginacion de Servicios
-    n_pagina = request.GET.get('page', 1)
-    global DEFAULT_PAGINATION_CLIENT_SERVICES
-    n_services = request.GET.get('n_services', DEFAULT_PAGINATION_CLIENT_SERVICES)
-    servicios = cliente.servicios.all()
-    paginacion = Paginator(servicios,n_services)
-    page_obj = paginacion.get_page(n_pagina)
-    context = {
-        'cliente':cliente,
-        'action':'view',
-        'servicios':page_obj,
-        'page_obj':page_obj,
-        'page':n_pagina,
-        'n_services':n_services
-
-    }
+    context = paginate_servicios_de_cliente(request,cliente)
     return render(request,'clientes/form.html',context)
 
 @login_required
@@ -394,3 +248,75 @@ def remove_servicios_to_cliente(request:HttpRequest,client_id):
         context = {'servicios':servicios_de_cliente,'action':'remove','cliente':cliente}
         return HttpResponse(template.render(context,request))
 
+
+def _create_or_modify_cliente(request:HttpRequest,cliente:Cliente|None = None):
+    template = loader.get_template('clientes/form.html')
+    user:User = request.user
+    empresas = Empresa.objects.filter(usuario_creador_id=user.UserID)
+
+    if cliente is None:
+        context = {'action':'create','empresas':empresas}
+    else:
+        context = {'action':'edit','cliente':cliente,'empresas':empresas}
+
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre','')
+        mail = request.POST.get('mail','')
+        contacto = request.POST.get('contacto','')
+        direccion = request.POST.get('direccion','')
+        provincia = request.POST.get('provincia','')
+        municipio = request.POST.get('municipio','')
+        telefono = request.POST.get('telefono','')
+        empresa_id = request.POST.get('empresa','')
+        
+        errors = validate_client(request,nombre,provincia,municipio,empresa_id)
+        if errors:
+            return HttpResponse(template.render(context,request))
+        created_at = now()
+        empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
+        build_cliente(data={'nombre':nombre,
+            'mail':mail,
+            'contacto':contacto,
+            'direccion':direccion,
+            'provincia':provincia,
+            'municipio':municipio,
+            'telefono':telefono,
+            'empresa':empresa},created_at=created_at,cliente=cliente)
+        
+        return redirect('/backoffice/clientes')
+        
+
+    elif request.method == 'GET':
+        return HttpResponse(template.render(context,request))
+    
+
+class ClienteAccionServicios(Enum):
+    ADD = 'add',
+    REMOVE = 'remove'
+
+def _change_servicios_de_cliente(request:HttpRequest,cliente:Cliente,action:ClienteAccionServicios):
+    
+    empresa:Empresa = cliente.empresa
+    template = loader.get_template('clientes/add_servicio.html')
+
+    if action == ClienteAccionServicios.ADD:
+        servicios_allowed = Servicio.objects.filter(empresa=empresa)
+        context = {'servicios':servicios_allowed,'action':'add','cliente':cliente}
+    elif action == ClienteAccionServicios.REMOVE:
+        servicios_allowed = cliente.servicios.all()
+        context = {'servicios':servicios_allowed,'action':'remove','cliente':cliente}
+    
+    if request.method == 'POST':
+        servicios_ids = request.POST.getlist('servicios_ids')
+        errors = validate_servicios_cliente(request,servicios_ids,servicios_allowed)
+        if errors:
+            return HttpResponse(template.render(context,request))
+        servicios = Servicio.objects.filter(ServicioID__in=servicios_ids)
+
+        if action == ClienteAccionServicios.ADD:
+            cliente.servicios.add(*servicios)
+        elif action == ClienteAccionServicios.REMOVE:
+            cliente.servicios.remove(*servicios)
+        return redirect('/backoffice/clientes/'+str(cliente.ClienteID))
+    elif request.method == 'GET':
+        return HttpResponse(template.render(context,request))
