@@ -14,12 +14,11 @@ from django.db.models.manager import BaseManager
 from enum import Enum
 
 from .filters import filtra_clientes
-from .paginators import paginate_clientes, paginate_servicios_de_cliente
+from .paginators import paginate_clientes, paginate_servicios_de_cliente, paginate_cliente_users
 from .builders import build_cliente
 from .validators import validate_client, validate_user_client,validate_servicios_cliente
 
 # Create your views here.
-DEFAULT_PAGINATION_USER_CLI = 25
 #Por un lado esta la creacion de organizaciones cliente y por otro, los usuarios tipo cliente asignados a la organizacion
 
 
@@ -188,19 +187,7 @@ def user_client_details(request:HttpRequest,client_id,user_client_id):
 @user_passes_test(can_view_clientes)
 def list_user_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
-    n_pagina = request.GET.get('page', 1)
-    global DEFAULT_PAGINATION_USER_CLI
-    n_user_clis = request.GET.get('n_us_clis', DEFAULT_PAGINATION_USER_CLI)
-    lista_user_clis = user_client.objects.filter(cliente_id = cliente.ClienteID)
-    paginacion = Paginator(lista_user_clis,n_user_clis)
-    page_obj = paginacion.get_page(n_pagina)
-
-    context = {
-        'user_clis':page_obj,
-        'page_obj':page_obj,
-        'page':n_pagina,
-        'n_user_clis':n_user_clis
-    }
+    context = paginate_cliente_users(request,cliente)
     return render(request,'backoffice/u_cli_list.html',context)
 
 
