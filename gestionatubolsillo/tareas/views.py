@@ -125,7 +125,6 @@ def create_list_usuarios(request:HttpRequest):
     user:User = request.user
     users_allowed = User.objects.filter(empresa__usuario_creador=user)
     context = {'usuarios':users_allowed,'action':'create'}
-
     if request.method == 'POST':
         nombre = request.POST.get('nombre','')
         users_ids = request.POST.getlist('users_ids')
