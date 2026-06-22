@@ -209,45 +209,14 @@ def list_user_client(request:HttpRequest,client_id):
 @user_passes_test(can_CRUD_servicios)
 def add_servicios_to_cliente(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
-    empresa:Empresa = cliente.empresa
-    allowed_services_to_add = Servicio.objects.filter(empresa=empresa)
-
-    if request.method == 'POST':
-        servicios_ids = request.POST.getlist('servicios_ids')
-        errors = validate_servicios_cliente(request,servicios_ids,allowed_services_to_add)
-        if errors:
-            template = loader.get_template('clientes/add_servicio.html')
-            context = {'servicios':allowed_services_to_add,'action':'add','cliente':cliente}
-            return HttpResponse(template.render(context,request))
-        servicios = Servicio.objects.filter(ServicioID__in=servicios_ids)
-        cliente.servicios.add(*servicios)
-        return redirect('/backoffice/clientes/'+str(client_id))
-    elif request.method == 'GET':
-        template = loader.get_template('clientes/add_servicio.html')
-        context = {'servicios':allowed_services_to_add,'action':'add','cliente':cliente}
-        return HttpResponse(template.render(context,request))
+    return _change_servicios_de_cliente(request,cliente,action=ClienteAccionServicios.ADD)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_servicios)
 def remove_servicios_to_cliente(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
-    servicios_de_cliente:BaseManager[Servicio] = cliente.servicios.all()
-    if request.method == 'POST':
-        servicios_ids = request.POST.getlist('servicios_ids')
-        errors = validate_servicios_cliente(request,servicios_ids,servicios_de_cliente)
-        if errors:
-            template = loader.get_template('clientes/add_servicio.html')
-            context = {'servicios':servicios_de_cliente,'action':'remove','cliente':cliente}
-            return HttpResponse(template.render(context,request))
-        servicios = Servicio.objects.filter(ServicioID__in=servicios_ids)
-        cliente.servicios.remove(*servicios)
-        return redirect('/backoffice/clientes/'+str(client_id))
-    elif request.method == 'GET':
-        template = loader.get_template('clientes/add_servicio.html')
-        context = {'servicios':servicios_de_cliente,'action':'remove','cliente':cliente}
-        return HttpResponse(template.render(context,request))
-
+    return _change_servicios_de_cliente(request,cliente,action=ClienteAccionServicios.REMOVE)
 
 def _create_or_modify_cliente(request:HttpRequest,cliente:Cliente|None = None):
     template = loader.get_template('clientes/form.html')
