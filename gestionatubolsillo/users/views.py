@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import User, can_access_backoffice, can_view_users, can_CRUD_users
+from .models import User,Cuadrante, can_access_backoffice, can_view_users, can_CRUD_users
 from django.core.paginator import Paginator
 from django.template import loader
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
@@ -8,15 +8,16 @@ from django.contrib import messages
 from empresas.models import Empresa
 from decimal import Decimal
 from servicios.models import can_CRUD_servicios, Servicio
+from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 from django.db.models.manager import BaseManager
 from enum import Enum
 # Create your views here.
 
-from .filters import filter_users
-from .paginators import paginate_users, paginate_servicios_users
-from .builders import build_user,build_permissions
-from .validators import validate_user,validate_user_edit,validate_services_of_user
+from .filters import filter_users,filter_cuadrantes
+from .paginators import paginate_users, paginate_servicios_users, paginate_cuadrantes_users
+from .builders import build_user,build_permissions,build_cuadrante
+from .validators import validate_user,validate_user_edit,validate_services_of_user,can_user_access_cuadrante, validate_cuadrante
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -166,6 +167,63 @@ def list_services_of_user(request:HttpRequest,user_id):
 def remove_services_to_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
     return _change_user_servicios(request,user,action=ServicioAccionUser.REMOVE)
+
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_users)
+def list_cuadrantes_of_user(request:HttpRequest,user_id):
+    user = User.objects.filter(UserID=user_id).first()
+    filtros,exclusiones = filter_cuadrantes(user)
+    cuadrantes = Cuadrante.objects.filter(**filtros).exclude(**exclusiones).order_by('id')
+    context = paginate_cuadrantes_users(request,cuadrantes)
+    return render(request,'account/users/cuadrantes/list.html',context)
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_users)
+def cuadrante_details(request:HttpRequest,user_id,cuadrante_id):
+    user = User.objects.filter(UserID=user_id).first()
+    cuadrante = Cuadrante.objects.filter(id=cuadrante_id).first()
+    auth_errors = can_user_access_cuadrante(request,user,cuadrante)
+    if auth_errors:
+        return redirect(f"/backoffice/users/{user.UserID}/cuadrantes")
+    context = {'usuario':user,'cuadrante':cuadrante,'action':'view'}
+    return render(request,'account/users/cuadrantes/form.html',context)
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_CRUD_users)
+def create_cuadrante(request:HttpRequest,user_id):
+    template = loader.get_template('account/users/cuadrantes/form.html')
+    context = {'action':'create'}
+    user = User.objects.filter(UserID=user_id).first()
+
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre','')
+        archivo = request.FILES.get('archivo')
+        errors = validate_cuadrante(request,nombre,archivo)
+        if errors:
+            return HttpResponse(template.render(context,request))
+        cuadrante = build_cuadrante(data={'file':archivo,'nombre':nombre,'user':user})
+        return redirect(f"/backoffice/users/{user.UserID}/cuadrantes/{cuadrante.pk}")
+
+    elif request.method == 'GET':
+        return HttpResponse(template.render(context,request))
+    
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_CRUD_users)
+def delete_cuadrante(request:HttpRequest,user_id,cuadrante_id):
+    user = User.objects.filter(UserID=user_id).first()
+    cuadrante = Cuadrante.objects.filter(id=cuadrante_id).first()
+    auth_errors = can_user_access_cuadrante(request,user,cuadrante)
+    if auth_errors:
+        return redirect(f"/backoffice/users/{user.UserID}/cuadrantes")
+    cuadrante.fecha_borrado = now()
+    cuadrante.save()
+    return redirect(f"/backoffice/users/{user.UserID}/cuadrantes")
 
 
 def _create_or_modify_user(request:HttpRequest,user:User|None = None):

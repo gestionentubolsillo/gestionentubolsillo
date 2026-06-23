@@ -72,6 +72,17 @@ class User(AbstractUser):
     delegacion = models.ForeignKey('delegaciones.Delegacion', on_delete=models.SET_NULL,related_name='usuarios', null=True, blank=True)
 
 
+
+def set_upload_path(instance:Cuadrante,filename:str)->str:
+    return f'users{instance.user.UserID}/cuadrantes/{filename}'
+
+class Cuadrante(models.Model):
+    nombre = models.CharField(max_length=20)
+    file = models.FileField(upload_to=set_upload_path)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='cuadrantes')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_borrado = models.DateTimeField(blank=True,null=True)
+
 def can_access_backoffice(user:User)-> bool:
     return user.has_login_access
 

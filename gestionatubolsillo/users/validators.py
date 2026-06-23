@@ -2,8 +2,9 @@ from django.http import  HttpRequest
 from django.contrib import messages
 from empresas.models import Empresa
 from django.db.models.manager import BaseManager
+from django.core.files.uploadedfile import UploadedFile
 from servicios.models import  Servicio
-from .models import User
+from .models import User,Cuadrante
 
 
 
@@ -71,5 +72,29 @@ def validate_services_of_user(request:HttpRequest,user:User,servicios:BaseManage
     servicios_de_diferente_empresa = servicios.exclude(empresa=empresa)
     if servicios_de_diferente_empresa.exists():
         messages.error(request,"Los servicios deben pertenecer a la misma empresa que el usuario para ser asignados",extra_tags='error')
+        errors = True
+    return errors
+
+
+def can_user_access_cuadrante(request:HttpRequest,user:User,cuadrante:Cuadrante)->bool:
+    errors = False
+    if user is None:
+        messages.error(request,"El usuario proporcionado no existe",extra_tags='error')
+        errors = True
+    if cuadrante is None:
+        messages.error(request,"El cuadrante proporcionado no existe",extra_tags='error')
+        errors = True
+    if not user.is_admin and cuadrante.user != user:
+        messages.error(request,"No está autorizado a ver el cuadrante",extra_tags='error')
+        errors = True
+    return errors
+
+def validate_cuadrante(request:HttpRequest,nombre,archivo:UploadedFile)->bool:
+    errors = False
+    if nombre == '':
+        messages.error(request,"Debe proporcionarle un nombre indicativo al cuadrante",extra_tags='error')
+        errors = True
+    if archivo is None:
+        messages.error(request,"Debe proporcionar un archivo que muestre el cuadrante",extra_tags='error')
         errors = True
     return errors

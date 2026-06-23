@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator
 from django.http import HttpRequest
 from django.db.models.manager import BaseManager
-from .models import User
+from .models import User, Cuadrante
 from servicios.models import Servicio
 
 DEFAULT_PAGINATION_USERS = 25
@@ -40,4 +40,9 @@ def paginate_servicios_users(request:HttpRequest,user:User):
         'page': n_pagina,
         'n_services':n_services
     }
+    return context
+
+
+def paginate_cuadrantes_users(request:HttpRequest,cuadrantes:BaseManager[Cuadrante]):
+    context = {}
     return context
