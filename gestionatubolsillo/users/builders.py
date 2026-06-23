@@ -1,7 +1,8 @@
 from typing import TypedDict
-from .models import User
+from .models import User,Cuadrante
 from empresas.models import Empresa
 from decimal import Decimal
+from django.core.files.uploadedfile import UploadedFile
 
 
 class UserCoreData(TypedDict):
@@ -59,3 +60,13 @@ class UserPermissionsData(TypedDict):
 def build_permissions(data:UserPermissionsData,user:User)->User:
     user = User.objects.filter(UserID=user.UserID).update(**data)
     return user
+
+
+class CuadranteData(TypedDict):
+    nombre:str
+    file:UploadedFile
+    user:User
+
+def build_cuadrante(data:CuadranteData)->Cuadrante:
+    cuadrante = Cuadrante.objects.create(**data)
+    return cuadrante
