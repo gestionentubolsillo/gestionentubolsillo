@@ -5,108 +5,38 @@ from django.http import HttpRequest,HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from users.models import can_access_backoffice, User
 from .models import Central, can_view_centrales, can_CRUD_centrales
-from django.core.paginator import Paginator
 from django.utils.timezone import now
 
+from .filters import filter_centrales
+from .paginators import paginate_centrales
+from .builders import build_central
+from .validators import validate_central
 
-DEFAULT_PAGINATION_CENTRALES = 25
+
 # Create your views here.
 
-def validate_central(request:HttpRequest,nombre)->bool:
-    errors = False
-    if nombre == '':
-        messages.error(request,"Debe indicar un nombre a la central receptora",extra_tags='error')
-        errors = True
-    return errors
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_centrales)
 def list_centrales(request: HttpRequest):
-    user:User = request.user
-    centrales = Central.objects.filter(usuario_creador_id = user.UserID)
-    n_pagina = request.GET.get('page',1)
-    global DEFAULT_PAGINATION_CENTRALES
-    n_centrales = request.GET.get('n_centrales', DEFAULT_PAGINATION_CENTRALES)
-    paginacion = Paginator(centrales,n_centrales)
-    page_obj = paginacion.get_page(n_pagina)
-    context = {
-        'centrales': page_obj,
-        'page_obj': page_obj,
-        'page':n_pagina,
-        'n_centrales':n_centrales
-    }
+    filtros, exclusiones = filter_centrales(request)
+    centrales = Central.objects.filter(**filtros).exclude(**exclusiones).order_by('CentralID')
+    context = paginate_centrales(request,centrales)
     return render(request,'centrales/list.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_centrales)
 def create_central(request: HttpRequest):
-    if request.method == 'POST':
-        created_at = now()
-        nombre = request.POST.get('nombre','')
-        telefono = request.POST.get('telefono','')
-        mail = request.POST.get('mail','')
-        persona_de_contacto = request.POST.get('persona_de_contacto','')
-        observaciones = request.POST.get('observaciones','')
-
-        errors = validate_central(request,nombre)
-         
-        if errors:
-            template = loader.get_template('form.html')
-            context = {'action':'create'}
-            return HttpResponse(template.render(context,request))
-         
-        central = Central()
-        central.nombre = nombre
-        central.telefono = telefono
-        central.mail = mail
-        central.persona_de_contacto = persona_de_contacto
-        central.observaciones = observaciones
-        central.usuario_creador = request.user
-        central.fecha_creacion = created_at
-        central.save()
-
-        return redirect('/backoffice/centrales')
-    
-    elif request.method == 'GET':
-        template = loader.get_template('centrales/form.html')
-        context = {'action':'create'}
-        return HttpResponse(template.render(context,request))
+    _create_or_modify_central(request)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_centrales)
 def edit_central(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
-    if request.method == 'POST':
-        nombre = request.POST.get('nombre','')
-        telefono = request.POST.get('telefono','')
-        mail = request.POST.get('mail','')
-        persona_de_contacto = request.POST.get('persona_de_contacto','')
-        observaciones = request.POST.get('observaciones','')
-        errors = validate_central(request,nombre)
-        if errors:
-            template = loader.get_template('centrales/form.html')
-            context = {
-            'action':'edit',
-            'central': central
-            }
-            return HttpResponse(template.render(context,request))
-        central.nombre = nombre
-        central.telefono = telefono
-        central.mail = mail
-        central.persona_de_contacto = persona_de_contacto
-        central.observaciones = observaciones
-        central.save()
-        return redirect('/backoffice/centrales')
-    elif request.method == 'GET':
-        template = loader.get_template('centrales/form.html')
-        context = {
-            'action':'edit',
-            'central': central
-            }
-        return HttpResponse(template.render(context,request))
+    _create_or_modify_central(request,central)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -130,3 +60,36 @@ def central_details(request: HttpRequest, central_id):
         'action':'view'
     }
     return render(request,'centrales/form.html',context)
+
+
+def _create_or_modify_central(request:HttpRequest,central:Central | None = None):
+    template = loader.get_template('centrales/form.html')
+    if central is None:
+        context = {'action':'create'}
+    else:
+        context = {'action':'edit','central': central}
+    
+
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre','')
+        telefono = request.POST.get('telefono','')
+        mail = request.POST.get('mail','')
+        persona_de_contacto = request.POST.get('persona_de_contacto','')
+        observaciones = request.POST.get('observaciones','')
+        errors = validate_central(request,nombre)
+        if errors:
+            return HttpResponse(template.render(context,request))
+        created_at = now()
+
+        build_central(data={
+            'nombre':nombre,
+            'contacto':persona_de_contacto,
+            'mail':mail,
+            'observaciones':observaciones,
+            'telefono':telefono
+        },created_at=created_at,central=central)
+
+        return redirect('/backoffice/centrales')
+
+    elif request.method == 'GET':
+        return HttpResponse(template.render(context,request))
