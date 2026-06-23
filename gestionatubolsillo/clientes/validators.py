@@ -4,6 +4,7 @@ from django.db.models.manager import BaseManager
 
 from empresas.models import Empresa
 from servicios.models import Servicio
+from .models import Cliente, user_client
 
 MIN_CHARS_PASSWORD = 8
 
@@ -45,5 +46,18 @@ def validate_servicios_cliente(request:HttpRequest,servicios_ids,allowed_service
     servicios_no_permitidos = servicios.difference(allowed_services_to_add)
     if servicios_no_permitidos.exists():
         messages.error(request, "No puede añadir servicios no autorizados a este cliente", extra_tags='error')
+        errors = True
+    return errors
+
+def can_client_access_user_cli(request:HttpRequest,cliente:Cliente,user_cli:user_client)->bool:
+    errors = False
+    if not cliente:
+        messages.error(request,"El cliente proporcionado no existe",extra_tags='error')
+        errors = True
+    if not user_cli:
+        messages.error(request,"El usuario proporcionado al cliente no existe",extra_tags='error')
+        errors = True
+    if cliente != user_cli.cliente:
+        messages.error(request,"Acceso inválido, no tiene acceso al usuario requerido",extra_tags='error')
         errors = True
     return errors

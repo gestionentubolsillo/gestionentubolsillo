@@ -4,19 +4,17 @@ from .decorators import cli_login_required
 from django.template import loader
 from django.http import HttpResponse, HttpRequest
 from django.contrib import messages
-from django.core.paginator import Paginator
 from users.models import User, can_access_backoffice
 from .models import Cliente,user_client,can_view_clientes,can_CRUD_clientes
 from servicios.models import Servicio, can_CRUD_servicios
 from django.utils.timezone import now
 from empresas.models import Empresa
-from django.db.models.manager import BaseManager
 from enum import Enum
 
 from .filters import filtra_clientes
 from .paginators import paginate_clientes, paginate_servicios_de_cliente, paginate_cliente_users
-from .builders import build_cliente
-from .validators import validate_client, validate_user_client,validate_servicios_cliente
+from .builders import build_cliente,build_user_client
+from .validators import validate_client, validate_user_client,validate_servicios_cliente, can_client_access_user_cli
 
 # Create your views here.
 #Por un lado esta la creacion de organizaciones cliente y por otro, los usuarios tipo cliente asignados a la organizacion
@@ -72,50 +70,8 @@ def delete_client(request:HttpRequest,client_id):
 @user_passes_test(can_CRUD_clientes)
 def create_user_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
-    if request.method == 'POST':
-        username = request.POST.get('username','')
-        password = request.POST.get('password','')
-        #Servicios recibiria una lista de los ids de servicios para añadir las relaciones N:N con respecto al user_client
-        servicios_ids = request.POST.getlist('servicios')
-        errors = validate_user_client(request,username,password)
-        if errors:
-            template = loader.get_template('u_cli_form.html')
-            context = {}
-            return HttpResponse(template.render(context,request))
-        
-        created_at = now()
-        user_cli = user_client()
-        user_cli.username = username
-        user_cli.set_password(password)
-        user_cli.fecha_creacion = created_at
-        user_cli.cliente = cliente
-        user_cli.save()
-        #Añadir relaciones N:N de servicios
-        servicios_validos = cliente.servicios.filter(id__in=servicios_ids)
-        user_cli.servicios.set(servicios_validos)
-        return redirect('backoffice/clientes/'+str(client_id)+'/users')
-    
-    elif request.method == 'GET':
-        servicios = cliente.servicios.all() if cliente else []
-        template = loader.get_template('u_cli_form.html')
-        context = {
-            'servicios':servicios
-        }
-        return HttpResponse(template.render(context,request))
+    return _create_or_modify_user_cliente(request,cliente)
 
-
-def can_client_access_user_cli(request:HttpRequest,cliente:Cliente,user_cli:user_client)->bool:
-    errors = False
-    if not cliente:
-        messages.error(request,"El cliente proporcionado no existe",extra_tags='error')
-        errors = True
-    if not user_cli:
-        messages.error(request,"El usuario proporcionado al cliente no existe",extra_tags='error')
-        errors = True
-    if cliente != user_cli.cliente:
-        messages.error(request,"Acceso inválido, no tiene acceso al usuario requerido",extra_tags='error')
-        errors = True
-    return errors
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -127,32 +83,7 @@ def edit_user_client(request:HttpRequest,client_id,user_client_id):
     if auth_error:
         return redirect('backoffice/clientes/'+str(client_id)+'/users')
     
-    if request.method == 'POST':
-        username = request.POST.get('username','')
-        password = request.POST.get('password','')
-        #Servicios recibiria una lista de los ids de servicios para añadir las relaciones N:N con respecto al user_client
-        servicios_ids = request.POST.getlist('servicios')
-        errors = validate_user_client(request,username,password)
-        if errors:
-            template = loader.get_template('u_cli_form.html')
-            context = {}
-            return HttpResponse(template.render(context,request))
-        
-        user_cli.username = username
-        user_cli.set_password(password)
-        user_cli.save()
-        #Añadir relaciones N:N de servicios
-        servicios_validos = cliente.servicios.filter(id__in=servicios_ids)
-        user_cli.servicios.set(servicios_validos)
-        return redirect('backoffice/clientes/'+str(client_id)+'/users')
-
-    elif request.method == 'GET':
-        servicios = cliente.servicios.all() if cliente else []
-        template = loader.get_template('u_cli_form.html')
-        context = {
-            'servicios':servicios
-        }
-        return HttpResponse(template.render(context,request))
+    return _create_or_modify_user_cliente(request,cliente,user_cli)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -274,5 +205,35 @@ def _change_servicios_de_cliente(request:HttpRequest,cliente:Cliente,action:Clie
         elif action == ClienteAccionServicios.REMOVE:
             cliente.servicios.remove(*servicios)
         return redirect('/backoffice/clientes/'+str(cliente.ClienteID))
+    elif request.method == 'GET':
+        return HttpResponse(template.render(context,request))
+    
+
+def _create_or_modify_user_cliente(request:HttpRequest,cliente:Cliente,user_cli:user_client|None=None):
+    template = loader.get_template('u_cli_form.html')
+    servicios = cliente.servicios.all()
+    if user_cli is None:
+        context = {'action':'create','servicios':servicios}
+    else:
+        context = {'action':'edit','servicios':servicios}
+
+    if request.method == 'POST':
+        username = request.POST.get('username','')
+        password = request.POST.get('password','')
+        errors = validate_user_client(request,username,password)
+        if errors:
+            return HttpResponse(template.render(context,request))
+        
+        created_at = now()
+        servicios_ids = request.POST.getlist('servicios')
+        servicios_validos = cliente.servicios.filter(ServicioID__in=servicios_ids)
+        build_user_client(data={
+            'username':username,
+            'password':password,
+            'cliente':cliente
+        },servicios=servicios_validos,created_at=created_at,user_cli=user_cli)
+        return redirect('backoffice/clientes/'+str(cliente.ClienteID)+'/users')
+
+
     elif request.method == 'GET':
         return HttpResponse(template.render(context,request))
