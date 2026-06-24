@@ -1,6 +1,7 @@
 from django.db import models
 from allauth.account.utils import get_next_redirect_url
 from django.contrib.auth.models import AbstractUser
+from encrypted_fields.fields import EncryptedEmailField, EncryptedCharField
 
 from django.db import models
 
@@ -72,6 +73,38 @@ class User(AbstractUser):
     delegacion = models.ForeignKey('delegaciones.Delegacion', on_delete=models.SET_NULL,related_name='usuarios', null=True, blank=True)
 
 
+class PermisosModulo(models.Model):
+    MODULOS = [
+        ('USR', 'Usuarios'),
+        ('TAR', 'Tareas'),
+        ('CLI', 'Clientes'),
+        ('NFC', 'Servicios NFC'),
+        ('CEN', 'Central Receptora'),
+        ('MED', 'Medios Auxiliares'),
+        ('SUG', 'Sugerencias'),
+        ('PAR', 'Partes Trabajo'),
+        ('INC', 'Partes Incidencias'),
+        ('ACU', 'Informes Acuda'),
+        ('INS', 'Partes Inspección'),
+        ('MAN', 'Mantenimientos'),
+        ('ALM', 'Almacén'),
+        ('INF', 'Informes'),
+        ('EMP', 'Empresas'),
+        ('CON', 'Configuración'),
+    ]
+    
+    NIVELES = [
+        ('0', 'Sin acceso'),
+        ('1', 'Lectura'),
+        ('2', 'Escritura'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='permisos')
+    modulo  = models.CharField(max_length=3, choices=MODULOS)
+    nivel   = models.CharField(max_length=1, choices=NIVELES, default='0')
+
+    def __str__(self):
+        return f"{self.user.username}: {self.get_modulo_display()}"
 
 def set_upload_path(instance:Cuadrante,filename:str)->str:
     return f'users{instance.user.UserID}/cuadrantes/{filename}'
@@ -87,7 +120,17 @@ def can_access_backoffice(user:User)-> bool:
     return user.has_login_access
 
 def can_view_users(user:User)-> bool:
-    return user.permisos_usuario == 'view_only' or user.permisos_usuario == 'create_modify'
+    return tiene_acceso(user,'USR')
 
 def can_CRUD_users(user:User)-> bool:
-    return user.permisos_usuario == 'create_modify'
+    return tiene_acceso(user,'USR',nivel_min='2')
+
+
+def get_permiso(usuario:User,modulo:str):
+    try:
+        return PermisosModulo.objects.get(user=usuario, modulo=modulo).nivel
+    except PermisosModulo.DoesNotExist:
+        return '0'
+
+def tiene_acceso(usuario:User,modulo:str,nivel_min='1'):
+    return get_permiso(usuario, modulo) >= nivel_min
