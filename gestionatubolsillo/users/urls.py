@@ -11,5 +11,10 @@ urlpatterns = [
     path('backoffice/users/permissions/<int:user_id>',views.view_user_permissions),
     path('backoffice/users/<int:user_id>/services',views.list_services_of_user),
     path('backoffice/users/<int:user_id>/services/assign',views.assign_services_to_user),
-    path('backoffice/users/<int:user_id>/services/remove',views.remove_services_to_user)
+    path('backoffice/users/<int:user_id>/services/remove',views.remove_services_to_user),
+    path('backoffice/users/<int:user_id>/cuadrantes',views.list_cuadrantes_of_user),
+    path('backoffice/users/<int:user_id>/cuadrantes/create',views.create_cuadrante),
+    path('backoffice/users/<int:user_id>/cuadrantes/<int:cuadrante_id>',views.cuadrante_details),
+    path('backoffice/users/<int:user_id>/cuadrantes/<int:cuadrante_id>/pdf',views.show_cuadrante_pdf,name='show_pdf'),
+    path('backoffice/users/<int:user_id>/cuadrantes/<int:cuadrante_id>/delete',views.delete_cuadrante),
 ]
