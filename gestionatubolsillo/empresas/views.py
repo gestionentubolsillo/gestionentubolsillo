@@ -8,65 +8,27 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from users.models import User
 
-# Create your views here.
-DEFAULT_PAGINATION_EMPRESAS = 25
+from .filters import filtra_empresa
+from .paginators import paginate_empresas
+from .validators import validate_empresa
+from .builders import build_empresa
 
-def validate_empresa(request:HttpRequest,nombre,paquete)->bool:
-    errors = False
-    if nombre == '' or paquete == '':
-        messages.error(request,"Todos los campos son obligatorios",extra_tags='error')
-    return errors
+# Create your views here.
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_empresas)
 def create_empresa(request:HttpRequest):
-    user:User = request.user
-    if request.method == 'POST':
-        nombre = request.POST.get('name','')
-        paquete = request.POST.get('paquete','')
-        errors = validate_empresa(request,nombre,paquete)
-        if errors:
-            template = loader.get_template('empresas/form.html')
-            context = {'action':'create'}
-            return HttpResponse(template.render(context,request))
-
-        empresa = Empresa()
-        empresa.nombre = nombre
-        empresa.paquete = paquete
-        empresa.usuario_creador = user
-        empresa.save()
-        return redirect('/backoffice/empresas')
-    elif request.method == 'GET':
-        template = loader.get_template('empresas/form.html')
-        context = {'action':'create'}
-        return HttpResponse(template.render(context,request))
+    return _create_or_modify_empresa(request)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_empresas)
 def list_empresas(request:HttpRequest):
-    #Listar todas las empresas creadas por el usuario mas la empresa a la que pertenece
-    user:User = request.user
-    empresa_usuario:Empresa = user.empresa
-    list_empresas = Empresa.objects.filter(
-        usuario_creador_id = user.UserID
-    ).exclude(EmpresaID=empresa_usuario.EmpresaID)
-
-    n_pagina = request.GET.get('page', 1)
-    global DEFAULT_PAGINATION_EMPRESAS
-    #La empresa del usuario siempre va a aparecer por lo que se debe mostrar 1 empresa menos de paginacion
-    n_empresas :int = request.GET.get('n_empresas', DEFAULT_PAGINATION_EMPRESAS) -1
-    paginacion = Paginator(list_empresas,n_empresas)
-    page_obj = paginacion.get_page(n_pagina)
-
-    context = {
-        'empresa_usuario' : empresa_usuario,
-        'empresas': page_obj,
-        'page_obj': page_obj,
-        'page': n_pagina,
-        'n_empresas':n_empresas+1,
-    }
+    #TODO: Cambiar el filtro a cuenta a la que pertenece la empresa
+    filtros, exclusiones = filtra_empresa(request)
+    list_empresas = Empresa.objects.filter(**filtros).exclude(**exclusiones).order_by('EmpresaID')
+    context = paginate_empresas(request,list_empresas)
     return render(request,'empresas/list.html',context)
 
 @login_required
@@ -88,23 +50,7 @@ def details_empresa(request,empresa_id):
 @user_passes_test(can_CRUD_empresas)
 def edit_empresa(request : HttpRequest,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
-    if request.method == 'POST':
-        nombre = request.POST.get('name','')
-        paquete = request.POST.get('paquete','')
-        errors = validate_empresa(request,nombre,paquete)
-        if errors:
-            return redirect('/backoffice/empresas/edit/'+str(empresa.EmpresaID))
-        empresa.nombre = nombre
-        empresa.paquete = paquete
-        empresa.save()
-        return redirect('/backoffice/empresas/'+str(empresa.EmpresaID))
-    elif request.method == 'GET':
-        template = loader.get_template('empresas/form.html')
-        context = {
-            'empresa': empresa,
-            'action': 'edit'
-        }
-        return HttpResponse(template.render(context,request))
+    return _create_or_modify_empresa(request,empresa)
     
 
 @login_required
@@ -115,3 +61,25 @@ def delete_empresa(request:HttpRequest,empresa_id):
     empresa.delete()
     messages.success(request,"La empresa se ha eliminado con éxito",extra_tags='success')
     return redirect('/backoffice/empresas')
+
+
+def _create_or_modify_empresa(request:HttpRequest,empresa:Empresa | None = None):
+    template = loader.get_template('empresas/form.html')
+    if empresa is None:
+        context = {'action':'create'}
+    else:
+        context = {'empresa': empresa,'action': 'edit'}
+
+    if request.method == 'POST':
+        nombre = request.POST.get('name','')
+        paquete = request.POST.get('paquete','')
+        errors = validate_empresa(request,nombre,paquete)
+        if errors:
+            return HttpResponse(template.render(context,request))
+        user:User = request.user
+        build_empresa(data={'nombre':nombre,'paquete':paquete},creador=user,empresa=empresa)
+        return redirect('/backoffice/empresas')
+        
+
+    elif request.method == 'GET':
+        return HttpResponse(template.render(context,request))

@@ -11,28 +11,66 @@
   <div class="list-toolbar">
     <span class="list-title">
       <i class="bi bi-building me-1 text-primary"></i>
-      Usuarios
+      Sugerencias
     </span>
 
     <!-- Búsqueda por nombre -->
-    <form method="get" action="" class="search-box mb-0 d-flex gap-2">
+    <form method="get" action="" class="search-box mb-0 d-flex gap-2 ">
       <i class="bi bi-search"></i>
+      <select name="usuario_creador_id" class="form-select form-select-sm" style="min-width: 160px;">
+        <option value="" selected>Filtro por usuario...</option>
+        {% for usuario in  usuarios%}
+          <option value="{{usuario.UserID}}">{{usuario.username}}</option>
+        {% endfor %}
+      </select>
+      Desde
       <input
-        type="text"
-        name="q"
+        type="datetime-local"
+        name="fecha_inicio"
         class="form-control form-control-sm"
-        placeholder="Buscar por nombre..."
-        value="Ejemplo S.L."
       />
+      Hasta
+      <input
+        type="datetime-local"
+        name="fecha_fin"
+        class="form-control form-control-sm"
+      />
+      <select name="estado" class="form-select form-select-sm" style="min-width: 160px;">
+        <option value="" selected>Filtro por estado...</option>
+        {% for valor, etiqueta in estados %}
+          <option value="{{valor}}">{{etiqueta}}</option>
+        {% endfor %}
+      </select>
+      <select name="user_ref_id" class="form-select form-select-sm" style="min-width: 160px;">
+        <option value="" selected>Filtro por referente...</option>
+        {% for usuario in  usuarios%}
+          <option value="{{usuario.UserID}}">{{usuario.username}}</option>
+        {% endfor %}
+      </select>
+      <select name="empresa_id" class="form-select form-select-sm" style="min-width: 160px;">
+        <option value="" selected>Filtro por empresa...</option>
+        {% for empresa in  empresas%}
+          <option value="{{empresa.EmpresaID}}">{{empresa.nombre}}</option>
+        {% endfor %}
+      </select>
       <button type="submit" class="btn btn-primary btn-sm">
             <i class="bi bi-search"></i>
         </button>
     </form>
+    <!-- Botón ver listados - mostrar solo si tiene permiso minimo de vista-->
+     {% if  user.permisos_sugerencias in 'view_only,create_modify'%}
+        <a href="/backoffice/sugerencias" class="btn btn-primary btn-sm ms-auto">
+            <i class="bi bi-plus-lg me-1"></i> Ver Todas
+        </a>
 
+        <a href="/backoffice/sugerencias/self" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Ver Propias
+        </a>
+     {% endif %}
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
-    {% if user.permisos_usuario == 'create_modify' %}
-        <a href="/backoffice/users/create" class="btn btn-primary btn-sm ms-auto">
-            <i class="bi bi-plus-lg me-1"></i> Nuevo Usuario
+    {% if user.permisos_sugerencias == 'create_modify' %}
+        <a href="/backoffice/sugerencias/create" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Nueva Sugerencia
         </a>
     {% endif %}
   </div>
@@ -43,94 +81,61 @@
       <thead>
         <tr>
           <!-- Añade o quita columnas según el modelo -->
-          <th>Usuario</th>
-          <th>Nombre</th>
-          <th>Apellidos</th>
-          <th>Cuadrantes</th>
-          <th>Tareas</th>
-          <th>Servicios</th>
-          <th>Permisos</th>
+          <th>Fecha</th>
+          <th>Usuario</th><!--Usuario creador de la sugerencia-->
+          <th>Departamento</th>
+          <th>Referente al usuario</th><!--Usuario al que va dirigida la sugerencia-->
+          <th>Sugerencia</th>
+          <th>Estado</th>
           <!-- Columna acciones: siempre la última -->
           <th class="text-end">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        {% for usuario in usuarios %}
-        <tr>
-          <td class="fw-medium">{{usuario.username}}</td>
-          <td class="text-muted">{{usuario.first_name}}</td>
-          <td class="text-muted">{{usuario.last_name}}</td>
-          <td class="text-muted">
-            {% if  user.permisos_usuario in 'view_only,create_modify'%}
-              <a href="/backoffice/users/{{usuario.UserID}}/cuadrantes" class="action-btn" title="Ver">
-                    <i class="bi bi-eye"></i>
-              </a>
-            {% endif %}
-          </td>
-          <td class="text-muted">
-            <a href="/backoffice/users/{{usuario.UserID}}/tareas" class="action-btn" title="Ver">
-                    <i class="bi bi-eye"></i>
-              </a>
-          </td>
-          <td class="text-muted">
-            {% if  user.permisos_usuario in 'view_only,create_modify'%}
-              <a href="/backoffice/users/{{usuario.UserID}}/services" class="action-btn" title="Ver">
-                    <i class="bi bi-eye"></i>
-              </a>
-            {% endif %}
-          </td>
-          <td class="text-muted"> 
-            <!-- Ver: permiso view_only o create_modify -->
-              {% if user.permisos_usuario in 'view_only,create_modify' %}
-                <a href="/backoffice/users/permissions/{{usuario.UserID}}" class="action-btn" title="Ver">
-                    <i class="bi bi-eye"></i>
-                </a>
-              {% endif %}
-              {% if  user.permisos_usuario == 'create_modify'%}
-                                <a href="/backoffice/users/permissions/edit/{{usuario.UserID}}" class="action-btn" title="Editar">
-                    <i class="bi bi-pencil"></i>
-                </a>
-              {% endif %}
-          </td>
 
+        <!-- Visualizacion del resto de sugerencias -->
+        {% for sugerencia in sugerencias %}
+        <tr>
+          <td class="fw-medium">{{sugerencia.fecha_creacion}}</td>
+          <td class="text-muted">{{sugerencia.usuario_creador}}</td>
+          <td class="text-muted">{{sugerencia.departamento}}</td>
+          <td class="text-muted">{{sugerencia.usuario_referente}}</td>
+          <td class="text-muted">{{sugerencia.texto}}</td>
+          <td class="text-muted">{{sugerencia.get_estado_display}}</td>
           <td class="text-end">
             <div class="d-flex gap-1 justify-content-end">
 
               <!-- Ver: permiso view_only o create_modify -->
-              {% if user.permisos_usuario in 'view_only,create_modify' %}
-                <a href="/backoffice/users/{{usuario.UserID}}" class="action-btn" title="Ver">
+              {% if user.permisos_sugerencias in 'view_only,create_modify' %}
+                <a href="/backoffice/sugerencias/{{sugerencia.SugerenciaID}}" class="action-btn" title="Ver">
                     <i class="bi bi-eye"></i>
                 </a>
               {% endif %}
 
-              <!-- Editar: solo create_modify -->
-              {% if user.permisos_usuario == 'create_modify' %}
-                <a href="/backoffice/users/edit/{{usuario.UserID}}" class="action-btn" title="Editar">
-                    <i class="bi bi-pencil"></i>
-                </a>
+              {% if user.permisos_sugerencias == 'create_modify' %}
 
               <!-- Eliminar: solo create_modify -->
                 <button class="action-btn delete" title="Eliminar"
-                      data-bs-toggle="modal" data-bs-target="#deleteModal-{{usuario.UserID}}">
+                      data-bs-toggle="modal" data-bs-target="#deleteModal-{{sugerencia.SugerenciaID}}">
                     <i class="bi bi-trash"></i>
                 </button>
                 <!-- MODAL CONFIRMACIÓN ELIMINAR -->
-                <div class="modal fade" id="deleteModal-{{usuario.UserID}}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal fade" id="deleteModal-{{sugerencia.SugerenciaID}}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content" style="border-radius:14px;border:none;">
                             <div class="modal-header border-0 pb-0">
                                 <h5 class="modal-title fw-bold" id="deleteModalLabel">
-                                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Eliminar Usuario
+                                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Eliminar sugerencia
                                 </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body text-muted" style="font-size:.9rem;">
-                                    ¿Estás seguro de que quieres eliminar el usuario <strong>{{usuario.username}}</strong>? Esta acción no se puede deshacer.
+                                    ¿Estás seguro de que quieres eliminar la sugerencia <strong>{{sugerencia.texto}}</strong>? Esta acción no se puede deshacer.
                             </div>
                             <div class="modal-footer border-0 pt-0">
                                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
                                 <!-- Apunta al endpoint de borrado con el id del objeto -->
-                                <a href="/backoffice/users/delete/{{usuario.UserID}}" class="btn btn-danger btn-sm">Eliminar</a>
+                                <a href="/backoffice/sugerencias/{{sugerencia.SugerenciaID}}/delete" class="btn btn-danger btn-sm">Eliminar</a>
                             </div>
                         </div>
                     </div>
@@ -148,7 +153,7 @@
   <!-- FOOTER: info de resultados + paginación -->
   <div class="list-footer">
     <span class="results-info">
-        Mostrando <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> de <strong>{{ page_obj.paginator.count}}</strong> resultados
+        Mostrando <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> de <strong>{{ page_obj.paginator.count }}</strong> resultados
     </span>
 
     <nav aria-label="Paginación">

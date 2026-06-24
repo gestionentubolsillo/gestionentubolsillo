@@ -7,118 +7,37 @@ from django.core.paginator import Paginator
 from users.models import can_access_backoffice, User
 from .models import Tarea, can_view_tareas, can_CRUD_tareas, ListadoUsers
 from empresas.models import Empresa
-from django.utils.timezone import now, make_aware
+from django.utils.timezone import now
 from django.db.models import Count
-from datetime import datetime
-from zoneinfo import ZoneInfo
 
+from .validators import validate_query_filters, QueryFilterData, parse_datetime, validate_list_users,validate_tarea, validate_users_assigned
+from .paginators import paginate_tareas, paginate_listados
+from .filters import filtra_tareas
+from .builders import create_bulk_tareas, build_listado_users
 # Create your views here.
-
-DEFAULT_PAGINATION_TAREAS = 25
-DEFAULT_PAGINATION_LISTADOS = 25
-
-def validate_tarea(request:HttpRequest,texto)->bool:
-    errors = False
-    if texto=='':
-        messages.error(request,"Debe indicar descripcion de la tarea",extra_tags='error')
-        errors = True
-    return errors
-
-def validate_list_users(request:HttpRequest,nombre,list_users)->bool:
-    errors = False
-    if nombre == '':
-        messages.error(request,"Debe indicar un nombre identificativo a la lista de usuarios", extra_tags='error')
-        errors = True
-    if list_users == '':
-        messages.error(request,"Debe indicar al menos 1 usuario para crear la lista de usuarios", extra_tags='error')
-        errors = True
-    return errors
-
-def create_bulk_tareas(texto, es_urgente, created_at, usuario_creador, usuarios):
-    Tarea.objects.bulk_create(
-                [Tarea(
-                    texto=texto,
-                    estado='pendiente',
-                    es_urgente=es_urgente,
-                    fecha_creacion = created_at,
-                    usuario_creador = usuario_creador,
-                    usuario_asignado = u_asignado
-
-                ) for u_asignado in usuarios]
-            )
-
-def validate_query_filters(request:HttpRequest,fecha_inicio,fecha_fin,estado,usuario,urgencia)->bool:
-    errors = False
-    choices = Tarea._meta.get_field('estado').choices
-    user :User|None = None
-    if usuario != '':
-        user = User.objects.filter(UserID=usuario).first()
-    query_between_dates_exists = (fecha_inicio is not None and fecha_inicio != '') and (fecha_fin is not None and fecha_fin != '')
-    if query_between_dates_exists and fecha_fin < fecha_inicio:
-        messages.error(request,"La fecha de fin debe ser posterior a la fecha de inicio de la búsqueda", extra_tags='error')
-        errors = True
-    if estado != '' and estado not in [choice[0] for choice in choices]:
-        messages.error(request, "El estado debe ser uno de los posibles estados de una tarea",extra_tags='error')
-        errors = True
-    if usuario != '' and user is None:
-        messages.error(request,"Debe indicar un usuario válido",extra_tags='error')
-        errors = True
-    if urgencia and not str(urgencia).isnumeric():
-        messages.error(request,"Debe indicar un valor válido de urgencia de la tarea",extra_tags='error')
-        errors = True
-    return errors
 
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_tareas)
 def list_tareas(request:HttpRequest):
-    user : User = request.user
-    
-    usuarios = User.objects.filter(tareas_asignadas__usuario_creador=user).distinct()
-    choices = Tarea._meta.get_field('estado').choices
 
-    fecha_inicio = request.GET.get('fecha_inicio')
-    fecha_fin = request.GET.get('fecha_fin')
-    estado = request.GET.get('estado')
-    usuario = request.GET.get('usuario')
-    urgencia = request.GET.get('urgencia')
+    data:QueryFilterData = {
+        'usuario_id': request.GET.get('usuario'),
+        'fecha_inicio': parse_datetime(request.GET.get('fecha_inicio')),
+        'fecha_fin': parse_datetime(request.GET.get('fecha_fin')),
+        'estado': request.GET.get('estado'),
+        'es_urgente': request.GET.get('urgencia')
 
-    filtros = {'usuario_creador_id':user.UserID}
-
-    errors = validate_query_filters(request,fecha_inicio,fecha_fin,estado,usuario,urgencia)
-
-    if not errors:
-
-        if fecha_inicio:
-            filtros['fecha_creacion__gte'] = fecha_inicio
-        if fecha_fin:
-            filtros['fecha_creacion__lte'] = fecha_fin
-        if estado:
-            filtros['estado'] = estado
-        if usuario:
-            filtros['usuario_asignado_id'] = usuario
-        if urgencia:
-            filtros['es_urgente'] = bool(int(urgencia))
-
-    list_tareas = Tarea.objects.filter(
-        **filtros
-    )
-
-    n_pagina = request.GET.get('page',1)
-    global DEFAULT_PAGINATION_TAREAS
-    n_tareas = request.GET.get('n_tareas', DEFAULT_PAGINATION_TAREAS)
-    paginacion = Paginator(list_tareas,n_tareas)
-    page_obj = paginacion.get_page(n_pagina)
-
-    context = {
-        'tareas' : page_obj,
-        'page_obj': page_obj,
-        'page':n_pagina,
-        'n_tareas':n_tareas,
-        'usuarios':usuarios,
-        'estados':choices
     }
+
+    errors = validate_query_filters(request,data=data)
+
+    filtros, exclusiones = filtra_tareas(request,errors)
+    list_tareas = Tarea.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
+
+    context = paginate_tareas(request,list_tareas)
+
     return render(request,'tareas/list.html',context)
 
 @login_required
@@ -130,38 +49,36 @@ def create_tarea(request:HttpRequest):
     empresas = Empresa.objects.filter(usuario_creador=user)
     listas = ListadoUsers.objects.all()
     context = {'action':'create','empresas':empresas,'usuarios':users_allowed, 'listados':listas}
+    template = loader.get_template('tareas/form.html')
     if request.method == 'POST':
         es_urgente = request.POST.get('is_urgent','Normal') == 'Urgente'
         texto = request.POST.get('texto','')
 
         errors = validate_tarea(request,texto)
         if errors:
-            template = loader.get_template('tareas/form.html')
             return HttpResponse(template.render(context,request))
         
         created_at = now()
 
         empresas_ids = [eid for eid in request.POST.getlist('empresas_ids') if eid]
         listas_usuarios_ids = [luid for luid in request.POST.getlist('listas_ids') if luid] 
+
         if empresas_ids:
             users = User.objects.filter(empresa_id__in=empresas_ids).distinct()
-            create_bulk_tareas(texto=texto,es_urgente=es_urgente,created_at=created_at,usuario_creador=user,usuarios=users)
+            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at)
 
         elif listas_usuarios_ids:
             users = User.objects.filter(listados__id__in=listas_usuarios_ids).distinct()
-            create_bulk_tareas(texto=texto,es_urgente=es_urgente,created_at=created_at,usuario_creador=user,usuarios=users)                   
+            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at)                  
         else:
-            users_asigned_id :int = [uid for uid in request.POST.getlist('users_id') if uid]
-            users_asigned = User.objects.filter(UserID__in=users_asigned_id)
-            if not users_asigned:
-                messages.error(request,"Debe indicar un usuario válido",extra_tags='error')
-                template = loader.get_template('tareas/form.html')
+            errors = validate_users_assigned(request)
+            if errors:
                 return HttpResponse(template.render(context,request))
-            create_bulk_tareas(texto=texto,es_urgente=es_urgente,created_at=created_at,usuario_creador=user,usuarios=users_asigned)  
+            
+            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at)
         return redirect('/backoffice/tareas')
     
     elif request.method == 'GET':
-        template = loader.get_template('tareas/form.html')
         return HttpResponse(template.render(context,request))
 
 @login_required
@@ -214,12 +131,9 @@ def create_list_usuarios(request:HttpRequest):
         errors = validate_list_users(request,nombre,users_ids)
         if errors:
             return HttpResponse(template.render(context,request))
+        
         users = User.objects.filter(UserID__in=users_ids)
-        listado = ListadoUsers()
-
-        listado.nombre = nombre
-        listado.save()
-        listado.usuarios.set(users)
+        build_listado_users(data={'nombre':nombre,'usuarios':users})
         return redirect('/backoffice/tareas/listados')
 
     elif request.method == 'GET':
@@ -249,17 +163,6 @@ def edit_list_usuarios(request:HttpRequest,lista_id):
 @user_passes_test(can_view_tareas)
 def lista_listados_de_usuarios(request:HttpRequest):
     listas = ListadoUsers.objects.all().annotate(num_users=Count('usuarios',distinct=True))
-    n_pagina = request.GET.get('page',1)
-    global DEFAULT_PAGINATION_LISTADOS
-    n_listas = request.GET.get('n_listas', DEFAULT_PAGINATION_LISTADOS)
-    paginacion = Paginator(listas,n_listas)
-    page_obj = paginacion.get_page(n_pagina)
-
-    context = {
-        'listados' : page_obj,
-        'page_obj': page_obj,
-        'page':n_pagina,
-        'n_listas':n_listas
-    }
+    context = paginate_listados(request,listas)
     return render(request,'tareas/list_users/list.html',context)
 
