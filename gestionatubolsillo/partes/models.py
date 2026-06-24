@@ -44,37 +44,13 @@ class Parte_Trabajo(Parte):
     #1 servicio tiene asociado N partes de trabajo
     servicio = models.ForeignKey('servicios.Servicio', on_delete=models.CASCADE, related_name='partes_servicio')
     observaciones = models.TextField(blank=True, null=True)
-    horas_calculadas = models.FloatField(null=True, blank=True, editable=False)
 
 
-
-    def _calcular_horas(self)->float:
-        if not self.fecha_finalizacion or not self.servicio:
-            return 0.
-        if not self.servicio.hora_inicio or not self.servicio.hora_fin:
-            return 0.
-        fecha_inicio = self.fecha_creacion.date()
-        fecha_fin = self.fecha_finalizacion.date()
-        total_dias = (fecha_fin - fecha_inicio).days + 1
-        semanas_completas, dias_restantes = divmod(total_dias, 7)
-
-        horas_servicio = (
-        datetime.combine(fecha_inicio, self.servicio.hora_fin) -
-        datetime.combine(fecha_inicio, self.servicio.hora_inicio)
-        ).total_seconds() / 3600
-
-        global DIAS_WEEKDAY
-        dias_activos = [DIAS_WEEKDAY[d] for d in self.servicio.dias_semana]
-
-        total = 0.
-        primer_dia = fecha_inicio.weekday()
-        for dia in dias_activos:
-            apariciones = semanas_completas
-            if (dia - primer_dia) % 7 < dias_restantes:
-                apariciones += 1
-            total += apariciones * horas_servicio
-
-        return total
+    def calcular_horas(self)->float | None:
+        if self.fecha_creacion and self.fecha_finalizacion:
+            diff = self.fecha_finalizacion - self.fecha_creacion
+            return round(diff.total_seconds()/3600,1)
+        return None
 
 
 class Linea_Parte_Trabajo(models.Model):
@@ -83,6 +59,7 @@ class Linea_Parte_Trabajo(models.Model):
     #TO-DO: Cambiar el campo de actividad por un campo de eleccion con las actividades predefinidas
     actividad = models.TextField(blank=True, null=True)
     extra_info = models.TextField(blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
     #Relaciones con otros modelos
     #1 parte de trabajo tiene asociado N líneas de parte de trabajo
     parte_trabajo = models.ForeignKey('Parte_Trabajo', on_delete=models.CASCADE, related_name='lineas_parte_trabajo')

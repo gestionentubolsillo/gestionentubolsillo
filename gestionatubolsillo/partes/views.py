@@ -10,6 +10,8 @@ from django.contrib import messages
 from .models import *
 from empresas.models import Empresa
 
+from .paginators import paginate_informes
+
 # Create your views here.
 DEFAULT_PAGINATION_PARTES = 25
 @login_required
@@ -26,17 +28,7 @@ def dashboard_informes(request:HttpRequest):
 def list_partes_trabajo(request:HttpRequest):
     empresa_id = request.GET.get('empresa_id')
     partes = Parte_Trabajo.objects.filter(empresa_id = empresa_id).order_by('-fecha_creacion')
-    global DEFAULT_PAGINATION_PARTES
-    n_pagina = request.GET.get('page',1)
-    n_partes = request.GET.get('n_partes',DEFAULT_PAGINATION_PARTES)
-    paginacion = Paginator(partes,n_partes)
-    page_obj = paginacion.get_page(n_pagina)
-    context = {
-        'partes':page_obj,
-        'page_obj':page_obj,
-        'page': n_pagina,
-        'n_partes': n_partes
-    }
+    context = paginate_informes(request,partes)
     return render(request,'list_trabajo.html',context)
     
 
@@ -47,17 +39,7 @@ def list_partes_trabajo(request:HttpRequest):
 def list_partes_incidencia(request:HttpRequest):
     empresa_id = request.GET.get('empresa_id')
     partes = Parte_Incidencia.objects.filter(empresa_id = empresa_id).order_by('-fecha_creacion')
-    global DEFAULT_PAGINATION_PARTES
-    n_pagina = request.GET.get('page',1)
-    n_partes = request.GET.get('n_partes',DEFAULT_PAGINATION_PARTES)
-    paginacion = Paginator(partes,n_partes)
-    page_obj = paginacion.get_page(n_pagina)
-    context = {
-        'partes':page_obj,
-        'page_obj':page_obj,
-        'page': n_pagina,
-        'n_partes': n_partes
-    }
+    context = paginate_informes(request,partes)
     return render(request,'list_incidencia.html',context)
 
 @login_required
@@ -66,17 +48,7 @@ def list_partes_incidencia(request:HttpRequest):
 def list_partes_inspeccion(request:HttpRequest):
     empresa_id = request.GET.get('empresa_id')
     partes = Parte_Inspeccion.objects.filter(empresa_id = empresa_id).order_by('-fecha_creacion')
-    global DEFAULT_PAGINATION_PARTES
-    n_pagina = request.GET.get('page',1)
-    n_partes = request.GET.get('n_partes',DEFAULT_PAGINATION_PARTES)
-    paginacion = Paginator(partes,n_partes)
-    page_obj = paginacion.get_page(n_pagina)
-    context = {
-        'partes':page_obj,
-        'page_obj':page_obj,
-        'page': n_pagina,
-        'n_partes': n_partes
-    }
+    context = paginate_informes(request,partes)
     return render(request,'list_inspeccion.html',context)
 
 
@@ -86,17 +58,7 @@ def list_partes_inspeccion(request:HttpRequest):
 def list_inf_acuda(request:HttpRequest):
     empresa_id = request.GET.get('empresa_id')
     partes = Informe_Acuda.objects.filter(empresa_id = empresa_id).order_by('-fecha_creacion')
-    global DEFAULT_PAGINATION_PARTES
-    n_pagina = request.GET.get('page',1)
-    n_partes = request.GET.get('n_partes',DEFAULT_PAGINATION_PARTES)
-    paginacion = Paginator(partes,n_partes)
-    page_obj = paginacion.get_page(n_pagina)
-    context = {
-        'partes':page_obj,
-        'page_obj':page_obj,
-        'page': n_pagina,
-        'n_partes': n_partes
-    }
+    context = paginate_informes(request,partes)
     return render(request,'list_acuda.html',context)
 
 @login_required
