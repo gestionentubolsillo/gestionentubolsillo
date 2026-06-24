@@ -17,4 +17,5 @@ urlpatterns = [
     path('backoffice/users/<int:user_id>/cuadrantes/<int:cuadrante_id>',views.cuadrante_details),
     path('backoffice/users/<int:user_id>/cuadrantes/<int:cuadrante_id>/pdf',views.show_cuadrante_pdf,name='show_pdf'),
     path('backoffice/users/<int:user_id>/cuadrantes/<int:cuadrante_id>/delete',views.delete_cuadrante),
+    path('backoffice/users/<int:user_id>/tareas',views.list_tareas_user)
 ]

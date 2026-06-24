@@ -238,6 +238,16 @@ def delete_cuadrante(request:HttpRequest,user_id,cuadrante_id):
     return redirect(f"/backoffice/users/{user.UserID}/cuadrantes")
 
 
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_users)
+def list_tareas_user(request:HttpRequest,user_id):
+    user = User.objects.filter(UserID=user_id).first()
+    if not user:
+        messages.error(request, "Usuario no encontrado", extra_tags='error')
+        return redirect('/backoffice/users/')
+    return redirect(f"/backoffice/tareas?usuario={user_id}")
+
 def _create_or_modify_user(request:HttpRequest,user:User|None = None):
 
     template = loader.get_template('account/users/form.html')
