@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import User,Cuadrante, can_access_backoffice, can_view_users, can_CRUD_users
 from django.core.paginator import Paginator
 from django.template import loader
-from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
+from django.http import HttpResponseRedirect, HttpResponse, HttpRequest, FileResponse
 from django.contrib import messages
 from empresas.models import Empresa
 from decimal import Decimal
@@ -12,6 +12,7 @@ from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 from django.db.models.manager import BaseManager
 from enum import Enum
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 # Create your views here.
 
 from .filters import filter_users,filter_cuadrantes
@@ -176,7 +177,7 @@ def list_cuadrantes_of_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
     filtros,exclusiones = filter_cuadrantes(user)
     cuadrantes = Cuadrante.objects.filter(**filtros).exclude(**exclusiones).order_by('id')
-    context = paginate_cuadrantes_users(request,cuadrantes)
+    context = paginate_cuadrantes_users(request,cuadrantes,user)
     return render(request,'account/users/cuadrantes/list.html',context)
 
 @login_required
@@ -191,18 +192,29 @@ def cuadrante_details(request:HttpRequest,user_id,cuadrante_id):
     context = {'usuario':user,'cuadrante':cuadrante,'action':'view'}
     return render(request,'account/users/cuadrantes/form.html',context)
 
+@xframe_options_sameorigin
+def show_cuadrante_pdf(request:HttpRequest,user_id,cuadrante_id):
+    user = User.objects.filter(UserID=user_id).first()
+    cuadrante = Cuadrante.objects.filter(id=cuadrante_id).first()
+    auth_errors = can_user_access_cuadrante(request,user,cuadrante)
+    if auth_errors:
+        return redirect(f"/backoffice/users/{user.UserID}/cuadrantes")
+    return FileResponse(cuadrante.file.open(), content_type='application/pdf')
+
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
 def create_cuadrante(request:HttpRequest,user_id):
     template = loader.get_template('account/users/cuadrantes/form.html')
-    context = {'action':'create'}
+    
     user = User.objects.filter(UserID=user_id).first()
+    context = {'action':'create','usuario':user}
 
     if request.method == 'POST':
         nombre = request.POST.get('nombre','')
         archivo = request.FILES.get('archivo')
         errors = validate_cuadrante(request,nombre,archivo)
+        print(f"errors={errors}")
         if errors:
             return HttpResponse(template.render(context,request))
         cuadrante = build_cuadrante(data={'file':archivo,'nombre':nombre,'user':user})

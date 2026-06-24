@@ -11,7 +11,7 @@
   <div class="list-toolbar">
     <span class="list-title">
       <i class="bi bi-building me-1 text-primary"></i>
-      Usuarios
+      Cuadrantes
     </span>
 
     <!-- Búsqueda por nombre -->
@@ -31,8 +31,8 @@
 
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
     {% if user.permisos_usuario == 'create_modify' %}
-        <a href="/backoffice/users/create" class="btn btn-primary btn-sm ms-auto">
-            <i class="bi bi-plus-lg me-1"></i> Nuevo Usuario
+        <a href="/backoffice/users/{{usuario.UserID}}/cuadrantes/create" class="btn btn-primary btn-sm ms-auto">
+            <i class="bi bi-plus-lg me-1"></i> Nuevo Cuadrante
         </a>
     {% endif %}
   </div>
@@ -43,67 +43,28 @@
       <thead>
         <tr>
           <!-- Añade o quita columnas según el modelo -->
-          <th>Usuario</th>
           <th>Nombre</th>
-          <th>Apellidos</th>
-          <th>Cuadrantes</th>
-          <th>Tareas</th>
-          <th>Servicios</th>
-          <th>Permisos</th>
           <!-- Columna acciones: siempre la última -->
           <th class="text-end">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        {% for usuario in usuarios %}
+        {% for cuadrante in cuadrantes %}
         <tr>
-          <td class="fw-medium">{{usuario.username}}</td>
-          <td class="text-muted">{{usuario.first_name}}</td>
-          <td class="text-muted">{{usuario.last_name}}</td>
-          <td class="text-muted">
-            {% if  user.permisos_usuario in 'view_only,create_modify'%}
-              <a href="/backoffice/users/{{usuario.UserID}}/cuadrantes" class="action-btn" title="Ver">
-                    <i class="bi bi-eye"></i>
-              </a>
-            {% endif %}
-          </td>
-          <td class="text-muted">Ver tareas de usuario </td>
-          <td class="text-muted">
-            {% if  user.permisos_usuario in 'view_only,create_modify'%}
-              <a href="/backoffice/users/{{usuario.UserID}}/services" class="action-btn" title="Ver">
-                    <i class="bi bi-eye"></i>
-              </a>
-            {% endif %}
-          </td>
-          <td class="text-muted"> 
-            <!-- Ver: permiso view_only o create_modify -->
-              {% if user.permisos_usuario in 'view_only,create_modify' %}
-                <a href="/backoffice/users/permissions/{{usuario.UserID}}" class="action-btn" title="Ver">
-                    <i class="bi bi-eye"></i>
-                </a>
-              {% endif %}
-              {% if  user.permisos_usuario == 'create_modify'%}
-                                <a href="/backoffice/users/permissions/edit/{{usuario.UserID}}" class="action-btn" title="Editar">
-                    <i class="bi bi-pencil"></i>
-                </a>
-              {% endif %}
-          </td>
+          <td class="fw-medium">{{cuadrante.nombre}}</td>
 
           <td class="text-end">
             <div class="d-flex gap-1 justify-content-end">
 
               <!-- Ver: permiso view_only o create_modify -->
               {% if user.permisos_usuario in 'view_only,create_modify' %}
-                <a href="/backoffice/users/{{usuario.UserID}}" class="action-btn" title="Ver">
+                <a href="/backoffice/users/{{usuario.UserID}}/cuadrantes/{{cuadrante.id}}" class="action-btn" title="Ver">
                     <i class="bi bi-eye"></i>
                 </a>
               {% endif %}
 
               <!-- Editar: solo create_modify -->
               {% if user.permisos_usuario == 'create_modify' %}
-                <a href="/backoffice/users/edit/{{usuario.UserID}}" class="action-btn" title="Editar">
-                    <i class="bi bi-pencil"></i>
-                </a>
 
               <!-- Eliminar: solo create_modify -->
                 <button class="action-btn delete" title="Eliminar"
@@ -116,17 +77,17 @@
                         <div class="modal-content" style="border-radius:14px;border:none;">
                             <div class="modal-header border-0 pb-0">
                                 <h5 class="modal-title fw-bold" id="deleteModalLabel">
-                                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Eliminar Usuario
+                                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Eliminar Cuadrante
                                 </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body text-muted" style="font-size:.9rem;">
-                                    ¿Estás seguro de que quieres eliminar el usuario <strong>{{usuario.username}}</strong>? Esta acción no se puede deshacer.
+                                    ¿Estás seguro de que quieres eliminar el cuadrante <strong>{{cuadrante.nombre}}</strong>? Esta acción no se puede deshacer.
                             </div>
                             <div class="modal-footer border-0 pt-0">
                                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
                                 <!-- Apunta al endpoint de borrado con el id del objeto -->
-                                <a href="/backoffice/users/delete/{{usuario.UserID}}" class="btn btn-danger btn-sm">Eliminar</a>
+                                <a href="/backoffice/users/{{usuario.UserID}}/cuadrantes/{{cuadrante.id}}/delete" class="btn btn-danger btn-sm">Eliminar</a>
                             </div>
                         </div>
                     </div>
