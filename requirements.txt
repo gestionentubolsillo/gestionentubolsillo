@@ -7,3 +7,6 @@ django-multiselectfield==1.0.1
 
 #Config
 python-dotenv==1.2.2
+
+#Obfuscation
+django-fernet-encrypted-fields==0.4.0
