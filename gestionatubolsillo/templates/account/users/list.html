@@ -67,7 +67,11 @@
               </a>
             {% endif %}
           </td>
-          <td class="text-muted">Ver tareas de usuario </td>
+          <td class="text-muted">
+            <a href="/backoffice/users/{{usuario.UserID}}/tareas" class="action-btn" title="Ver">
+                    <i class="bi bi-eye"></i>
+              </a>
+          </td>
           <td class="text-muted">
             {% if  user.permisos_usuario in 'view_only,create_modify'%}
               <a href="/backoffice/users/{{usuario.UserID}}/services" class="action-btn" title="Ver">
