@@ -1,6 +1,7 @@
 from django.db import models
 from multiselectfield import MultiSelectField
 from users.models import User, tiene_acceso
+from encrypted_fields import EncryptedEmailField
 
 # Create your models here.
 
@@ -28,7 +29,8 @@ class Servicio(models.Model):
     #Campo que indica la necesidad de gps
     #Si requiere gps, el dispositibo del usuario debe tenerlo habilitado para poder enviar partes, actividades, etc.
     requiere_gps = models.BooleanField(default=False)
-    mail_de_contacto = models.EmailField(blank=True, null=True)
+    #Datos Sensibles
+    mail_de_contacto = EncryptedEmailField(blank=True,null=True)
 
     #Relacion N:1 con el modelo Empresa
     empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='servicio')
