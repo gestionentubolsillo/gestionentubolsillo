@@ -29,11 +29,15 @@ class User(AbstractUser):
     UserID = models.AutoField(primary_key=True)
 
     # You can add additional fields here if needed
-    direccion = models.CharField(max_length=255, blank=True, null=True)
     provincia = models.CharField(max_length=100)
     municipio = models.CharField(max_length=100)
-    telefono = models.CharField(max_length=20, blank=True, null=True)
-    nif = models.CharField(max_length=20, blank=True, null=True)
+
+
+    #Datos que necesitan encriptacion
+    email = EncryptedEmailField(null=True, blank=True)
+    telefono = EncryptedCharField(max_length=20,blank=True,null=True)
+    direccion = EncryptedCharField(max_length=255,blank=True,null=True)
+    nif = EncryptedCharField(max_length=20,blank=True,null=True)
 
     #Campos que necesitan la implementación de otros modelos para su funcionamiento
     #delegacion = ForeignKey(delegaciones models.delegacionID)
@@ -43,8 +47,7 @@ class User(AbstractUser):
     esInspector_parteTrabajo = models.BooleanField(default=False)
     has_login_access = models.BooleanField(default=True)
     has_dashboard_access = models.BooleanField(default=False)
-    # Permisos de usuario para cada sección del sistema
-    # Sin permiso/Puede ver/Puede crear y modificar/En el caso de partes de trabajo, habilitar la opción de solo ver sus propios registros
+    
 
     can_view_own_partes_trabajo = models.BooleanField(default=False)  # Permiso adicional para ver solo sus propios registros
     empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='usuarios', null=True, blank=True)
