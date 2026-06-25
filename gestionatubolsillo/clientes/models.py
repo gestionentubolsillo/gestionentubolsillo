@@ -1,16 +1,20 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
 from users.models import User, tiene_acceso
+from encrypted_fields import EncryptedCharField,EncryptedEmailField
 
 # Create your models here.
 
 class Cliente(models.Model):
     ClienteID = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255)
-    direccion = models.CharField(max_length=255, blank=True, null=True)
-    telefono = models.CharField(max_length=20, blank=True, null=True)
-    cif = models.CharField(max_length=20, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
+
+    #Datos sensibles
+    direccion = EncryptedCharField(max_length=255,blank=True,null=True)
+    telefono = EncryptedCharField(max_length=20,blank=True,null=True)
+    cif = EncryptedCharField(max_length=20,blank=True,null=True)
+    email = EncryptedEmailField(blank=True,null=True)
+    
     persona_contacto = models.CharField(max_length=100, blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
