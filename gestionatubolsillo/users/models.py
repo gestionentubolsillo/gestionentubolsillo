@@ -2,6 +2,8 @@ from django.db import models
 from allauth.account.utils import get_next_redirect_url
 from django.contrib.auth.models import AbstractUser
 from encrypted_fields.fields import EncryptedEmailField, EncryptedCharField
+from Crypto.Random import get_random_bytes
+import base64
 
 from django.db import models
 
@@ -103,6 +105,21 @@ class Cuadrante(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='cuadrantes')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_borrado = models.DateTimeField(blank=True,null=True)
+
+class Cuenta(models.Model):
+    #Clave usada para encriptar los archivos de una cuenta. Tamaño necesario 32 Bytes (AES-GCM 256)
+    file_key_encription = EncryptedCharField()
+    is_active = models.BooleanField(default=True)
+
+
+    def save(self,*args, **kwargs):
+        if not self.file_key_encription:
+            self.create()
+        return super().save(**args, **kwargs)
+    
+    def create(self):
+        self.file_key_encription = base64.b64encode(get_random_bytes(32)).decode()
+
 
 def can_access_backoffice(user:User)-> bool:
     return user.has_login_access
