@@ -45,23 +45,8 @@ class User(AbstractUser):
     has_dashboard_access = models.BooleanField(default=False)
     # Permisos de usuario para cada sección del sistema
     # Sin permiso/Puede ver/Puede crear y modificar/En el caso de partes de trabajo, habilitar la opción de solo ver sus propios registros
-    permisos_usuario = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_tareas = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_clientes = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_servicios_NFC = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_central_receptora = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_medios_auxiliares = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_sugerencias = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_partes_trabajo = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
+
     can_view_own_partes_trabajo = models.BooleanField(default=False)  # Permiso adicional para ver solo sus propios registros
-    permisos_partes_incidencias = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_informes_acuda = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_partes_inspeccion = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_mantenimientos = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_almacen = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_informes = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_empresas = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
-    permisos_configuracion = models.CharField(max_length=20, choices=PERMISSIONS_CHOICES, default='no_access')
     empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='usuarios', null=True, blank=True)
     always_track_GPS = models.BooleanField(default=False)
     precio_hora = models.FloatField(default=0.)
