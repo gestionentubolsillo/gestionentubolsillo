@@ -1,6 +1,6 @@
 from django.db import models
 
-from users.models import User
+from users.models import User, tiene_acceso
 
 # Create your models here.
 
@@ -36,8 +36,8 @@ class Mantenimiento_DOC_CAMPO(models.Model):
     grupo_documento = models.ForeignKey('Mantenimiento_DOC_GRUPO', on_delete=models.SET_NULL, related_name='campos_grupo',null=True, blank=True)
 
 
-def can_view_mantenimientos(user:User)->bool:
-    return user.permisos_mantenimientos == 'view_only' or user.permisos_mantenimientos == 'create_modify'
+def can_view_mantenimientos(user: User)-> bool:
+    return tiene_acceso(user, 'MAN')
 
-def can_CRUD_mantenimientos(user:User)->bool:
-    return user.permisos_mantenimientos == 'create_modify'
+def can_CRUD_mantenimientos(user: User)-> bool:
+    return tiene_acceso(user, 'MAN', nivel_min='2')

@@ -1,8 +1,10 @@
 {% extends "navbar.html" %}
 {% load query_filters %}
-
+{% load permisos_tags %}
 {% block body %}
 {% include "backoffice/sidemenu.html" %}
+{% permiso user 'ALM' as perm_lectura%}
+{% permiso user 'ALM' '2' as perm_escritura%}
 <main id="main">
     <div class="main-content">
         <div class="list-card">
@@ -30,7 +32,7 @@
     </form>
 
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
-    {% if user.permisos_almacen == 'create_modify' %}
+    {% if perm_escritura %}
         <a href="/backoffice/almacen/create" class="btn btn-primary btn-sm ms-auto">
             <i class="bi bi-plus-lg me-1"></i> Nuevo Producto
         </a>
@@ -65,14 +67,14 @@
             <div class="d-flex gap-1 justify-content-end">
 
               <!-- Ver: permiso view_only o create_modify -->
-              {% if user.permisos_almacen in 'view_only,create_modify' %}
+              {% if perm_lectura %}
                 <a href="/backoffice/almacen/{{item.AlmacenID}}" class="action-btn" title="Ver">
                     <i class="bi bi-eye"></i>
                 </a>
               {% endif %}
 
               <!-- Editar: solo create_modify -->
-              {% if user.permisos_almacen == 'create_modify' %}
+              {% if perm_escritura %}
                 <a href="/backoffice/almacen/edit/{{item.AlmacenID}}" class="action-btn" title="Editar">
                     <i class="bi bi-pencil"></i>
                 </a>
@@ -93,7 +95,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body text-muted" style="font-size:.9rem;">
-                                    ¿Estás seguro de que quieres eliminar el Producto de almacén <strong>{{empresa.nombre}}</strong>? Esta acción no se puede deshacer.
+                                    ¿Estás seguro de que quieres eliminar el Producto de almacén <strong>{{item.nombre}}</strong>? Esta acción no se puede deshacer.
                             </div>
                             <div class="modal-footer border-0 pt-0">
                                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>

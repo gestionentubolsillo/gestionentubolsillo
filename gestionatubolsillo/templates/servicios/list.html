@@ -1,8 +1,12 @@
 {% extends "navbar.html" %}
 {% load query_filters %}
+{% load permisos_tags %}
 
 {% block body %}
 {% include "backoffice/sidemenu.html" %}
+{% permiso user 'NFC' as perm_lectura%}
+{% permiso user 'NFC' '2' as perm_escritura%}
+
 <main id="main">
     <div class="main-content">
         <div class="list-card">
@@ -37,7 +41,7 @@
     </form>
 
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
-    {% if user.permisos_servicios_NFC == 'create_modify' %}
+    {% if perm_escritura %}
         <a href="/backoffice/servicios/create" class="btn btn-primary btn-sm ms-auto">
             <i class="bi bi-plus-lg me-1"></i> Nuevo servicio
         </a>
@@ -72,14 +76,14 @@
             <div class="d-flex gap-1 justify-content-end">
 
               <!-- Ver: permiso view_only o create_modify -->
-              {% if user.permisos_servicios_NFC in 'view_only,create_modify' %}
+              {% if perm_lectura %}
                 <a href="/backoffice/servicios/{{servicio.ServicioID}}" class="action-btn" title="Ver">
                     <i class="bi bi-eye"></i>
                 </a>
               {% endif %}
 
               <!-- Editar: solo create_modify -->
-              {% if user.permisos_servicios_NFC == 'create_modify' %}
+              {% if perm_escritura %}
                 <a href="/backoffice/servicios/edit/{{servicio.ServicioID}}" class="action-btn" title="Editar">
                     <i class="bi bi-pencil"></i>
                 </a>

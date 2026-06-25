@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from users.models import User, tiene_acceso
 
 # Create your models here.
 
@@ -37,8 +37,8 @@ class ListadoUsers(models.Model):
     nombre = models.CharField(max_length=20)
     usuarios = models.ManyToManyField('users.User',related_name='listados')
 
-def can_view_tareas(user:User)-> bool:
-    return user.permisos_tareas == 'view_only' or user.permisos_tareas == 'create_modify'
+def can_view_tareas(user: User)-> bool:
+    return tiene_acceso(user, 'TAR')
 
-def can_CRUD_tareas(user:User)->bool:
-    return user.permisos_tareas == 'create_modify'
+def can_CRUD_tareas(user: User)-> bool:
+    return tiene_acceso(user, 'TAR', nivel_min='2')

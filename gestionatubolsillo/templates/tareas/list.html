@@ -1,8 +1,11 @@
 {% extends "navbar.html" %}
 {% load query_filters %}
+{% load permisos_tags %}
 
 {% block body %}
 {% include "backoffice/sidemenu.html" %}
+{% permiso user 'TAR' as perm_lectura%}
+{% permiso user 'TAR' '2' as perm_escritura%}
 <main id="main">
     <div class="main-content">
         <div class="list-card">
@@ -51,13 +54,13 @@
         </button>
     </form>
     <!-- Botón ver listados - mostrar solo si tiene permiso minimo de vista-->
-     {% if  user.permisos_tareas in 'view_only,create_modify'%}
+     {% if  perm_lectura%}
         <a href="/backoffice/tareas/listados" class="btn btn-primary btn-sm ms-auto">
             <i class="bi bi-plus-lg me-1"></i> Ver Listados
         </a>
      {% endif %}
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
-    {% if user.permisos_tareas == 'create_modify' %}
+    {% if perm_escritura %}
         <a href="/backoffice/tareas/create" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-lg me-1"></i> Nueva Tarea
         </a>
@@ -99,14 +102,14 @@
             <div class="d-flex gap-1 justify-content-end">
 
               <!-- Ver: permiso view_only o create_modify -->
-              {% if user.permisos_tareas in 'view_only,create_modify' %}
+              {% if perm_lectura%}
                 <a href="/backoffice/tareas/{{tarea.TareaID}}" class="action-btn" title="Ver">
                     <i class="bi bi-eye"></i>
                 </a>
               {% endif %}
 
               <!-- Editar: solo create_modify -->
-              {% if user.permisos_tareas == 'create_modify' %}
+              {% if perm_escritura %}
                 <a href="/backoffice/tareas/edit/{{tarea.TareaID}}" class="action-btn" title="Editar">
                     <i class="bi bi-pencil"></i>
                 </a>

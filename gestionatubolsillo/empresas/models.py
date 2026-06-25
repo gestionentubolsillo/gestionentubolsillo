@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from users.models import User, tiene_acceso
 # Create your models here.
 
 class Empresa(models.Model):
@@ -17,10 +17,10 @@ class Empresa(models.Model):
     usuario_creador = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='empresas_creadas')
 
 
-def can_view_empresas(user:User)-> bool:
-    return user.permisos_empresas == 'view_only' or user.permisos_empresas == 'create_modify'
+def can_view_empresas(user: User)-> bool:
+    return tiene_acceso(user, 'EMP')
 
-def can_CRUD_empresas(user:User)->bool:
-    return user.permisos_empresas == 'create_modify'
+def can_CRUD_empresas(user: User)-> bool:
+    return tiene_acceso(user, 'EMP', nivel_min='2')
 
 

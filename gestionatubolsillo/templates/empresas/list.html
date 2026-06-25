@@ -1,8 +1,12 @@
 {% extends "navbar.html" %}
 {% load query_filters %}
+{% load permisos_tags %}
+
 
 {% block body %}
 {% include "backoffice/sidemenu.html" %}
+{% permiso user 'EMP' as perm_lectura%}
+{% permiso user 'EMP' '2' as perm_escritura%}
 <main id="main">
     <div class="main-content">
         <div class="list-card">
@@ -30,7 +34,7 @@
     </form>
 
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
-    {% if user.permisos_empresas == 'create_modify' %}
+    {% if perm_escritura %}
         <a href="/backoffice/empresas/create" class="btn btn-primary btn-sm ms-auto">
             <i class="bi bi-plus-lg me-1"></i> Nueva empresa
         </a>
@@ -58,14 +62,14 @@
                 <div class="d-flex gap-1 justify-content-end">
 
               <!-- Ver: permiso view_only o create_modify -->
-              {% if user.permisos_empresas in 'view_only,create_modify' %}
+              {% if perm_lectura%}
                 <a href="/backoffice/empresas/{{empresa_usuario.EmpresaID}}" class="action-btn" title="Ver">
                     <i class="bi bi-eye"></i>
                 </a>
               {% endif %}
 
               <!-- Editar: solo create_modify -->
-              {% if user.permisos_empresas == 'create_modify' %}
+              {% if perm_escritura %}
                 <a href="/backoffice/empresas/edit/{{empresa_usuario.EmpresaID}}" class="action-btn" title="Editar">
                     <i class="bi bi-pencil"></i>
                 </a>
@@ -87,14 +91,14 @@
             <div class="d-flex gap-1 justify-content-end">
 
               <!-- Ver: permiso view_only o create_modify -->
-              {% if user.permisos_empresas in 'view_only,create_modify' %}
+              {% if perm_lectura %}
                 <a href="/backoffice/empresas/{{empresa.EmpresaID}}" class="action-btn" title="Ver">
                     <i class="bi bi-eye"></i>
                 </a>
               {% endif %}
 
               <!-- Editar: solo create_modify -->
-              {% if user.permisos_empresas == 'create_modify' %}
+              {% if perm_escritura %}
                 <a href="/backoffice/empresas/edit/{{empresa.EmpresaID}}" class="action-btn" title="Editar">
                     <i class="bi bi-pencil"></i>
                 </a>
