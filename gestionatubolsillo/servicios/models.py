@@ -1,6 +1,6 @@
 from django.db import models
 from multiselectfield import MultiSelectField
-from users.models import User
+from users.models import User, tiene_acceso
 
 # Create your models here.
 
@@ -38,8 +38,8 @@ class Servicio(models.Model):
     def __str__(self):
         return self.nombre
 
-def can_view_servicios(user:User)->bool:
-    return user.permisos_servicios_NFC == 'view_only' or user.permisos_servicios_NFC == 'create_modify'
+def can_view_servicios(user: User)-> bool:
+    return tiene_acceso(user, 'NFC')
 
-def can_CRUD_servicios(user:User)->bool:
-    return user.permisos_servicios_NFC == 'create_modify'
+def can_CRUD_servicios(user: User)-> bool:
+    return tiene_acceso(user, 'NFC', nivel_min='2')

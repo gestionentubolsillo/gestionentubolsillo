@@ -1,8 +1,12 @@
 {% extends "navbar.html" %}
 {% load query_filters %}
+{% load permisos_tags %}
+
 
 {% block body %}
 {% include "backoffice/sidemenu.html" %}
+{% permiso user 'TAR' '2' as perm_escritura%}
+
 <main id="main">
     <div class="main-content">
         <div class="list-card">
@@ -30,7 +34,7 @@
     </form>
 
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
-    {% if user.permisos_tareas == 'create_modify' %}
+    {% if perm_escritura %}
         <a href="/backoffice/tareas/listados/create" class="btn btn-primary btn-sm ms-auto">
             <i class="bi bi-plus-lg me-1"></i> Nueva Lista
         </a>
@@ -60,7 +64,7 @@
             <div class="d-flex gap-1 justify-content-end">
 
               <!-- Editar: solo create_modify -->
-              {% if user.permisos_tareas == 'create_modify' %}
+              {% if perm_escritura %}
                 <a href="/backoffice/tareas/listados/{{lista.id}}/edit" class="action-btn" title="Editar">
                     <i class="bi bi-pencil"></i>
                 </a>

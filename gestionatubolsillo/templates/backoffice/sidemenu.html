@@ -1,45 +1,55 @@
 <!--SIDE-BAR-->
 {% load static %}
+{% load permisos_tags %}
 {% block head %}
 <link href="{% static 'css/home.css'%}" rel="stylesheet">
 {% endblock head %}
 
 <aside id="sidebar">
     <a class="sidebar-brand" href="#">Gestión en tu <span>Bolsillo</span></a>
+    {% permiso user 'USR' as permiso_user%}
+    {% permiso user 'EMP' as permiso_empresas%}
+    {% permiso user 'CLI' as permiso_clientes%}
+    {% permiso user 'NFC' as permiso_servicios_nfc%}
+    {% permiso user 'ALM' as permiso_almacen%}
+    {% permiso user 'CEN' as permiso_centrales%}
+    {% permiso user 'MED' as permiso_medios_auxiliares%}
+    {% permiso user 'TAR' as permiso_tareas%}
+    {% permiso user 'SUG' as permiso_sugerencias%}
     <nav>
       <div class="sidebar-group">
         <p class="sidebar-label">Principal</p>
         {% if  user.has_dashboard_access%}
             <a href="/backoffice" class="sidebar-link active"> Dashboard</a>
         {% endif %}
-        {% if user.permisos_usuario != 'no_access' %}
+        {% if permiso_user %}
             <a href="/backoffice/users" class="sidebar-link"> Usuarios</a>
         {% endif %}
         <a href="#" class="sidebar-link"> Configuración</a>
       </div>
       <div class="sidebar-group">
         <p class="sidebar-label">Módulos</p>
-        {% if  user.permisos_empresas != 'no_access' %}
+        {% if permiso_empresas %}
             <a href="/backoffice/empresas" class="sidebar-link"> Empresas</a>
         {% endif %}
-        {% if user.permisos_clientes != 'no_access'%}
+        {% if permiso_clientes %}
             <a href="/backoffice/clientes" class="sidebar-link">Clientes</a>
         {% endif %}
-        {% if user.permisos_servicios_NFC != 'no_access' %}
+        {% if permiso_servicios_nfc %}
             <a href="/backoffice/servicios" class="sidebar-link"> Servicios</a>
         {% endif %}
-        {% if user.permisos_almacen != 'no_access' %}
+        {% if permiso_almacen %}
             <a href="/backoffice/almacen" class="sidebar-link"> Almacén</a>
         {% endif %}
         
-        {% if user.permisos_centrales != 'no_access' %}
+        {% if permiso_centrales %}
             <a href="/backoffice/centrales" class="sidebar-link"> Centrales Receptoras</a>
         {% endif %}
-        {% if user.permisos_medios_auxiliares != 'no_access' %}
+        {% if permiso_medios_auxiliares %}
             <a href="/backoffice/medios_auxiliares" class="sidebar-link"> Medios Auxiliares</a>
         {% endif %}
         <a href="/backoffice/delegaciones" class="sidebar-link"> Delegaciones</a>
-        {% if  user.permisos_servicios_NFC != 'no_access'%}
+        {% if permiso_servicios_nfc %}
             <a href="#" class="sidebar-link"> NFC</a>
         {% endif %}
         
@@ -47,10 +57,10 @@
       </div>
       <div class="sidebar-group">
         <p class="sidebar-label">Notificaciones</p>
-        {% if  user.permisos_tareas != 'no_access'%}
+        {% if permiso_tareas %}
             <a href="/backoffice/tareas" class="sidebar-link"> Tareas</a>
         {% endif %}
-        {% if user.permisos_sugerencias != 'no_access' %}
+        {% if permiso_sugerencias %}
             <a href="/backoffice/sugerencias" class="sidebar-link"></i> Sugerencias</a>
         {% endif %}
       </div>

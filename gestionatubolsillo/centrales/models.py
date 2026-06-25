@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from users.models import User, tiene_acceso
 # Create your models here.
 class Central(models.Model):
     CentralID = models.AutoField(primary_key=True)
@@ -15,8 +15,8 @@ class Central(models.Model):
     def __str__(self):
         return self.nombre
 
-def can_view_centrales(user:User)->bool:
-    return user.permisos_central_receptora == 'view_only' or user.permisos_central_receptora == 'create_modify'
+def can_view_centrales(user: User)-> bool:
+    return tiene_acceso(user, 'CEN')
 
-def can_CRUD_centrales(user:User)->bool:
-    return user.permisos_central_receptora == 'create_modify'
+def can_CRUD_centrales(user: User)-> bool:
+    return tiene_acceso(user, 'CEN', nivel_min='2')

@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
-from users.models import User
+from users.models import User, tiene_acceso
 
 # Create your models here.
 
@@ -41,8 +41,8 @@ class user_client(models.Model):
         return check_password(password=raw_password,encoded=self.password)
 
 
-def can_view_clientes(user:User)->bool:
-    return user.permisos_clientes == 'view_only' or user.permisos_clientes == 'create_modify'
+def can_view_clientes(user: User)-> bool:
+    return tiene_acceso(user, 'CLI')
 
-def can_CRUD_clientes(user:User)->bool:
-    return user.permisos_clientes == 'create_modify'
+def can_CRUD_clientes(user: User)-> bool:
+    return tiene_acceso(user, 'CLI', nivel_min='2')

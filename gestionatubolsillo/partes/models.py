@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from users.models import User, tiene_acceso
 
 # Create your models here.
 
@@ -74,31 +74,31 @@ class Informe_Acuda(Parte):
 
 
 #Parece que solo hay funcionalidad de vista de informes en general, no parece que haya opcion de crear/modificar
-def can_view_informes(user:User)->bool:
-    return user.permisos_informes in ['view_only','create_modify']
+def can_view_informes(user: User)-> bool:
+    return tiene_acceso(user, 'INF')
 
 #Resto de informes si tienen opcion
-def can_view_parte_trabajo(user:User)->bool:
-    return user.permisos_partes_trabajo in ['view_only','create_modify']
-def can_CRUD_parte_trabajo(user:User)->bool:
-    return user.permisos_partes_trabajo == 'create_modify'
+def can_view_parte_trabajo(user: User)-> bool:
+    return tiene_acceso(user, 'PAR')
+def can_CRUD_parte_trabajo(user: User)-> bool:
+    return tiene_acceso(user, 'PAR', nivel_min='2')
 
-def can_view_parte_inspeccion(user:User)->bool:
-    return user.permisos_partes_inspeccion in ['view_only','create_modify']
+def can_view_parte_inspeccion(user: User)-> bool:
+    return tiene_acceso(user, 'INS')
 
-def can_CRUD_parte_inspeccion(user:User)->bool:
-    return user.permisos_partes_inspeccion == 'create_modify'
+def can_CRUD_parte_inspeccion(user: User)-> bool:
+    return tiene_acceso(user, 'INS', nivel_min='2')
 
-def can_view_parte_incidencia(user:User)->bool:
-    return user.permisos_partes_incidencias in ['view_only','create_modify']
+def can_view_parte_incidencia(user: User)-> bool:
+    return tiene_acceso(user, 'INC')
 
-def can_CRUD_parte_incidencia(user:User)->bool:
-    return user.permisos_partes_incidencias == 'create_modify'
+def can_CRUD_parte_incidencia(user: User)-> bool:
+    return tiene_acceso(user, 'INC', nivel_min='2')
 
-def can_view_acuda(user:User)->bool:
-    return user.permisos_informes_acuda in ['view_only','create_modify']
+def can_view_acuda(user: User)-> bool:
+    return tiene_acceso(user, 'ACU')
 
-def can_CRUD_acuda(user:User)->bool:
-    return user.permisos_informes_acuda == 'create_modify'
+def can_CRUD_acuda(user: User)-> bool:
+    return tiene_acceso(user, 'ACU', nivel_min='2')
 
 
