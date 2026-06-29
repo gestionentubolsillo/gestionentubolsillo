@@ -1,8 +1,11 @@
 {% extends "navbar.html" %}
 {% load query_filters %}
+{% load permisos_tags %}
 
 {% block body %}
 {% include "backoffice/sidemenu.html" %}
+{% permiso user 'USR' as perm_lectura%}
+{% permiso user 'USR' '2' as perm_escritura%}
 <main id="main">
     <div class="main-content">
         <div class="list-card">
@@ -30,7 +33,7 @@
     </form>
 
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
-    {% if user.permisos_usuario == 'create_modify' %}
+    {% if perm_escritura %}
         <a href="/backoffice/users/{{usuario.UserID}}/cuadrantes/create" class="btn btn-primary btn-sm ms-auto">
             <i class="bi bi-plus-lg me-1"></i> Nuevo Cuadrante
         </a>
@@ -57,14 +60,14 @@
             <div class="d-flex gap-1 justify-content-end">
 
               <!-- Ver: permiso view_only o create_modify -->
-              {% if user.permisos_usuario in 'view_only,create_modify' %}
+              {% if perm_lectura %}
                 <a href="/backoffice/users/{{usuario.UserID}}/cuadrantes/{{cuadrante.id}}" class="action-btn" title="Ver">
                     <i class="bi bi-eye"></i>
                 </a>
               {% endif %}
 
               <!-- Editar: solo create_modify -->
-              {% if user.permisos_usuario == 'create_modify' %}
+              {% if perm_escritura %}
 
               <!-- Eliminar: solo create_modify -->
                 <button class="action-btn delete" title="Eliminar"

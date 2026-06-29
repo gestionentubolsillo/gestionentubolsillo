@@ -1,13 +1,35 @@
 from django.db import models
 from allauth.account.utils import get_next_redirect_url
 from django.contrib.auth.models import AbstractUser
+from django.core.files.base import ContentFile
 from encrypted_fields.fields import EncryptedEmailField, EncryptedCharField
 from Crypto.Random import get_random_bytes
 import base64
 
 from django.db import models
+from collections import namedtuple
+
+Cipher = namedtuple('Cipher',['HMAC','Nonce','Ciphertext'])
 
 # Create your models here.
+
+class Cuenta(models.Model):
+    #Clave usada para encriptar los archivos de una cuenta. Tamaño necesario 32 Bytes (AES-GCM 256)
+    file_key_encription = EncryptedCharField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+
+    def save(self, force_insert = False, force_update = False, using = None, update_fields = None):
+        
+        if not self.file_key_encription:
+            self.create()
+        return super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)    
+    def create(self):
+        self.file_key_encription = base64.b64encode(get_random_bytes(32)).decode()
+
+    def get_key(self)->bytes:
+        return base64.b64decode(self.file_key_encription)
+
 class User(AbstractUser):
 
     PERMISSIONS_CHOICES = [
@@ -62,6 +84,7 @@ class User(AbstractUser):
     servicios = models.ManyToManyField('servicios.Servicio', related_name='users')
     delegacion = models.ForeignKey('delegaciones.Delegacion', on_delete=models.SET_NULL,related_name='usuarios', null=True, blank=True)
 
+    cuenta = models.ForeignKey(Cuenta,on_delete=models.SET_NULL,related_name='usuarios',null=True,blank=True)
 
 class PermisosModulo(models.Model):
     MODULOS = [
@@ -99,26 +122,26 @@ class PermisosModulo(models.Model):
 def set_upload_path(instance:Cuadrante,filename:str)->str:
     return f'users{instance.user.UserID}/cuadrantes/{filename}'
 
+
+class EncryptedFilePDF(models.Model):
+    nonce = models.CharField()
+    tag = models.CharField()
+    file = models.FileField()
+
+    @classmethod
+    def from_cipher(cls,cipher_result:Cipher,upload_path:str) -> EncryptedFilePDF:
+        instance = cls(nonce=base64.b64encode(cipher_result.Nonce).decode(),
+                       tag=base64.b64encode(cipher_result.HMAC).decode())
+        instance.file.save(upload_path,ContentFile(cipher_result.Ciphertext),save=False)
+        return instance
+
 class Cuadrante(models.Model):
     nombre = models.CharField(max_length=20)
-    file = models.FileField(upload_to=set_upload_path)
+    file = models.OneToOneField(EncryptedFilePDF,on_delete=models.SET_NULL,null=True,blank=True)
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='cuadrantes')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_borrado = models.DateTimeField(blank=True,null=True)
 
-class Cuenta(models.Model):
-    #Clave usada para encriptar los archivos de una cuenta. Tamaño necesario 32 Bytes (AES-GCM 256)
-    file_key_encription = EncryptedCharField()
-    is_active = models.BooleanField(default=True)
-
-
-    def save(self,*args, **kwargs):
-        if not self.file_key_encription:
-            self.create()
-        return super().save(**args, **kwargs)
-    
-    def create(self):
-        self.file_key_encription = base64.b64encode(get_random_bytes(32)).decode()
 
 
 def can_access_backoffice(user:User)-> bool:

@@ -1,5 +1,5 @@
 from typing import TypedDict
-from .models import User,Cuadrante
+from .models import User,Cuadrante, EncryptedFilePDF
 from empresas.models import Empresa
 from decimal import Decimal
 from django.core.files.uploadedfile import UploadedFile
@@ -64,7 +64,7 @@ def build_permissions(data:UserPermissionsData,user:User)->User:
 
 class CuadranteData(TypedDict):
     nombre:str
-    file:UploadedFile
+    file:EncryptedFilePDF
     user:User
 
 def build_cuadrante(data:CuadranteData)->Cuadrante:

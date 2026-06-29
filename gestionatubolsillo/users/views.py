@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import User,Cuadrante, can_access_backoffice, can_view_users, can_CRUD_users
+from .models import User,Cuadrante, Cuenta, EncryptedFilePDF,can_access_backoffice, can_view_users, can_CRUD_users
 from django.core.paginator import Paginator
 from django.template import loader
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest, FileResponse
@@ -13,6 +13,9 @@ from django.views.decorators.http import require_POST
 from django.db.models.manager import BaseManager
 from enum import Enum
 from django.views.decorators.clickjacking import xframe_options_sameorigin
+from home.utils import file_encrypt, file_decrypt
+import base64
+import io
 # Create your views here.
 
 from .filters import filter_users,filter_cuadrantes
@@ -199,7 +202,13 @@ def show_cuadrante_pdf(request:HttpRequest,user_id,cuadrante_id):
     auth_errors = can_user_access_cuadrante(request,user,cuadrante)
     if auth_errors:
         return redirect(f"/backoffice/users/{user.UserID}/cuadrantes")
-    return FileResponse(cuadrante.file.open(), content_type='application/pdf')
+    
+    cuenta:Cuenta = user.cuenta
+    plaintext = file_decrypt(enc_file=cuadrante.file, cuenta=cuenta)
+    if plaintext is None:
+        return HttpResponse('Error descifrando el archivo',status=500)
+
+    return FileResponse(io.BytesIO(plaintext), content_type='application/pdf')
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -217,7 +226,19 @@ def create_cuadrante(request:HttpRequest,user_id):
         print(f"errors={errors}")
         if errors:
             return HttpResponse(template.render(context,request))
-        cuadrante = build_cuadrante(data={'file':archivo,'nombre':nombre,'user':user})
+        
+        #Cifrar el archivo, guardarlo y crear cuadrante
+        cuenta: Cuenta = user.cuenta
+        print(f'cuenta: {cuenta.pk}, de usuario: {user}')
+        print(f'key={cuenta.file_key_encription}')
+        encrypted_file = file_encrypt(file=archivo,cuenta=cuenta)
+        if encrypted_file is None:
+            context['error'] = 'Error cifrando el archivo'
+            return HttpResponse(template.render(context, request))
+        file = EncryptedFilePDF.from_cipher(cipher_result=encrypted_file,
+            upload_path=f'users-{user.UserID}/cuadrantes/{base64.b64encode(encrypted_file.HMAC).decode()}')
+        file.save()
+        cuadrante = build_cuadrante(data={'file':file,'nombre':nombre,'user':user})
         return redirect(f"/backoffice/users/{user.UserID}/cuadrantes/{cuadrante.pk}")
 
     elif request.method == 'GET':
