@@ -10,7 +10,7 @@ from users.models import User
 
 from .filters import filtra_empresa
 from .paginators import paginate_empresas
-from .validators import validate_empresa
+from .validators import validate_empresa, validate_auth_empresa
 from .builders import build_empresa
 
 # Create your views here.
@@ -25,7 +25,6 @@ def create_empresa(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_empresas)
 def list_empresas(request:HttpRequest):
-    #TODO: Cambiar el filtro a cuenta a la que pertenece la empresa
     filtros, exclusiones = filtra_empresa(request)
     list_empresas = Empresa.objects.filter(**filtros).exclude(**exclusiones).order_by('EmpresaID')
     context = paginate_empresas(request,list_empresas)
@@ -36,9 +35,11 @@ def list_empresas(request:HttpRequest):
 @user_passes_test(can_view_empresas)
 def details_empresa(request,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
-    if not empresa:
-        messages.error(request,"La empresa no existe",extra_tags='error')
-        return redirect('backoffice/empresas')
+
+    auth_error = validate_auth_empresa(request,empresa)
+    if auth_error:
+        return auth_error
+    
     context = {
         'empresa':empresa,
         'action':'view'
@@ -50,6 +51,9 @@ def details_empresa(request,empresa_id):
 @user_passes_test(can_CRUD_empresas)
 def edit_empresa(request : HttpRequest,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
+    auth_error = validate_auth_empresa(request,empresa)
+    if auth_error:
+        return auth_error
     return _create_or_modify_empresa(request,empresa)
     
 
@@ -58,6 +62,9 @@ def edit_empresa(request : HttpRequest,empresa_id):
 @user_passes_test(can_CRUD_empresas)
 def delete_empresa(request:HttpRequest,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
+    auth_error = validate_auth_empresa(request,empresa)
+    if auth_error:
+        return auth_error
     empresa.delete()
     messages.success(request,"La empresa se ha eliminado con éxito",extra_tags='success')
     return redirect('/backoffice/empresas')

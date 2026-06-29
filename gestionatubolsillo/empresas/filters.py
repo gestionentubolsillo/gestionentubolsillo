@@ -5,7 +5,7 @@ from empresas.models import Empresa
 def filtra_empresa(request:HttpRequest)->tuple[dict,dict]:
     user:User = request.user
     empresa_usuario:Empresa = user.empresa
-    filtros = {'usuario_creador_id':user.UserID}
+    filtros = {'cuenta_id':user.cuenta.pk}
     exclusiones = {'EmpresaID':empresa_usuario.EmpresaID}
 
     return filtros, exclusiones

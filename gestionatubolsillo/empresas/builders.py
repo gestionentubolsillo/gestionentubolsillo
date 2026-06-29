@@ -10,6 +10,7 @@ def build_empresa(data:EmpresaData,creador:User | None = None, empresa:Empresa|N
     if empresa is None:
         empresa = Empresa()
         empresa.usuario_creador = creador
+        empresa.cuenta = creador.cuenta
     empresa.nombre = data.get('nombre')
     empresa.paquete = data.get('paquete')
     empresa.save()
