@@ -181,7 +181,7 @@ def _create_or_update_servicio(request:HttpRequest,servicio:Servicio | None = No
             'is_exterior':es_exterior,
             'mail':mail,
             'need_gps':requiere_gps
-        },servicio=servicio,created_at=created_at)
+        },servicio=servicio,created_at=created_at,user=user)
 
         return redirect('/backoffice/servicios')
     elif request.method == 'GET':
