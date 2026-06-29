@@ -5,6 +5,7 @@ from django.db.models.manager import BaseManager
 from django.core.files.uploadedfile import UploadedFile
 from servicios.models import  Servicio
 from .models import User,Cuadrante
+from django.shortcuts import redirect
 
 
 
@@ -98,3 +99,14 @@ def validate_cuadrante(request:HttpRequest,nombre,archivo:UploadedFile)->bool:
         messages.error(request,"Debe proporcionar un archivo que muestre el cuadrante",extra_tags='error')
         errors = True
     return errors
+
+def validate_account_access(request: HttpRequest, user: User | None):
+    if not user:
+        return redirect("/AuthError")
+
+    logged_user: User = request.user
+    if logged_user.cuenta_id != user.cuenta_id:
+        return redirect("/AuthError")
+
+    return None
+
