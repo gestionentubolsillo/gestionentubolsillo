@@ -208,7 +208,7 @@ def show_cuadrante_pdf(request:HttpRequest,user_id,cuadrante_id):
     if plaintext is None:
         return HttpResponse('Error descifrando el archivo',status=500)
 
-    return FileResponse(io.BytesIO(plaintext), content_type='application/pdf')
+    return FileResponse(io.BytesIO(plaintext), content_type='application/pdf',filename=cuadrante.file.tag)
 
 @login_required
 @user_passes_test(can_access_backoffice)
