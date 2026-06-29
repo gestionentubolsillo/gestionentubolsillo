@@ -1,10 +1,9 @@
 from Crypto.Cipher import AES
 from django.core.files.uploadedfile import UploadedFile
-from collections import namedtuple
-from users.models import Cuenta
 
+from users.models import Cuenta, Cipher, EncryptedFilePDF
 
-Cipher = namedtuple('Cipher',['HMAC','Nonce','Ciphertext'])
+import base64
 
 #Cambiar esto luego
 def _encrypt_bytes(data:bytes,key:bytes,chunk_size:int=64*1024):
@@ -49,8 +48,18 @@ def _decrypt_bytes(payload:Cipher,key:bytes):
         print('Integridad comprometida')
 
 def file_encrypt(file:UploadedFile,cuenta:Cuenta)-> Cipher:
-    key = cuenta.file_key_encription
+    key = cuenta.get_key()
     file.seek(0)
     data = file.read()
     encripted_data = _encrypt_bytes(data=data,key=key)
     return encripted_data
+
+
+def file_decrypt(enc_file:EncryptedFilePDF,cuenta:Cuenta):
+    key = cuenta.get_key()
+    enc_file.file.seek(0)
+    payload = Cipher(Nonce=base64.b64decode(enc_file.nonce),
+                     HMAC=base64.b64decode(enc_file.tag),
+                     Ciphertext=enc_file.file.read())
+    
+    return _decrypt_bytes(payload=payload,key=key)
