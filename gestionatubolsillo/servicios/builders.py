@@ -18,10 +18,11 @@ class ServicioData(TypedDict):
     mail:str
     need_gps:bool
 
-def build_Servicio(data:ServicioData,created_at:datetime | None = None, servicio:Servicio | None = None):
+def build_Servicio(data:ServicioData,user:User,created_at:datetime | None = None, servicio:Servicio | None = None):
     if servicio is None:
         servicio = Servicio()
         servicio.fecha_creacion = created_at
+        servicio.cuenta = user.cuenta
 
     servicio.nombre = data.get('nombre')
     servicio.descripcion = data.get('descripcion')
