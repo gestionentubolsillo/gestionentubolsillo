@@ -6,6 +6,7 @@ class Delegacion(models.Model):
     nombre = models.CharField(max_length=200)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     usuario_creador = models.ForeignKey('users.User', on_delete=models.SET_NULL,related_name='delegaciones_creadas',null=True)
+    cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL,null=True,blank=True,related_name='delegaciones')
 
 
 

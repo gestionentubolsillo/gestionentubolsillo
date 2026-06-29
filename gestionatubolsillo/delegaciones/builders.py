@@ -12,6 +12,7 @@ def build_delegacion(data:DelegacionData,created_at:datetime|None = None,delegac
     if delegacion is None:
         delegacion = Delegacion()
         delegacion.usuario_creador = data.get('user')
+        delegacion.cuenta = data.get('user').cuenta
         delegacion.fecha_creacion = created_at
     delegacion.nombre = data.get('nombre')
     delegacion.save()
