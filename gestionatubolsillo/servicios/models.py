@@ -35,7 +35,7 @@ class Servicio(models.Model):
     #Relacion N:1 con el modelo Empresa
     empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='servicio')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
-    
+    cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL, related_name='servicios',null=True,blank=True)
 
     def __str__(self):
         return self.nombre
