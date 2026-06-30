@@ -1,6 +1,6 @@
 from typing import TypedDict
 from django.db.models.manager import BaseManager
-from users.models import User
+from users.models import User, Cuenta
 from empresas.models import Empresa
 from .models import Cliente, user_client
 from servicios.models import Servicio
@@ -17,10 +17,11 @@ class ClienteData(TypedDict):
     telefono:str
     empresa:Empresa
 
-def build_cliente(data:ClienteData,created_at:datetime | None = None,cliente:Cliente | None = None):
+def build_cliente(data:ClienteData,cuenta:Cuenta,created_at:datetime | None = None,cliente:Cliente | None = None):
     if cliente is None:
         cliente = Cliente()
         cliente.fecha_creacion = created_at
+        cliente.cuenta = cuenta
     cliente.nombre = data.get('nombre')
     cliente.email = data.get('mail')
     cliente.persona_contacto = data.get('contacto')

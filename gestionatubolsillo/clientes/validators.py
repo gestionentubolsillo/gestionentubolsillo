@@ -5,6 +5,9 @@ from django.db.models.manager import BaseManager
 from empresas.models import Empresa
 from servicios.models import Servicio
 from .models import Cliente, user_client
+from users.models import User
+
+from django.shortcuts import redirect
 
 MIN_CHARS_PASSWORD = 8
 
@@ -61,3 +64,13 @@ def can_client_access_user_cli(request:HttpRequest,cliente:Cliente,user_cli:user
         messages.error(request,"Acceso inválido, no tiene acceso al usuario requerido",extra_tags='error')
         errors = True
     return errors
+
+
+def validate_auth_client(request:HttpRequest,cliente:Cliente):
+    logged_user : User = request.user
+    if not cliente:
+        messages.error(request,"El cliente no existe",extra_tags='error')
+        return redirect('/backoffice/clientes')
+    if logged_user.cuenta != cliente.cuenta:
+        return redirect('/AuthError')
+    return None
