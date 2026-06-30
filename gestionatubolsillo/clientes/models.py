@@ -25,6 +25,7 @@ class Cliente(models.Model):
     servicios = models.ManyToManyField('servicios.Servicio', related_name='clientes')
     #Relacion N:1 con empresa
     empresa = models.ForeignKey('empresas.Empresa',on_delete=models.CASCADE,related_name='clientes')
+    cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL,blank=True,null=True,related_name='clientes')
     
     def __str__(self):
         return self.nombre
