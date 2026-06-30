@@ -10,7 +10,7 @@ from django.utils.timezone import now
 from .filters import filter_centrales
 from .paginators import paginate_centrales
 from .builders import build_central
-from .validators import validate_central
+from .validators import validate_central, validate_auth_central
 
 
 # Create your views here.
@@ -36,6 +36,9 @@ def create_central(request: HttpRequest):
 @user_passes_test(can_CRUD_centrales)
 def edit_central(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
+    auth_error = validate_auth_central(request,central)
+    if auth_error:
+        return auth_error
     _create_or_modify_central(request,central)
 
 @login_required
@@ -43,6 +46,9 @@ def edit_central(request: HttpRequest, central_id):
 @user_passes_test(can_CRUD_centrales)
 def delete_central(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
+    auth_error = validate_auth_central(request,central)
+    if auth_error:
+        return auth_error
     central.delete()
     messages.success(request,"Central receptora eliminada correctamente",extra_tags='success')
     return redirect('/backoffice/centrales')
@@ -52,9 +58,9 @@ def delete_central(request: HttpRequest, central_id):
 @user_passes_test(can_view_centrales)
 def central_details(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
-    if not central:
-        messages.error(request,"La central receptora no existe",extra_tags='error')
-        return redirect('/backoffice/centrales')
+    auth_error = validate_auth_central(request,central)
+    if auth_error:
+        return auth_error
     context = {
         'central': central,
         'action':'view'
@@ -80,6 +86,7 @@ def _create_or_modify_central(request:HttpRequest,central:Central | None = None)
         if errors:
             return HttpResponse(template.render(context,request))
         created_at = now()
+        logged_user : User = request.user
 
         build_central(data={
             'nombre':nombre,
@@ -87,7 +94,7 @@ def _create_or_modify_central(request:HttpRequest,central:Central | None = None)
             'mail':mail,
             'observaciones':observaciones,
             'telefono':telefono
-        },created_at=created_at,central=central)
+        },created_at=created_at,central=central,cuenta=logged_user.cuenta)
 
         return redirect('/backoffice/centrales')
 
