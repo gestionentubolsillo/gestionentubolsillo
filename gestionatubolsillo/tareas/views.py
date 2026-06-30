@@ -10,7 +10,7 @@ from empresas.models import Empresa
 from django.utils.timezone import now
 from django.db.models import Count
 
-from .validators import validate_query_filters, QueryFilterData, parse_datetime, validate_list_users,validate_tarea, validate_users_assigned
+from .validators import validate_query_filters, QueryFilterData, parse_datetime, validate_list_users,validate_tarea, validate_users_assigned, validate_auth_tarea, validate_auth_listado
 from .paginators import paginate_tareas, paginate_listados
 from .filters import filtra_tareas
 from .builders import create_bulk_tareas, build_listado_users
@@ -45,9 +45,9 @@ def list_tareas(request:HttpRequest):
 @user_passes_test(can_CRUD_tareas)
 def create_tarea(request:HttpRequest):
     user:User = request.user
-    users_allowed = User.objects.filter(empresa__usuario_creador=user)
-    empresas = Empresa.objects.filter(usuario_creador=user)
-    listas = ListadoUsers.objects.all()
+    users_allowed = User.objects.filter(cuenta=user.cuenta)
+    empresas = Empresa.objects.filter(cuenta=user.cuenta)
+    listas = ListadoUsers.objects.filter(cuenta=user.cuenta)
     context = {'action':'create','empresas':empresas,'usuarios':users_allowed, 'listados':listas}
     template = loader.get_template('tareas/form.html')
     if request.method == 'POST':
@@ -65,17 +65,17 @@ def create_tarea(request:HttpRequest):
 
         if empresas_ids:
             users = User.objects.filter(empresa_id__in=empresas_ids).distinct()
-            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at)
+            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)
 
         elif listas_usuarios_ids:
             users = User.objects.filter(listados__id__in=listas_usuarios_ids).distinct()
-            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at)                  
+            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)                  
         else:
             errors = validate_users_assigned(request)
             if errors:
                 return HttpResponse(template.render(context,request))
             
-            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at)
+            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)
         return redirect('/backoffice/tareas')
     
     elif request.method == 'GET':
@@ -86,6 +86,9 @@ def create_tarea(request:HttpRequest):
 @user_passes_test(can_CRUD_tareas)
 def delete_tarea(request:HttpRequest,tarea_id):
     tarea = Tarea.objects.filter(TareaID=tarea_id).first()
+    auth_error = validate_auth_tarea(request,tarea)
+    if auth_error:
+        return auth_error
     tarea.delete()
     messages.success(request,"La tarea se ha eliminado con éxito",extra_tags='success')
     return redirect('/backoffice/tareas')
@@ -96,6 +99,9 @@ def delete_tarea(request:HttpRequest,tarea_id):
 @user_passes_test(can_CRUD_tareas)
 def change_state_tarea(request:HttpRequest,tarea_id):
     tarea = Tarea.objects.filter(TareaID=tarea_id).first()
+    auth_error = validate_auth_tarea(request,tarea)
+    if auth_error:
+        return auth_error
     estado = request.POST.get('estado','pendiente')
     tarea.estado = estado
     tarea.save()
@@ -108,9 +114,9 @@ def change_state_tarea(request:HttpRequest,tarea_id):
 @user_passes_test(can_view_tareas)
 def details_tarea(request:HttpRequest,tarea_id):
     tarea = Tarea.objects.filter(TareaID=tarea_id).first()
-    if not tarea:
-        messages.error(request,"La tarea no existe",extra_tags='error')
-        return redirect('/backoffice/tareas')
+    auth_error = validate_auth_tarea(request,tarea)
+    if auth_error:
+        return auth_error
     template = loader.get_template('tareas/form.html')
     context = {'action': 'view','tarea': tarea}
 
@@ -133,7 +139,7 @@ def create_list_usuarios(request:HttpRequest):
             return HttpResponse(template.render(context,request))
         
         users = User.objects.filter(UserID__in=users_ids)
-        build_listado_users(data={'nombre':nombre,'usuarios':users})
+        build_listado_users(data={'nombre':nombre,'usuarios':users},cuenta=user.cuenta)
         return redirect('/backoffice/tareas/listados')
 
     elif request.method == 'GET':
@@ -146,7 +152,10 @@ def edit_list_usuarios(request:HttpRequest,lista_id):
     template = loader.get_template('tareas/list_users/form.html')
     user:User = request.user
     listado = ListadoUsers.objects.filter(id=lista_id).first()
-    users_allowed = User.objects.filter(empresa__usuario_creador=user)
+    auth_error = validate_auth_listado(request,listado)
+    if auth_error:
+        return auth_error
+    users_allowed = User.objects.filter(cuenta=user.cuenta)
     listado_users_ids = set(listado.usuarios.values_list('UserID', flat=True))
     context = {'usuarios':users_allowed,'listado':listado, 'action':'edit','listado_users':listado_users_ids}
     if request.method == 'POST':
@@ -162,7 +171,8 @@ def edit_list_usuarios(request:HttpRequest,lista_id):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_tareas)
 def lista_listados_de_usuarios(request:HttpRequest):
-    listas = ListadoUsers.objects.all().annotate(num_users=Count('usuarios',distinct=True))
+    user : User = request.user
+    listas = ListadoUsers.objects.filter(cuenta=user.cuenta).annotate(num_users=Count('usuarios',distinct=True))
     context = paginate_listados(request,listas)
     return render(request,'tareas/list_users/list.html',context)
 

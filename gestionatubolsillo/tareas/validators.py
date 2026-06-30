@@ -2,9 +2,10 @@ from django.http import HttpRequest
 from typing import TypedDict
 from datetime import datetime
 from django.contrib import messages
+from django.shortcuts import redirect
 
 from users.models import User
-from .models import Tarea
+from .models import Tarea,ListadoUsers
 
 class QueryFilterData(TypedDict):
     usuario_id: str |None
@@ -76,3 +77,21 @@ def validate_users_assigned(request:HttpRequest)->bool:
         messages.error(request,"Debe indicar un usuario válido",extra_tags='error')
         errors = True
     return errors
+
+
+def validate_auth_tarea(request:HttpRequest,tarea:Tarea):
+    logged_user : User = request.user
+    if not tarea:
+        messages.error(request,"La tarea no existe",extra_tags='error')
+        return redirect('/backoffice/tareas')
+    if logged_user.cuenta != tarea.cuenta:
+        return redirect('/AuthError')
+    return None
+
+def validate_auth_listado(request:HttpRequest,listado:ListadoUsers):
+    logged_user : User = request.user
+    if not listado:
+        return redirect('/backoffice/tareas/listados')
+    if logged_user.cuenta != listado.cuenta:
+        return redirect('/AuthError')
+    return None
