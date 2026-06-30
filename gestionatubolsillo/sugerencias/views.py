@@ -11,7 +11,7 @@ from django.utils.timezone import now
 
 from .filters import filtra_sugerencias
 from .paginators import paginate_sugerencias
-from .validators import validate_sugerencia
+from .validators import validate_sugerencia, validate_auth_sugerencia
 from .builders import build_sugerencia
 
 
@@ -44,8 +44,7 @@ def list_own_sugerencias(request: HttpRequest):
 @user_passes_test(can_CRUD_sugerencias)
 def create_sugerencia(request:HttpRequest):
     user:User = request.user
-    #TOREFACTOR: añadir clase cuenta y filtrar por usuarios donde user.cuenta = allowed_users.cuenta
-    allowed_users = User.objects.all()
+    allowed_users = User.objects.filter(cuenta=user.cuenta)
     template = loader.get_template('sugerencias/form.html')
     context = {'action':'create','usuarios':allowed_users}
 
@@ -68,7 +67,7 @@ def create_sugerencia(request:HttpRequest):
                 'departamento':departamento,
                 'usuario_creador':user,
                 'usuario_referente':user_ref
-            },fecha_creacion=created_at
+            },fecha_creacion=created_at,cuenta=user.cuenta
         )
         return redirect('/backoffice/sugerencias')
     elif request.method == 'GET':
@@ -80,6 +79,9 @@ def create_sugerencia(request:HttpRequest):
 @user_passes_test(can_CRUD_sugerencias)
 def update_estado_sugerencia(request:HttpRequest, sugerencia_id):
     sugerencia = Sugerencia.objects.filter(SugerenciaID=sugerencia_id).first()
+    auth_error = validate_auth_sugerencia(request,sugerencia)
+    if auth_error:
+        return auth_error
     estado = request.POST.get('estado','pendiente')
     sugerencia.estado = estado
     sugerencia.save()
@@ -91,6 +93,9 @@ def update_estado_sugerencia(request:HttpRequest, sugerencia_id):
 @user_passes_test(can_CRUD_sugerencias)
 def delete_sugerencia(request:HttpRequest, sugerencia_id):
     sugerencia = Sugerencia.objects.filter(SugerenciaID=sugerencia_id).first()
+    auth_error = validate_auth_sugerencia(request,sugerencia)
+    if auth_error:
+        return auth_error
     sugerencia.estado = 'borrada'
     sugerencia.save()
     messages.success(request, 'La sugerencia ha sido borrada exitosamente.',extra_tags='success')
@@ -101,9 +106,9 @@ def delete_sugerencia(request:HttpRequest, sugerencia_id):
 @user_passes_test(can_view_sugerencias)
 def details_sugerencia(request:HttpRequest,sugerencia_id):
     sugerencia = Sugerencia.objects.filter(SugerenciaID=sugerencia_id).first()
-    if not sugerencia:
-        messages.error(request,"La Sugerencia no existe", extra_tags='error')
-        return redirect('/backoffice/sugerencias')
+    auth_error = validate_auth_sugerencia(request,sugerencia)
+    if auth_error:
+        return auth_error
     template = loader.get_template('sugerencias/form.html')
     context = {'action': 'view','sugerencia': sugerencia}
 

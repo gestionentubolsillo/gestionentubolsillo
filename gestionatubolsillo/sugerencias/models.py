@@ -17,6 +17,7 @@ class Sugerencia(models.Model):
     usuario_referente = models.ForeignKey('users.User', on_delete=models.SET_NULL,related_name='sugerencias_referente',null=True)
     estado = models.CharField(max_length=20, choices=Estado_CHOICES, default='pendiente')
     empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='sugerencias_empresa')
+    cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL,blank=True,null=True,related_name='sugerencias')
 
 def can_view_sugerencias(user: User)-> bool:
     return tiene_acceso(user, 'SUG')
