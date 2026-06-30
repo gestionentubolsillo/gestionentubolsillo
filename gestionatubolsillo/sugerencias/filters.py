@@ -6,7 +6,7 @@ from empresas.models import Empresa
 def filtra_sugerencias(request:HttpRequest,filter_only_self=False)->tuple[dict,dict]:
     user:User = request.user
     empresa:Empresa = user.empresa
-    filtros = {'empresa':empresa}
+    filtros = {'empresa':empresa,'cuenta_id':user.cuenta.pk}
     exclusiones = {}
 
     user_creador_id = request.GET.get('usuario_creador_id')

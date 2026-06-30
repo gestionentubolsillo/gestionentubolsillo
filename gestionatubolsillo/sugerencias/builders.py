@@ -1,5 +1,5 @@
 from typing import TypedDict
-from users.models import User
+from users.models import User, Cuenta
 from empresas.models import Empresa
 from .models import Sugerencia
 from datetime import datetime
@@ -12,7 +12,7 @@ class SugerenciaData(TypedDict):
 
 
 
-def build_sugerencia(data:SugerenciaData, fecha_creacion:datetime):
+def build_sugerencia(data:SugerenciaData, fecha_creacion:datetime,cuenta:Cuenta):
     texto = data.get('texto')
     departamento = data.get('departamento') or 'Sin Departamento'
     creador = data.get('usuario_creador')
@@ -28,4 +28,5 @@ def build_sugerencia(data:SugerenciaData, fecha_creacion:datetime):
     sugerencia.empresa = empresa
     sugerencia.fecha_creacion = fecha_creacion
     sugerencia.estado = 'pendiente'
+    sugerencia.cuenta = cuenta
     sugerencia.save()
