@@ -18,4 +18,4 @@ def validate_auth_empresa(request:HttpRequest,empresa:Empresa):
         messages.error(request,"La empresa no existe",extra_tags='error')
         return redirect('/backoffice/empresas')
     if logged_user.cuenta != empresa.cuenta:
-        return redirect('AuthError')
+        return redirect('/AuthError')
