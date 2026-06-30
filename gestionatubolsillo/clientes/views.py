@@ -14,7 +14,7 @@ from enum import Enum
 from .filters import filtra_clientes
 from .paginators import paginate_clientes, paginate_servicios_de_cliente, paginate_cliente_users
 from .builders import build_cliente,build_user_client
-from .validators import validate_client, validate_user_client,validate_servicios_cliente, can_client_access_user_cli
+from .validators import validate_client, validate_user_client,validate_servicios_cliente, can_client_access_user_cli, validate_auth_client
 
 # Create your views here.
 #Por un lado esta la creacion de organizaciones cliente y por otro, los usuarios tipo cliente asignados a la organizacion
@@ -43,6 +43,9 @@ def create_client(request:HttpRequest):
 @user_passes_test(can_CRUD_clientes)
 def edit_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
+    auth_error = validate_auth_client(request,cliente)
+    if auth_error:
+        return auth_error
     return _create_or_modify_cliente(request,cliente)
 
 @login_required
@@ -50,9 +53,9 @@ def edit_client(request:HttpRequest,client_id):
 @user_passes_test(can_view_clientes)
 def client_details(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
-    if not cliente:
-        messages.error(request,"El cliente no existe",extra_tags='error')
-        return redirect('/backoffice/clientes')
+    auth_error = validate_auth_client(request,cliente)
+    if auth_error:
+        return auth_error
     context = paginate_servicios_de_cliente(request,cliente)
     return render(request,'clientes/form.html',context)
 
@@ -61,6 +64,9 @@ def client_details(request:HttpRequest,client_id):
 @user_passes_test(can_CRUD_clientes)
 def delete_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
+    auth_error = validate_auth_client(request,cliente)
+    if auth_error:
+        return auth_error
     cliente.delete()
     messages.success(request,"El cliente ha sido eliminado con éxito",extra_tags='success')
     return redirect('/backoffice/clientes')
@@ -70,6 +76,9 @@ def delete_client(request:HttpRequest,client_id):
 @user_passes_test(can_CRUD_clientes)
 def create_user_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
+    auth_error = validate_auth_client(request,cliente)
+    if auth_error:
+        return auth_error
     return _create_or_modify_user_cliente(request,cliente)
 
 
@@ -78,9 +87,12 @@ def create_user_client(request:HttpRequest,client_id):
 @user_passes_test(can_CRUD_clientes)
 def edit_user_client(request:HttpRequest,client_id,user_client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
-    user_cli = user_client.objects.filter(id=user_client_id).first()
-    auth_error = can_client_access_user_cli(request,cliente,user_cli)
+    auth_error = validate_auth_client(request,cliente)
     if auth_error:
+        return auth_error
+    user_cli = user_client.objects.filter(id=user_client_id).first()
+    cli_error = can_client_access_user_cli(request,cliente,user_cli)
+    if cli_error:
         return redirect('backoffice/clientes/'+str(client_id)+'/users')
     
     return _create_or_modify_user_cliente(request,cliente,user_cli)
@@ -90,9 +102,12 @@ def edit_user_client(request:HttpRequest,client_id,user_client_id):
 @user_passes_test(can_CRUD_clientes)
 def delete_user_client(request:HttpRequest,client_id,user_client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
-    user_cli = user_client.objects.filter(id=user_client_id).first()
-    auth_error = can_client_access_user_cli(request,cliente,user_cli)
+    auth_error = validate_auth_client(request,cliente)
     if auth_error:
+        return auth_error
+    user_cli = user_client.objects.filter(id=user_client_id).first()
+    cli_error = can_client_access_user_cli(request,cliente,user_cli)
+    if cli_error:
         return redirect('backoffice/clientes/'+str(client_id)+'/users')
     user_cli.delete()
     messages.success(request,"El usuario proporcionado al cliente ha sido eliminado con éxito",extra_tags='success')
@@ -103,9 +118,12 @@ def delete_user_client(request:HttpRequest,client_id,user_client_id):
 @user_passes_test(can_view_clientes)
 def user_client_details(request:HttpRequest,client_id,user_client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
-    user_cli = user_client.objects.filter(id=user_client_id).first()
-    auth_error = can_client_access_user_cli(request,cliente,user_cli)
+    auth_error = validate_auth_client(request,cliente)
     if auth_error:
+        return auth_error
+    user_cli = user_client.objects.filter(id=user_client_id).first()
+    cli_error = can_client_access_user_cli(request,cliente,user_cli)
+    if cli_error:
         return redirect('backoffice/clientes/'+str(client_id)+'/users')
     context = {
         'user_cli':user_cli,
@@ -118,6 +136,9 @@ def user_client_details(request:HttpRequest,client_id,user_client_id):
 @user_passes_test(can_view_clientes)
 def list_user_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
+    auth_error = validate_auth_client(request,cliente)
+    if auth_error:
+        return auth_error
     context = paginate_cliente_users(request,cliente)
     return render(request,'backoffice/u_cli_list.html',context)
 
@@ -127,6 +148,9 @@ def list_user_client(request:HttpRequest,client_id):
 @user_passes_test(can_CRUD_servicios)
 def add_servicios_to_cliente(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
+    auth_error = validate_auth_client(request,cliente)
+    if auth_error:
+        return auth_error
     return _change_servicios_de_cliente(request,cliente,action=ClienteAccionServicios.ADD)
 
 @login_required
@@ -134,6 +158,9 @@ def add_servicios_to_cliente(request:HttpRequest,client_id):
 @user_passes_test(can_CRUD_servicios)
 def remove_servicios_to_cliente(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
+    auth_error = validate_auth_client(request,cliente)
+    if auth_error:
+        return auth_error
     return _change_servicios_de_cliente(request,cliente,action=ClienteAccionServicios.REMOVE)
 
 def _create_or_modify_cliente(request:HttpRequest,cliente:Cliente|None = None):
@@ -168,7 +195,7 @@ def _create_or_modify_cliente(request:HttpRequest,cliente:Cliente|None = None):
             'provincia':provincia,
             'municipio':municipio,
             'telefono':telefono,
-            'empresa':empresa},created_at=created_at,cliente=cliente)
+            'empresa':empresa},created_at=created_at,cliente=cliente,cuenta=user.cuenta)
         
         return redirect('/backoffice/clientes')
         

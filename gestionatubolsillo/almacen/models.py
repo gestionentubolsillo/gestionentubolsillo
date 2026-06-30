@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from users.models import User, tiene_acceso
 from decimal import Decimal
 
 # Create your models here.
@@ -19,8 +19,8 @@ class Almacen_Item(models.Model):
     def get_precio_total(self)->Decimal:
         return self.stock * self.precio_unitario
 
-def can_view_almacen(user: User)->bool:
-    return user.permisos_almacen == 'view_only' or user.permisos_almacen == 'create_modify'
+def can_view_almacen(user: User)-> bool:
+    return tiene_acceso(user, 'ALM')
 
-def can_CRUD_almacen(user: User)->bool:
-    return user.permisos_almacen == 'create_modify'
+def can_CRUD_almacen(user: User)-> bool:
+    return tiene_acceso(user, 'ALM', nivel_min='2')

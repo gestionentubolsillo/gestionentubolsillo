@@ -4,6 +4,9 @@ from django.db.models.manager import BaseManager
 from empresas.models import Empresa
 
 from clientes.models import Cliente
+from .models import Servicio
+from users.models import User
+from django.shortcuts import redirect
 
 
 
@@ -38,3 +41,12 @@ def validate_clientes_servicio(request:HttpRequest, clientes_ids,allowed_clients
         messages.error(request, "No puede añadir o eliminar clientes no autorizados a este servicio", extra_tags='error')
         errors = True
     return errors
+
+def validate_auth_servicio(request:HttpRequest,servicio:Servicio):
+    if not servicio:
+        messages.error(request,"El servicio no existe",extra_tags='error')
+        return redirect('/backoffice/servicios')
+    logged_user : User = request.user
+    if logged_user.cuenta != servicio.cuenta:
+        return redirect("/AuthError")
+    return None

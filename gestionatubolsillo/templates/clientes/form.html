@@ -2,6 +2,9 @@
 {% block body %}
 {% include "backoffice/sidemenu.html" %}
 {% load query_filters %}
+{% load permisos_tags %}
+{% permiso user 'NFC' as perm_lectura%}
+{% permiso user 'NFC' '2' as perm_escritura%}
 <main id="main">
     {% if action == 'create' %}
         <div class="main-content">
@@ -272,7 +275,7 @@
                                 <i class="bi bi-search"></i>
                             </button>
                         </form>
-                            {% if user.permisos_servicios_NFC == 'create_modify' %}
+                            {% if perm_escritura %}
                                 <div class="d-flex gap-2 ms-auto">
                                 <a href="/backoffice/clientes/{{cliente.ClienteID}}/servicios/add"
                                    class="btn btn-primary btn-sm">
@@ -296,7 +299,7 @@
                                   <table class="table mb-0">
                                     <thead>
                                         <tr>
-                                            {% if user.permisos_servicios_NFC == 'create_modify' %}
+                                            {% if perm_escritura%}
                                                 <th style="width:2.5rem;">
                                                 <input type="checkbox" class="form-check-input" id="check-all" title="Seleccionar todos">
                                                 </th>
@@ -312,7 +315,7 @@
                                         <!--Cambiar por paginacion mas adelante-->
                                         {% for servicio in servicios %}
                                             <tr>
-                                            {% if user.permisos_servicios_NFC == 'create_modify' %}
+                                            {% if perm_escritura %}
                                                 <td>
                                                     <input type="checkbox"
                                                        class="form-check-input check-cliente"
@@ -329,7 +332,7 @@
                                                     <div class="d-flex gap-1 justify-content-end">
 
                                                     <!-- Ver: permiso view_only o create_modify -->
-                                                    {% if user.permisos_servicios_NFC in 'view_only,create_modify' %}
+                                                    {% if perm_lectura %}
                                                         <a href="/backoffice/servicios/{{servicio.ServicioID}}" class="action-btn" title="Ver">
                                                             <i class="bi bi-eye"></i>
                                                         </a>

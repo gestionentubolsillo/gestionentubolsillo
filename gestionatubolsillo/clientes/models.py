@@ -1,16 +1,20 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
-from users.models import User
+from users.models import User, tiene_acceso
+from encrypted_fields import EncryptedCharField,EncryptedEmailField
 
 # Create your models here.
 
 class Cliente(models.Model):
     ClienteID = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=255)
-    direccion = models.CharField(max_length=255, blank=True, null=True)
-    telefono = models.CharField(max_length=20, blank=True, null=True)
-    cif = models.CharField(max_length=20, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
+
+    #Datos sensibles
+    direccion = EncryptedCharField(max_length=255,blank=True,null=True)
+    telefono = EncryptedCharField(max_length=20,blank=True,null=True)
+    cif = EncryptedCharField(max_length=20,blank=True,null=True)
+    email = EncryptedEmailField(blank=True,null=True)
+    
     persona_contacto = models.CharField(max_length=100, blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
@@ -21,6 +25,7 @@ class Cliente(models.Model):
     servicios = models.ManyToManyField('servicios.Servicio', related_name='clientes')
     #Relacion N:1 con empresa
     empresa = models.ForeignKey('empresas.Empresa',on_delete=models.CASCADE,related_name='clientes')
+    cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL,blank=True,null=True,related_name='clientes')
     
     def __str__(self):
         return self.nombre
@@ -41,8 +46,8 @@ class user_client(models.Model):
         return check_password(password=raw_password,encoded=self.password)
 
 
-def can_view_clientes(user:User)->bool:
-    return user.permisos_clientes == 'view_only' or user.permisos_clientes == 'create_modify'
+def can_view_clientes(user: User)-> bool:
+    return tiene_acceso(user, 'CLI')
 
-def can_CRUD_clientes(user:User)->bool:
-    return user.permisos_clientes == 'create_modify'
+def can_CRUD_clientes(user: User)-> bool:
+    return tiene_acceso(user, 'CLI', nivel_min='2')

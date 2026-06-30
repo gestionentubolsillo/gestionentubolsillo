@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from users.models import User, tiene_acceso
 
 # Create your models here.
 class Sugerencia(models.Model):
@@ -17,9 +17,10 @@ class Sugerencia(models.Model):
     usuario_referente = models.ForeignKey('users.User', on_delete=models.SET_NULL,related_name='sugerencias_referente',null=True)
     estado = models.CharField(max_length=20, choices=Estado_CHOICES, default='pendiente')
     empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='sugerencias_empresa')
+    cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL,blank=True,null=True,related_name='sugerencias')
 
-def can_view_sugerencias(user:User)->bool:
-    return user.permisos_sugerencias == 'view_only' or user.permisos_sugerencias == 'create_modify'
+def can_view_sugerencias(user: User)-> bool:
+    return tiene_acceso(user, 'SUG')
 
-def can_CRUD_sugerencias(user:User)->bool:
-    return user.permisos_sugerencias == 'create_modify'
+def can_CRUD_sugerencias(user: User)-> bool:
+    return tiene_acceso(user, 'SUG', nivel_min='2')

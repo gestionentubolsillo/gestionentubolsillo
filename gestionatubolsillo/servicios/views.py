@@ -14,7 +14,7 @@ from django.db.models.manager import BaseManager
 
 from .filters import filtra_servicios
 from .paginators import paginate_servicios, paginate_clientes_de_servicio
-from .validators import validate_servicio, validate_clientes_servicio
+from .validators import validate_servicio, validate_clientes_servicio,validate_auth_servicio
 from .builders import build_Servicio
 from enum import Enum
 
@@ -43,6 +43,11 @@ def create_servicio(request:HttpRequest):
 @user_passes_test(can_CRUD_servicios)
 def edit_servicio(request:HttpRequest,servicio_id):
     servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
+
+    auth_error = validate_auth_servicio(request,servicio)
+    if auth_error:
+        return auth_error
+
     return _create_or_update_servicio(request=request,servicio=servicio)
 
 @login_required
@@ -63,6 +68,11 @@ def servicio_details(request:HttpRequest,servicio_id):
 @user_passes_test(can_CRUD_servicios)
 def delete_servicio(request:HttpRequest,servicio_id):
     servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
+
+    auth_error = validate_auth_servicio(request,servicio)
+    if auth_error:
+        return auth_error
+    
     servicio.delete()
     messages.success(request,"El servicio ha sido eliminado con éxito",extra_tags='success')
     return redirect('/backoffice/servicios')
@@ -72,6 +82,11 @@ def delete_servicio(request:HttpRequest,servicio_id):
 @user_passes_test(can_CRUD_servicios)
 def add_clientes_to_servicio(request:HttpRequest,servicio_id):
     servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
+
+    auth_error = validate_auth_servicio(request,servicio)
+    if auth_error:
+        return auth_error
+    
     return _change_clientes_Servicio(request=request,servicio=servicio,action=ServicioAccionClientes.ADD)
 
 
@@ -80,6 +95,11 @@ def add_clientes_to_servicio(request:HttpRequest,servicio_id):
 @user_passes_test(can_CRUD_servicios)
 def remove_clientes_to_servicio(request:HttpRequest,servicio_id):
     servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
+
+    auth_error = validate_auth_servicio(request,servicio)
+    if auth_error:
+        return auth_error
+    
     return _change_clientes_Servicio(request=request,servicio=servicio,action=ServicioAccionClientes.REMOVE)
 
 
@@ -161,7 +181,7 @@ def _create_or_update_servicio(request:HttpRequest,servicio:Servicio | None = No
             'is_exterior':es_exterior,
             'mail':mail,
             'need_gps':requiere_gps
-        },servicio=servicio,created_at=created_at)
+        },servicio=servicio,created_at=created_at,user=user)
 
         return redirect('/backoffice/servicios')
     elif request.method == 'GET':

@@ -1,5 +1,5 @@
 from typing import TypedDict
-from users.models import User
+from users.models import User, Cuenta
 from .models import Tarea, ListadoUsers
 from datetime import datetime
 from django.db.models.manager import BaseManager
@@ -14,7 +14,7 @@ class TareaBulkData(TypedDict):
 
 
 
-def create_bulk_tareas(data:TareaBulkData, created_at:datetime):
+def create_bulk_tareas(data:TareaBulkData, created_at:datetime, cuenta:Cuenta):
     Tarea.objects.bulk_create(
                 [Tarea(
                     texto=data.get('texto'),
@@ -22,7 +22,8 @@ def create_bulk_tareas(data:TareaBulkData, created_at:datetime):
                     es_urgente=data.get('es_urgente'),
                     fecha_creacion = created_at,
                     usuario_creador = data.get('usuario_creador'),
-                    usuario_asignado = u_asignado
+                    usuario_asignado = u_asignado,
+                    cuenta = cuenta
 
                 ) for u_asignado in data.get('usuarios')]
             )
@@ -33,8 +34,9 @@ class ListaUserData(TypedDict):
     usuarios:BaseManager[User]
 
 
-def build_listado_users(data:ListaUserData):
+def build_listado_users(data:ListaUserData,cuenta:Cuenta):
     listado = ListadoUsers()
     listado.nombre = data.get('nombre')
+    listado.cuenta = cuenta
     listado.save()
     listado.usuarios.set(data.get('usuarios'))

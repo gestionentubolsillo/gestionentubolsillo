@@ -1,8 +1,12 @@
 {% extends "navbar.html" %}
 {% load query_filters %}
+{% load permisos_tags %}
+
 
 {% block body %}
 {% include "backoffice/sidemenu.html" %}
+{% permiso user 'SUG' as perm_lectura%}
+{% permiso user 'SUG' '2' as perm_escritura%}
 <main id="main">
     <div class="main-content">
         <div class="list-card">
@@ -58,7 +62,7 @@
         </button>
     </form>
     <!-- Botón ver listados - mostrar solo si tiene permiso minimo de vista-->
-     {% if  user.permisos_sugerencias in 'view_only,create_modify'%}
+     {% if  perm_lectura%}
         <a href="/backoffice/sugerencias" class="btn btn-primary btn-sm ms-auto">
             <i class="bi bi-plus-lg me-1"></i> Ver Todas
         </a>
@@ -68,7 +72,7 @@
         </a>
      {% endif %}
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
-    {% if user.permisos_sugerencias == 'create_modify' %}
+    {% if perm_escritura %}
         <a href="/backoffice/sugerencias/create" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-lg me-1"></i> Nueva Sugerencia
         </a>
@@ -106,13 +110,13 @@
             <div class="d-flex gap-1 justify-content-end">
 
               <!-- Ver: permiso view_only o create_modify -->
-              {% if user.permisos_sugerencias in 'view_only,create_modify' %}
+              {% if perm_lectura %}
                 <a href="/backoffice/sugerencias/{{sugerencia.SugerenciaID}}" class="action-btn" title="Ver">
                     <i class="bi bi-eye"></i>
                 </a>
               {% endif %}
 
-              {% if user.permisos_sugerencias == 'create_modify' %}
+              {% if perm_escritura %}
 
               <!-- Eliminar: solo create_modify -->
                 <button class="action-btn delete" title="Eliminar"

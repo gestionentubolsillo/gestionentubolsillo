@@ -1,6 +1,7 @@
 from django.db import models
 from multiselectfield import MultiSelectField
-from users.models import User
+from users.models import User, tiene_acceso
+from encrypted_fields import EncryptedEmailField
 
 # Create your models here.
 
@@ -28,18 +29,19 @@ class Servicio(models.Model):
     #Campo que indica la necesidad de gps
     #Si requiere gps, el dispositibo del usuario debe tenerlo habilitado para poder enviar partes, actividades, etc.
     requiere_gps = models.BooleanField(default=False)
-    mail_de_contacto = models.EmailField(blank=True, null=True)
+    #Datos Sensibles
+    mail_de_contacto = EncryptedEmailField(blank=True,null=True)
 
     #Relacion N:1 con el modelo Empresa
     empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='servicio')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
-    
+    cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL, related_name='servicios',null=True,blank=True)
 
     def __str__(self):
         return self.nombre
 
-def can_view_servicios(user:User)->bool:
-    return user.permisos_servicios_NFC == 'view_only' or user.permisos_servicios_NFC == 'create_modify'
+def can_view_servicios(user: User)-> bool:
+    return tiene_acceso(user, 'NFC')
 
-def can_CRUD_servicios(user:User)->bool:
-    return user.permisos_servicios_NFC == 'create_modify'
+def can_CRUD_servicios(user: User)-> bool:
+    return tiene_acceso(user, 'NFC', nivel_min='2')

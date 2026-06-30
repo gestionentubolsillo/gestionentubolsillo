@@ -4,7 +4,7 @@ from users.models import User
 
 def filtra_tareas(request:HttpRequest,query_errors:bool)->tuple[dict,dict]:
     user:User = request.user
-    filtros = {'usuario_creador_id':user.UserID}
+    filtros = {'cuenta_id':user.cuenta.pk}
     exclusiones = {}
     if query_errors:
         return filtros, exclusiones

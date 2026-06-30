@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import User
+from users.models import User, tiene_acceso
 
 # Create your models here.
 
@@ -23,22 +23,18 @@ class Tarea(models.Model):
 
     usuario_asignado = models.ForeignKey('users.User',on_delete=models.SET_NULL,related_name='tareas_asignadas', null=True, blank=True )
     servicio_asignado = models.ForeignKey('servicios.Servicio', on_delete=models.SET_NULL,related_name='tareas_asignadas', null=True, blank=True)
-
-    def get_usuarios_asociados(self):
-        if self.tipo_asociacion == 'usuario':
-            return self.usuarios_asignados.all()
-        elif self.tipo_asociacion == 'empresa':
-            return User.objects.filter(empresa__in=self.empresas_asociadas.all(),is_active=True).distinct()
-        return User.objects.none()
+    cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL,null=True,blank=True,related_name='tareas')
 
 
 
 class ListadoUsers(models.Model):
     nombre = models.CharField(max_length=20)
     usuarios = models.ManyToManyField('users.User',related_name='listados')
+    cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL,null=True,blank=True,related_name='listado_tareas')
 
-def can_view_tareas(user:User)-> bool:
-    return user.permisos_tareas == 'view_only' or user.permisos_tareas == 'create_modify'
 
-def can_CRUD_tareas(user:User)->bool:
-    return user.permisos_tareas == 'create_modify'
+def can_view_tareas(user: User)-> bool:
+    return tiene_acceso(user, 'TAR')
+
+def can_CRUD_tareas(user: User)-> bool:
+    return tiene_acceso(user, 'TAR', nivel_min='2')

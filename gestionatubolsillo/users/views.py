@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import User,Cuadrante, can_access_backoffice, can_view_users, can_CRUD_users
+from .models import User,Cuadrante, Cuenta, EncryptedFilePDF,PermisosModulo,can_access_backoffice, can_view_users, can_CRUD_users
 from django.core.paginator import Paginator
 from django.template import loader
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest, FileResponse
@@ -13,12 +13,15 @@ from django.views.decorators.http import require_POST
 from django.db.models.manager import BaseManager
 from enum import Enum
 from django.views.decorators.clickjacking import xframe_options_sameorigin
+from home.utils import file_encrypt, file_decrypt
+import base64
+import io
 # Create your views here.
 
 from .filters import filter_users,filter_cuadrantes
 from .paginators import paginate_users, paginate_servicios_users, paginate_cuadrantes_users
 from .builders import build_user,build_permissions,build_cuadrante
-from .validators import validate_user,validate_user_edit,validate_services_of_user,can_user_access_cuadrante, validate_cuadrante
+from .validators import validate_user,validate_user_edit,validate_services_of_user,can_user_access_cuadrante, validate_cuadrante,validate_account_access
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -45,6 +48,11 @@ def user_details(request:HttpRequest,user_id):
     if not user:
         messages.error(request,"El usuario no existe",extra_tags='error')
         return redirect('/backoffice/users')
+
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     context = {'action':'view','usuario':user}
     return render(request,'account/users/form.html',context)
 
@@ -53,6 +61,10 @@ def user_details(request:HttpRequest,user_id):
 @user_passes_test(can_CRUD_users)
 def edit_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     return _create_or_modify_user(request,user)
 
 
@@ -61,6 +73,10 @@ def edit_user(request:HttpRequest,user_id):
 @user_passes_test(can_CRUD_users)
 def delete_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     user.delete()
     messages.success(request,"El usuario ha sido eliminado correctamente",extra_tags='success')
     return redirect('/backoffice/users')
@@ -70,23 +86,11 @@ def delete_user(request:HttpRequest,user_id):
 @user_passes_test(can_CRUD_users)
 def alter_user_permissions(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     if request.method == 'POST':
-        p_almacen = request.POST.get('p_almacen','no_access')
-        p_central = request.POST.get('p_central','no_access')
-        p_clientes = request.POST.get('p_clientes','no_access')
-        p_config = request.POST.get('p_config','no_access')
-        p_empresas = request.POST.get('p_empresas','no_access')
-        p_informes = request.POST.get('p_informes','no_access')
-        p_acuda = request.POST.get('p_acuda','no_access')
-        p_mantenimiento = request.POST.get('p_mantenimiento','no_access')
-        p_medio_aux = request.POST.get('p_medio_aux','no_access')
-        p_parte_incidencia = request.POST.get('p_parte_incidencia','no_access')
-        p_parte_trabajo = request.POST.get('p_parte_trabajo','no_access')
-        p_parte_inspeccion = request.POST.get('p_parte_inspeccion','no_access')
-        p_servicio_NFC = request.POST.get('p_servicio_NFC','no_access')
-        p_sugerencias = request.POST.get('p_sugerencias','no_access')
-        p_tareas = request.POST.get('p_tareas','no_access')
-        p_usuario = request.POST.get('p_usuario','no_access')
         p_dashboard = request.POST.get('p_dashboard') == 'on'
         p_login = request.POST.get('p_login') == 'on'
         p_view_self_trabajo = request.POST.get('p_view_self_trabajo') == 'on'
@@ -96,22 +100,24 @@ def alter_user_permissions(request:HttpRequest,user_id):
             'can_view_own_partes_trabajo':p_view_self_trabajo,
             'has_dashboard_access':p_dashboard,
             'has_login_access':p_login,
-            'permisos_almacen':p_almacen,
-            'permisos_central_receptora':p_central,
-            'permisos_clientes':p_clientes,
-            'permisos_configuracion':p_config,
-            'permisos_empresas':p_empresas,
-            'permisos_informes':p_informes,
-            'permisos_informes_acuda':p_acuda,
-            'permisos_mantenimientos':p_mantenimiento,
-            'permisos_medios_auxiliares':p_medio_aux,
-            'permisos_partes_incidencias':p_parte_incidencia,
-            'permisos_partes_inspeccion':p_parte_inspeccion,
-            'permisos_partes_trabajo':p_parte_trabajo,
-            'permisos_servicios_NFC':p_servicio_NFC,
-            'permisos_sugerencias':p_sugerencias,
-            'permisos_tareas':p_tareas,
-            'permisos_usuario':p_usuario
+            'permisos':{
+                'USR': request.POST.get('p_USR', '0'),
+                'TAR': request.POST.get('p_TAR', '0'),
+                'CLI': request.POST.get('p_CLI', '0'),
+                'NFC': request.POST.get('p_NFC', '0'),
+                'CEN': request.POST.get('p_CEN', '0'),
+                'MED': request.POST.get('p_MED', '0'),
+                'SUG': request.POST.get('p_SUG', '0'),
+                'PAR': request.POST.get('p_PAR', '0'),
+                'INC': request.POST.get('p_INC', '0'),
+                'ACU': request.POST.get('p_ACU', '0'),
+                'INS': request.POST.get('p_INS', '0'),
+                'MAN': request.POST.get('p_MAN', '0'),
+                'ALM': request.POST.get('p_ALM', '0'),
+                'INF': request.POST.get('p_INF', '0'),
+                'EMP': request.POST.get('p_EMP', '0'),
+                'CON': request.POST.get('p_CON', '0'),
+            }
         },user=user)
         return redirect("/backoffice/users")
 
@@ -120,7 +126,10 @@ def alter_user_permissions(request:HttpRequest,user_id):
         context = {
             'usuario':user,
             'action':'edit',
-            'choices':User.PERMISSIONS_CHOICES
+            'choices':User.PERMISSIONS_CHOICES,
+            'modulos': PermisosModulo.MODULOS,
+            'niveles': PermisosModulo.NIVELES,
+            'permisos': [(permiso.modulo, permiso.nivel) for permiso in user.permisos.all()],
         }
         return HttpResponse(template.render(context,request))
     
@@ -132,7 +141,18 @@ def view_user_permissions(request:HttpRequest,user_id):
     if not user:
         messages.error(request,"El usuario no existe",extra_tags='error')
         return redirect('/backoffice/users')
-    context = {'action':'view','usuario':user}
+
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
+    context = {
+        'action':'view',
+        'usuario':user,
+        'modulos': PermisosModulo.MODULOS,
+        'niveles': PermisosModulo.NIVELES,
+        'permisos': [(permiso.modulo, permiso.nivel) for permiso in user.permisos.all()],
+    }
     return render(request,'account/users/permissions/form.html',context)
 
 
@@ -149,6 +169,10 @@ TODO: Poder eliminar servicios del usuario
 @user_passes_test(can_CRUD_users)
 def assign_services_to_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     return _change_user_servicios(request,user,action=ServicioAccionUser.ADD)
 
 
@@ -157,6 +181,10 @@ def assign_services_to_user(request:HttpRequest,user_id):
 @user_passes_test(can_view_users)
 def list_services_of_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     context = paginate_servicios_users(request,user)
     return render(request,'account/users/services/list.html', context)
 
@@ -167,6 +195,10 @@ def list_services_of_user(request:HttpRequest,user_id):
 @require_POST
 def remove_services_to_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     return _change_user_servicios(request,user,action=ServicioAccionUser.REMOVE)
 
 
@@ -175,6 +207,10 @@ def remove_services_to_user(request:HttpRequest,user_id):
 @user_passes_test(can_view_users)
 def list_cuadrantes_of_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     filtros,exclusiones = filter_cuadrantes(user)
     cuadrantes = Cuadrante.objects.filter(**filtros).exclude(**exclusiones).order_by('id')
     context = paginate_cuadrantes_users(request,cuadrantes,user)
@@ -185,6 +221,10 @@ def list_cuadrantes_of_user(request:HttpRequest,user_id):
 @user_passes_test(can_view_users)
 def cuadrante_details(request:HttpRequest,user_id,cuadrante_id):
     user = User.objects.filter(UserID=user_id).first()
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     cuadrante = Cuadrante.objects.filter(id=cuadrante_id).first()
     auth_errors = can_user_access_cuadrante(request,user,cuadrante)
     if auth_errors:
@@ -195,11 +235,21 @@ def cuadrante_details(request:HttpRequest,user_id,cuadrante_id):
 @xframe_options_sameorigin
 def show_cuadrante_pdf(request:HttpRequest,user_id,cuadrante_id):
     user = User.objects.filter(UserID=user_id).first()
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     cuadrante = Cuadrante.objects.filter(id=cuadrante_id).first()
     auth_errors = can_user_access_cuadrante(request,user,cuadrante)
     if auth_errors:
         return redirect(f"/backoffice/users/{user.UserID}/cuadrantes")
-    return FileResponse(cuadrante.file.open(), content_type='application/pdf')
+    
+    cuenta:Cuenta = user.cuenta
+    plaintext = file_decrypt(enc_file=cuadrante.file, cuenta=cuenta)
+    if plaintext is None:
+        return HttpResponse('Error descifrando el archivo',status=500)
+
+    return FileResponse(io.BytesIO(plaintext), content_type='application/pdf',filename=cuadrante.file.tag)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -208,6 +258,10 @@ def create_cuadrante(request:HttpRequest,user_id):
     template = loader.get_template('account/users/cuadrantes/form.html')
     
     user = User.objects.filter(UserID=user_id).first()
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     context = {'action':'create','usuario':user}
 
     if request.method == 'POST':
@@ -217,7 +271,19 @@ def create_cuadrante(request:HttpRequest,user_id):
         print(f"errors={errors}")
         if errors:
             return HttpResponse(template.render(context,request))
-        cuadrante = build_cuadrante(data={'file':archivo,'nombre':nombre,'user':user})
+        
+        #Cifrar el archivo, guardarlo y crear cuadrante
+        cuenta: Cuenta = user.cuenta
+        print(f'cuenta: {cuenta.pk}, de usuario: {user}')
+        print(f'key={cuenta.file_key_encription}')
+        encrypted_file = file_encrypt(file=archivo,cuenta=cuenta)
+        if encrypted_file is None:
+            context['error'] = 'Error cifrando el archivo'
+            return HttpResponse(template.render(context, request))
+        file = EncryptedFilePDF.from_cipher(cipher_result=encrypted_file,
+            upload_path=f'users-{user.UserID}/cuadrantes/{base64.b64encode(encrypted_file.HMAC).decode()}')
+        file.save()
+        cuadrante = build_cuadrante(data={'file':file,'nombre':nombre,'user':user})
         return redirect(f"/backoffice/users/{user.UserID}/cuadrantes/{cuadrante.pk}")
 
     elif request.method == 'GET':
@@ -229,6 +295,10 @@ def create_cuadrante(request:HttpRequest,user_id):
 @user_passes_test(can_CRUD_users)
 def delete_cuadrante(request:HttpRequest,user_id,cuadrante_id):
     user = User.objects.filter(UserID=user_id).first()
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     cuadrante = Cuadrante.objects.filter(id=cuadrante_id).first()
     auth_errors = can_user_access_cuadrante(request,user,cuadrante)
     if auth_errors:
@@ -246,6 +316,11 @@ def list_tareas_user(request:HttpRequest,user_id):
     if not user:
         messages.error(request, "Usuario no encontrado", extra_tags='error')
         return redirect('/backoffice/users/')
+
+    auth_error = validate_account_access(request, user)
+    if auth_error:
+        return auth_error
+
     return redirect(f"/backoffice/tareas?usuario={user_id}")
 
 def _create_or_modify_user(request:HttpRequest,user:User|None = None):

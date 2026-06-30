@@ -11,7 +11,7 @@ from django.contrib import messages
 from .filters import filter_delegaciones
 from .paginators import paginate_delegaciones
 from .builders import build_delegacion
-from .validators import validate_delegacion
+from .validators import validate_delegacion, validate_auth_delegacion
 
 
 # Create your views here.
@@ -31,6 +31,9 @@ def create_delegacion(request: HttpRequest):
 @user_passes_test(can_access_backoffice)
 def delete_delegacion(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
+    auth_error = validate_auth_delegacion(request,delegacion)
+    if auth_error:
+        return auth_error
     delegacion.delete()
     messages.success(request, 'La delegación ha sido borrada exitosamente.',extra_tags='success')
     return redirect('/backoffice/delegaciones')
@@ -39,6 +42,9 @@ def delete_delegacion(request: HttpRequest, delegacion_id):
 @user_passes_test(can_access_backoffice)
 def edit_delegacion(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
+    auth_error = validate_auth_delegacion(request,delegacion)
+    if auth_error:
+        return auth_error
     return _create_or_modify_delegacion(request,delegacion)
     
 
@@ -46,9 +52,9 @@ def edit_delegacion(request: HttpRequest, delegacion_id):
 @user_passes_test(can_access_backoffice)
 def delegacion_details(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
-    if not delegacion:
-        messages.error(request,"La delegación no existe",extra_tags='error')
-        return redirect('/backoffice/delegaciones')
+    auth_error = validate_auth_delegacion(request,delegacion)
+    if auth_error:
+        return auth_error
     context={
         'delegacion':delegacion,
         'action':'view'

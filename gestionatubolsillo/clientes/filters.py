@@ -7,6 +7,6 @@ def filtra_clientes(request:HttpRequest, show_deleted=False)->tuple[dict,dict]:
     user:User = request.user
     empresa:Empresa = user.empresa
     filtro_empresa = request.GET.get('empresa',empresa.EmpresaID)
-    filtros = {'empresa_id':filtro_empresa}
+    filtros = {'empresa_id':filtro_empresa, 'cuenta_id':user.cuenta.pk}
     exclusiones = {} if show_deleted else {}
     return filtros, exclusiones
