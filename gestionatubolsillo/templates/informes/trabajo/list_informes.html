@@ -1,0 +1,17 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+    <div class="main-content">
+        <div class="list-card">
+            <div class="list-toolbar">
+                <span class="list-title">
+                    <i class="bi bi-file-earmark-text me-1 text-primary"></i>
+                    Informes de Partes de Trabajo
+                </span>
+                {% include "informes/trabajo/list_form.html" %}
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock body %}

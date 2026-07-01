@@ -1,0 +1,118 @@
+{% extends "informes/base_informe.html" %}
+{% block titulo_informe %}PARTE DE TRABAJO{% endblock %}
+
+{% block contenido %}
+<div class="parte-trabajo">
+
+  {# ---------- CABECERA ---------- #}
+  <table class="tabla-cabecera">
+    <tr>
+      <td class="celda-logo">
+        <img src="{{ logo_url }}" alt="Logo" class="logo">
+      </td>
+      <td class="celda-titulo">
+        <h1>PARTE DE<br>TRABAJO</h1>
+      </td>
+      <td class="celda-numero">
+        Num. {{ numero_parte }}
+      </td>
+    </tr>
+  </table>
+
+  {# ---------- BLOQUE INICIO DE TURNO ---------- #}
+  <div class="seccion-titulo">Cumplimentar al inicio del turno</div>
+  <table class="tabla-datos">
+    <tr>
+      <td class="col-izq">
+        <p>Fecha: {{ fecha|date:"d/m/Y" }}</p>
+        <p>Hora inicio: {{ hora_inicio|time:"H:i:s" }}</p>
+        <p>Hora fin: {{ hora_fin|time:"H:i:s" }}</p>
+      </td>
+      <td class="col-der">
+        <p>Trabajador: {{ trabajador }}</p>
+        {# cliente y servicio: contenido de usuario, SIN |safe #}
+        <p>Cliente: {{ cliente }}</p>
+        <p>Servicio: {{ servicio }}</p>
+      </td>
+    </tr>
+  </table>
+
+  {# ---------- TABLA DE ACTIVIDAD ---------- #}
+  <table class="tabla-actividad">
+    <thead>
+      <tr>
+        <th class="th-hora">HORA</th>
+        <th class="th-actividad">ACTIVIDAD</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in actividades %}
+      <tr>
+        <td class="td-hora">{{ item.hora|time:"H:i:s" }}</td>
+        <td class="td-actividad">{{ item.descripcion }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="2" class="sin-actividad">Sin actividad registrada</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {# ---------- BLOQUE FIN DE TURNO ---------- #}
+  <div class="seccion-titulo">Cumplimentar al finalizar del turno</div>
+  <table class="tabla-cierre">
+    <tr>
+      <td colspan="2" class="relevo">
+        Relevado a las
+        <span class="campo-rellenar">{{ relevo_hora|default:"_______" }}</span>
+        horas por D.
+        <span class="campo-rellenar campo-largo">{{ relevo_nombre|default:"" }}</span>
+      </td>
+    </tr>
+    <tr>
+      <td class="firma-celda">
+        <p class="firma-etiqueta">TRABAJADOR SALIENTE:</p>
+        <div class="recuadro-firma">
+          {% if firma_saliente_b64 %}
+            <img src="{{ firma_saliente_b64 }}" alt="Firma trabajador saliente" class="img-firma">
+          {% endif %}
+        </div>
+      </td>
+      <td class="firma-celda">
+        <p class="firma-etiqueta">TRABAJADOR ENTRANTE:</p>
+        <div class="recuadro-firma">
+          {% if firma_entrante_b64 %}
+            <img src="{{ firma_entrante_b64 }}" alt="Firma trabajador entrante" class="img-firma">
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="observaciones-celda">
+        <p class="firma-etiqueta">Observaciones:</p>
+        {# observaciones: contenido de usuario, SIN |safe #}
+        <p class="texto-libre">{{ observaciones|linebreaksbr }}</p>
+      </td>
+      <td class="inspeccion-celda">
+        <p class="firma-etiqueta">Inspeccionado por:</p>
+        <p>{{ inspeccionado_por|default:"" }}</p>
+      </td>
+    </tr>
+  </table>
+
+  {# ---------- TEXTO LEGAL FIJO ---------- #}
+  <p class="texto-legal">
+    Dejo anotado todo lo acontecido en mi Turno, e informo de las incidencias observadas e instrucciones
+    temporales recibidas, haciéndome responsable de todo el material utilizado durante mi Servicio
+  </p>
+
+  {# ---------- PIE DE CIERRE (estado / trazabilidad) ---------- #}
+  {% if finalizado %}
+  <p class="meta-cierre">
+    Documento finalizado el {{ fecha_finalizacion|date:"d/m/Y H:i" }}
+  </p>
+  {% endif %}
+
+</div>
+{% endblock %}

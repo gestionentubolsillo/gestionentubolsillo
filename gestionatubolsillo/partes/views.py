@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpRequest,HttpResponse
+from django.http import HttpRequest,HttpResponse, JsonResponse
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.template import loader
@@ -9,6 +9,8 @@ from django.contrib import messages
 #Mucha info sale mas rentable importarlo todo
 from .models import *
 from empresas.models import Empresa
+from clientes.models import Cliente
+from servicios.models import Servicio
 
 from .paginators import paginate_informes
 
@@ -20,7 +22,7 @@ DEFAULT_PAGINATION_PARTES = 25
 def dashboard_informes(request:HttpRequest):
     #Vista que lista los diferentes enlaces para consulta de los diferentes tipos de informe
     context = {}
-    return render(request,'informes/list_general.html',context)
+    return render(request,'informes/general.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -92,3 +94,57 @@ def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
     pass
 
 #Necesario indagar más en estas caracteristicas
+def view_parte_trabajo(request:HttpRequest):
+    context = {}
+    return render(request,'informes/trabajo/pdfview.html',context)
+
+def view_parte_incidencia(request:HttpRequest):
+    context = {}
+    return render(request,'informes/incidencia/pdfview.html',context)
+
+def view_parte_acuda(request:HttpRequest):
+    context = {}
+    return render(request,'informes/acuda/pdfview.html',context)
+
+
+
+#TOREFACTOR: Hacer que solo muestre los clientes cuya cuenta es la del usuario logueado y verificar que los servicios que se muestran tambien pertenecen a la cuenta del usuario logueado 
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_informes)
+def list_informes_informe_trabajo(request:HttpRequest):
+    clientes = Cliente.objects.all()
+    context = {'clientes': clientes}
+    return render(request,'informes/trabajo/list_informes.html',context)
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_informes)
+def list_informes_informe_trabajo_horas_cliente(request:HttpRequest):
+    clientes = Cliente.objects.all()
+    context = {'clientes': clientes}
+    return render(request,'informes/trabajo/list_horas_cliente.html',context)
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_informes)
+def list_informes_informe_trabajo_horas_tecnico(request:HttpRequest):
+    clientes = Cliente.objects.all()
+    context = {'clientes': clientes}
+    return render(request,'informes/trabajo/list_horas_tecnico.html',context)
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_informes)
+def list_informes_informe_trabajo_resumen(request:HttpRequest):
+    clientes = Cliente.objects.all()
+    context = {'clientes': clientes}
+    return render(request,'informes/trabajo/list_resumen.html',context)
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_informes)
+def get_servicios_por_cliente(request:HttpRequest,cliente_id):
+    #Vista que devuelve los servicios asociados a un cliente, para ser usados en un select de un formulario
+    servicios = Servicio.objects.filter(clientes__ClienteID = cliente_id).values('ServicioID','nombre').distinct()
+    return JsonResponse(list(servicios),safe=False)

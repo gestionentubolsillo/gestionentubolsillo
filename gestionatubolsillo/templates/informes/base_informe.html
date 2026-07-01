@@ -1,0 +1,20 @@
+{% load static %}
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>{% block titulo_informe %}Informe{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/informes.css' %}">
+</head>
+<body>
+
+  {% if logo_url %}
+  <div class="cabecera-corporativa">
+    <img src="{{ logo_url }}" alt="Logo">
+    {% if nombre_empresa %}<span>{{ nombre_empresa }}</span>{% endif %}
+  </div>
+  {% endif %}
+
+  {% block contenido %}{% endblock %}
+
+</body>
+</html>
