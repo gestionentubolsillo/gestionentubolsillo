@@ -19,6 +19,7 @@ class Parte(models.Model):
     foto = models.ImageField(upload_to='partes/', blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     usuario_creador = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='%(class)s_creados')
+    usuario_asignado = models.ForeignKey('users.User', on_delete=models.SET_NULL, blank=True, null=True, related_name='%(class)s_asignados')
     cliente = models.ForeignKey('clientes.Cliente', on_delete=models.CASCADE, related_name='%(class)s_clientes')
     empresa = models.ForeignKey('empresas.Empresa',on_delete=models.CASCADE,related_name='%(class)s_empresas')
     cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL,related_name='%(class)s_cuenta',null=True,blank=True)
@@ -35,6 +36,7 @@ class Parte_Trabajo(Parte):
     #Campos específicos para partes de trabajo
     usuario_relevo = models.ForeignKey('users.User', on_delete=models.SET_NULL, blank=True, null=True, related_name='partes_relevo')
     fecha_hora_relevo = models.DateTimeField(blank=True, null=True)
+    fecha_hora_relevo_registrada = models.DateTimeField(blank=True, null=True)
     servicio = models.ForeignKey('servicios.Servicio', on_delete=models.CASCADE, related_name='partes_servicio')
     observaciones = EncryptedTextField(blank=True, null=True)
     fecha_inicio_registrada = models.DateTimeField(blank=True, null=True)
@@ -76,20 +78,17 @@ class Parte_Incidencia(Parte):
     #Campos específicos para partes de incidencia
     texto_incidencia = EncryptedTextField(blank=True, null=True)
     fecha_hora_incidencia = models.DateTimeField(auto_now_add=True)
-    usuario_asociado_a_incidencia = models.ForeignKey('users.User',on_delete=models.SET_NULL, blank=True, null=True, related_name='partes_incidencia_sobre_usuario')
-
+    
 class Parte_Inspeccion(Parte):
     ParteInspeccionID = models.AutoField(primary_key=True)
     #Campos específicos para partes de inspeccion
     descripcion = EncryptedTextField(blank=True, null=True)
-    inspector_asociado = models.ForeignKey('users.User',on_delete=models.SET_NULL,blank=True,null=True,related_name='partes_inspeccion_inspector_asociado')
-    
+        
 
 class Informe_Acuda(Parte):
     InformeAcudaID = models.AutoField(primary_key=True)
     #Campos específicos para informes de acuda
     descripcion = EncryptedTextField(blank=True, null=True)
-    tecnico_asociado = models.ForeignKey('users.User', on_delete=models.PROTECT,related_name='informe_acuda_tecnico_asociado')
     central = models.ForeignKey('centrales.Central', on_delete=models.SET_NULL,null=True,blank=True)
 
 

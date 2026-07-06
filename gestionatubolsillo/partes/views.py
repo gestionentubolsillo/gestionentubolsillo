@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.shortcuts import render, redirect
 from django.http import HttpRequest,HttpResponse, JsonResponse
 from django.utils.timezone import now
@@ -6,14 +8,18 @@ from django.template import loader
 from django.core.paginator import Paginator
 from users.models import User, can_access_backoffice
 from django.contrib import messages
+from django.db.models import Count, Sum, Q, F, ExpressionWrapper
 #Mucha info sale mas rentable importarlo todo
 from .models import *
 from empresas.models import Empresa
 from clientes.models import Cliente
 from servicios.models import Servicio
+from centrales.models import Central
 
-from .paginators import paginate_informes
-
+from .paginators import paginate_informes, paginate_informes_trabajo_resumen
+from .validators import validate_parte_trabajo, validate_linea_parte_trabajo, validate_parte_incidencia, validate_parte_acuda
+from .builders import build_parte_trabajo, build_linea_parte_trabajo, build_parte_incidencia, build_parte_acuda
+from .filters import filtra_partes_trabajo, filtra_partes_incidencia, filtra_partes_inspeccion, filtra_informes_acuda
 # Create your views here.
 DEFAULT_PAGINATION_PARTES = 25
 @login_required
@@ -28,8 +34,8 @@ def dashboard_informes(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_parte_trabajo)
 def list_partes_trabajo(request:HttpRequest):
-    empresa_id = request.GET.get('empresa_id')
-    partes = Parte_Trabajo.objects.filter(empresa_id = empresa_id).order_by('-fecha_creacion')
+    filtros, exclusiones = filtra_partes_trabajo(request)
+    partes = Parte_Trabajo.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
     return render(request,'list_trabajo.html',context)
     
@@ -39,8 +45,8 @@ def list_partes_trabajo(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_parte_incidencia)
 def list_partes_incidencia(request:HttpRequest):
-    empresa_id = request.GET.get('empresa_id')
-    partes = Parte_Incidencia.objects.filter(empresa_id = empresa_id).order_by('-fecha_creacion')
+    filtros, exclusiones = filtra_partes_incidencia(request)
+    partes = Parte_Incidencia.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
     return render(request,'list_incidencia.html',context)
 
@@ -48,8 +54,8 @@ def list_partes_incidencia(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_parte_inspeccion)
 def list_partes_inspeccion(request:HttpRequest):
-    empresa_id = request.GET.get('empresa_id')
-    partes = Parte_Inspeccion.objects.filter(empresa_id = empresa_id).order_by('-fecha_creacion')
+    filtros, exclusiones = filtra_partes_inspeccion(request)
+    partes = Parte_Inspeccion.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
     return render(request,'list_inspeccion.html',context)
 
@@ -58,8 +64,8 @@ def list_partes_inspeccion(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_acuda)
 def list_inf_acuda(request:HttpRequest):
-    empresa_id = request.GET.get('empresa_id')
-    partes = Informe_Acuda.objects.filter(empresa_id = empresa_id).order_by('-fecha_creacion')
+    filtros, exclusiones = filtra_informes_acuda(request)
+    partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
     return render(request,'list_acuda.html',context)
 
@@ -67,31 +73,151 @@ def list_inf_acuda(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_parte_trabajo)
 def create_parte_trabajo(request:HttpRequest):
-    pass
+    user : User = request.user
+    template = loader.get_template('informes/trabajo/form.html')
+    allowed_users = User.objects.filter(cuenta=user.cuenta, is_active=True)
+    allowed_clientes = Cliente.objects.filter(cuenta=user.cuenta)
+    context = {'usuarios': allowed_users, 'clientes': allowed_clientes}
+    if request.method == 'POST':
+        #Aquí se procesaría el formulario de creación de parte de trabajo
+        cliente_id = request.POST.get('cliente_id')
+        servicio_id = request.POST.get('servicio_id')
+        usuario_id = request.POST.get('usuario_id')
+        observaciones = request.POST.get('observaciones','')
+        fecha_registrada = request.POST.get('fecha_registrada',None)
+
+        errors = validate_parte_trabajo(request, cliente_id, servicio_id, usuario_id)
+        if errors:
+            return HttpResponse(template.render(context,request))
+        created_at = now()
+        fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
+        parte_trabajo = build_parte_trabajo(data={
+            'general':{
+                'usuario_asignado': User.objects.get(UserID=usuario_id),
+                'cliente': Cliente.objects.get(ClienteID=cliente_id),
+                'empresa': User.objects.get(UserID=usuario_id).empresa
+            },
+            'servicio': Servicio.objects.get(ServicioID=servicio_id),
+            'observaciones': observaciones
+        }, user=user,created_at=created_at, fecha_inicio_registrada=fecha)
+
+        return redirect('/backoffice/partes_trabajo')
+
+    elif request.method == 'GET':
+        return HttpResponse(template.render(context,request))
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_parte_incidencia)
 def create_parte_incidencia(request:HttpRequest):
-    pass
+    user : User = request.user
+    template = loader.get_template('informes/incidencia/form.html')
+    allowed_users = User.objects.filter(cuenta=user.cuenta, is_active=True)
+    allowed_clientes = Cliente.objects.filter(cuenta=user.cuenta)
+    context = {'usuarios':allowed_users,'clientes':allowed_clientes}
+    if request.method == 'POST':
+        cliente_id = request.POST.get('cliente_id')
+        usuario_id = request.POST.get('usuario_id')
+        observaciones = request.POST.get('observaciones','')
+        fecha_registrada = request.POST.get('fecha_registrada',None)
+        errors = validate_parte_incidencia(request,cliente_id,usuario_id,observaciones)
+        if errors:
+            return HttpResponse(template.render(context,request))
+        created_at = now()
+        fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
+
+        incidencia = build_parte_incidencia(data={
+            'general':{
+                'usuario_asignado':User.objects.get(UserID=usuario_id),
+                'cliente':Cliente.objects.get(ClienteID=cliente_id),
+                'empresa': User.objects.get(UserID=usuario_id).empresa
+            },
+            'fecha_hora_incidencia':fecha,
+            'texto_incidencia':observaciones
+        },user=user,created_at=created_at)
+
+        return redirect('/backoffice/partes_incidencia')
+    elif request.method == 'GET':
+        return HttpResponse(template.render(context,request))
+
 
 
 #Para la inspeccion el inspector que crea el parte no necesita tener acceso al backoffice
+"""
+@DEPRECATED
+Este método de momento no se trabajará
+"""
 @login_required
 @user_passes_test(can_CRUD_parte_inspeccion)
 def create_parte_inspeccion(request:HttpRequest):
-    pass
+    user:User = request.user
+    template = loader.get_template('informes/inspeccion/form.html')
+    allowed_users = User.objects.filter(cuenta=user.cuenta, is_active=True)
+    allowed_clientes = Cliente.objects.filter(cuenta=user.cuenta)
+    context = {'usuarios':allowed_users,'clientes':allowed_clientes}
+    if request.method == 'POST':
+        pass
+    elif request.method == 'GET':
+        return HttpResponse(template.render(context,request))
 
 @login_required
 @user_passes_test(can_CRUD_acuda)
 def create_inf_acuda(request:HttpRequest):
-    pass
+    user:User = request.user
+    template = loader.get_template('informes/acuda/form.html')
+    allowed_users = User.objects.filter(cuenta=user.cuenta, is_active=True)
+    allowed_clientes = Cliente.objects.filter(cuenta=user.cuenta)
+    context = {'usuarios':allowed_users,'clientes':allowed_clientes}
+    if request.method == 'POST':
+        cliente_id = request.POST.get('cliente_id')
+        usuario_id = request.POST.get('usuario_id')
+        central_id = request.POST.get('central_id')
+        descripcion = request.POST.get('descripcion','')
+        errors = validate_parte_acuda(request,cliente_id,usuario_id,central_id,descripcion)
+        if errors:
+            return HttpResponse(template.render(context,request))
+        created_at = now()
+        parte = build_parte_acuda(data={
+            'general':{
+                'usuario_asignado':User.objects.get(UserID=usuario_id),
+                'cliente':Cliente.objects.get(ClienteID=cliente_id),
+                'empresa':User.objects.get(UserID=usuario_id).empresa
+            },
+            'central':Central.objects.get(CentralID=central_id),
+            'descripcion':descripcion
+        },user=user,created_at=created_at)
+        return redirect('/backoffice/informes_acuda')
+    elif request.method == 'GET':
+        return HttpResponse(template.render(context,request))
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_parte_trabajo)
 def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
-    pass
+    template = loader.get_template('informes/trabajo/actividad_form.html')
+    parte = Parte_Trabajo.objects.filter(ParteTrabajoID=p_trabajo_id).first()
+    lineas = parte.lineas_parte_trabajo
+    context = {'parte':parte,'lineas':lineas}
+    if request.method == 'POST':
+        actividad = request.POST.get('actividad')
+        fecha_registrada = request.POST.get('fecha')
+        extra_info = request.POST.get('extra')
+        errors = validate_linea_parte_trabajo(request,actividad)
+        if errors:
+            return HttpResponse(template.render(context,request))
+        created_at = now()
+        fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
+
+        nueva_linea = build_linea_parte_trabajo(data={
+            'actividad':actividad,
+            'extra_info':extra_info,
+            'fecha_registrada':fecha,
+            'parte_trabajo':parte
+        },created_at=created_at)
+        return redirect('/backoffice/partes_trabajo')
+
+    if request.method == 'GET':
+        return HttpResponse(template.render(context,request))
 
 #Necesario indagar más en estas caracteristicas
 def view_parte_trabajo(request:HttpRequest):
@@ -106,39 +232,50 @@ def view_parte_acuda(request:HttpRequest):
     context = {}
     return render(request,'informes/acuda/pdfview.html',context)
 
-
-
-#TOREFACTOR: Hacer que solo muestre los clientes cuya cuenta es la del usuario logueado y verificar que los servicios que se muestran tambien pertenecen a la cuenta del usuario logueado 
+ 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
 def list_informes_informe_trabajo(request:HttpRequest):
-    clientes = Cliente.objects.all()
-    context = {'clientes': clientes}
+    filtros, exclusiones = filtra_partes_trabajo(request)
+    partes = Parte_Trabajo.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
+    context = paginate_informes(request,partes)
     return render(request,'informes/trabajo/list_informes.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
 def list_informes_informe_trabajo_horas_cliente(request:HttpRequest):
-    clientes = Cliente.objects.all()
-    context = {'clientes': clientes}
+    filtros, exclusiones = filtra_partes_trabajo(request)
+    partes = Parte_Trabajo.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
+    context = paginate_informes(request,partes)
     return render(request,'informes/trabajo/list_horas_cliente.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
 def list_informes_informe_trabajo_horas_tecnico(request:HttpRequest):
-    clientes = Cliente.objects.all()
-    context = {'clientes': clientes}
+    filtros, exclusiones = filtra_partes_trabajo(request)
+    partes = Parte_Trabajo.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
+    context = paginate_informes(request,partes)
     return render(request,'informes/trabajo/list_horas_tecnico.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
 def list_informes_informe_trabajo_resumen(request:HttpRequest):
-    clientes = Cliente.objects.all()
-    context = {'clientes': clientes}
+    #No se filtran partes, sino usuarios asignados a los partes para mostrar total de partes asociados al usuario y horas totales de los partes
+    filtros, exclusiones = filtra_partes_trabajo(request)
+    partes = Parte_Trabajo.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
+    #Total horas --> Calcula diferencia entre inicio y fin de cada uno y lo va sumando
+    usuarios_asignados = User.objects.filter(
+        parte_trabajo_asignados__in=partes).distinct().annotate(
+            num_partes=Count('parte_trabajo_asignados', distinct=True, filter=Q(parte_trabajo_asignados__in=partes)
+                             )).annotate(
+            total_horas=Sum(ExpressionWrapper(F('parte_trabajo_asignados__fecha_finalizacion')-F('parte_trabajo_asignados__fecha_creacion'), 
+                    output_field=models.DurationField()), filter=Q(parte_trabajo_asignados__in=partes))
+        )
+    context = paginate_informes_trabajo_resumen(request,usuarios_asignados)
     return render(request,'informes/trabajo/list_resumen.html',context)
 
 @login_required
@@ -147,4 +284,13 @@ def list_informes_informe_trabajo_resumen(request:HttpRequest):
 def get_servicios_por_cliente(request:HttpRequest,cliente_id):
     #Vista que devuelve los servicios asociados a un cliente, para ser usados en un select de un formulario
     servicios = Servicio.objects.filter(clientes__ClienteID = cliente_id).values('ServicioID','nombre').distinct()
+    return JsonResponse(list(servicios),safe=False)
+
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_CRUD_parte_trabajo)
+def get_servicios_por_cliente_y_usuario(request:HttpRequest,cliente_id,usuario_id):
+    #Vista que devuelve los servicios asociados a un cliente y a un usuario, para ser usados en un select de formulario creacion de parte de trabajo
+    servicios = Servicio.objects.filter(clientes__ClienteID = cliente_id, users__UserID = usuario_id).values('ServicioID','nombre').distinct()
     return JsonResponse(list(servicios),safe=False)
