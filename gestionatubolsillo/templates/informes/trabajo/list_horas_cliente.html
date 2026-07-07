@@ -30,14 +30,24 @@
                         {% for parte in  partes%}
                             <tr>
                                 <td class="fw-medium">{{parte.fecha_creacion}}</td>
-                                <td class="fw-medium">{{parte.fecha_finalizacion}}</td>
+                                <td class="fw-medium">
+                                    {% if  parte.fecha_finalizacion is None%}
+                                    Parte Abierto
+                                    {% else %}
+                                    {{parte.fecha_finalizacion}}
+                                    {% endif %}</td>
                                 <td class="text-muted">{{parte.usuario_asignado}}</td>
                                 <td class="text-muted">
                                     <!--Se supone que debe mostrar horas y minutos con X de redondeo llamando al metodo-->
+                                    {% if parte.fecha_finalizacion is None %}
+                                    Parte Abierto
+                                    {% else %}
                                     {% with horas_min=parte.calcular_horas%}
                                         Horas: {{horas_min.0}}
                                         Minutos: {{horas_min.1}}
                                     {% endwith %}
+                                    {% endif %}
+                                    
                                 </td>
                                 <td class="text-muted">{{parte.cliente}}</td>
                                 <td class="text-muted">{{parte.servicio}}</td>

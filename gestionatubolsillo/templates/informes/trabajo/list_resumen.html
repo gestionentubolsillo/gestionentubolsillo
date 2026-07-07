@@ -31,8 +31,12 @@
                                 <td class="text-muted">
                                     <!--Se supone que debe mostrar horas y minutos con X de redondeo llamando al metodo-->
                                     {% with horas_min=usuario.total_horas%}
-                                        Horas: {{horas_min.0}}
-                                        Minutos: {{horas_min.1}}
+                                    {% if horas_min is None %}
+                                    Todos los partes se encuentran abiertos
+                                    {% else %}
+                                    Horas: {{horas_min.0}}
+                                    Minutos: {{horas_min.1}}
+                                    {% endif %}
                                     {% endwith %}
                                 </td>
                             </tr>
