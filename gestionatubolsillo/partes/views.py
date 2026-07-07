@@ -35,8 +35,8 @@ def dashboard_informes(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_parte_trabajo)
 def list_partes_trabajo(request:HttpRequest):
-    filtros, exclusiones = filtra_partes_trabajo(request)
-    partes = Parte_Trabajo.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
+    filtros, exclusiones, related_fields = filtra_partes_trabajo(request)
+    partes = Parte_Trabajo.objects.select_related(*related_fields).filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
     return render(request,'informes/trabajo/list.html',context)
     
@@ -238,8 +238,8 @@ def view_parte_acuda(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
 def list_informes_informe_trabajo(request:HttpRequest):
-    filtros, exclusiones = filtra_partes_trabajo(request)
-    partes = Parte_Trabajo.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
+    filtros, exclusiones, related_fields = filtra_partes_trabajo(request)
+    partes = Parte_Trabajo.objects.select_related(*related_fields).filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
     return render(request,'informes/trabajo/list_informes.html',context)
 
@@ -247,8 +247,8 @@ def list_informes_informe_trabajo(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
 def list_informes_informe_trabajo_horas_cliente(request:HttpRequest):
-    filtros, exclusiones = filtra_partes_trabajo(request)
-    partes = Parte_Trabajo.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
+    filtros, exclusiones, related_fields = filtra_partes_trabajo(request)
+    partes = Parte_Trabajo.objects.select_related(*related_fields).filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
     return render(request,'informes/trabajo/list_horas_cliente.html',context)
 
@@ -256,8 +256,8 @@ def list_informes_informe_trabajo_horas_cliente(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
 def list_informes_informe_trabajo_horas_tecnico(request:HttpRequest):
-    filtros, exclusiones = filtra_partes_trabajo(request)
-    partes = Parte_Trabajo.objects.filter(**filtros).exclude(**exclusiones).annotate(
+    filtros, exclusiones,related_fields = filtra_partes_trabajo(request)
+    partes = Parte_Trabajo.objects.select_related(*related_fields).filter(**filtros).exclude(**exclusiones).annotate(
         duracion=ExpressionWrapper(
             F('fecha_finalizacion') - F('fecha_creacion'),
             output_field=DurationField()
@@ -307,7 +307,7 @@ def list_informes_informe_trabajo_horas_tecnico(request:HttpRequest):
 @user_passes_test(can_view_informes)
 def list_informes_informe_trabajo_resumen(request:HttpRequest):
     #No se filtran partes, sino usuarios asignados a los partes para mostrar total de partes asociados al usuario y horas totales de los partes
-    filtros, exclusiones = filtra_partes_trabajo(request)
+    filtros, exclusiones, _ = filtra_partes_trabajo(request)
     partes = Parte_Trabajo.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     #Total horas --> Calcula diferencia entre inicio y fin de cada uno y lo va sumando
     usuarios_asignados = User.objects.filter(parte_trabajo_asignados__in=partes).distinct().annotate(
@@ -322,6 +322,13 @@ def list_informes_informe_trabajo_resumen(request:HttpRequest):
     ).order_by('UserID')
     context = paginate_informes_trabajo_resumen(request,usuarios_asignados)
     return render(request,'informes/trabajo/list_resumen.html',context)
+
+
+def list_informes_informe_acuda_cliente(request:HttpRequest):
+    pass
+
+def list_informes_informe_acuda_tecnico(request:HttpRequest):
+    pass
 
 @login_required
 @user_passes_test(can_access_backoffice)

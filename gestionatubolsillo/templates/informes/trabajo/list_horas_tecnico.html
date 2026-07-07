@@ -47,7 +47,7 @@
                                 <td class="text-muted">{{parte.servicio}}</td>
                                 <td class="text-muted">{{parte.precio_usuario}}</td>
                                 <td class="text-muted">{{parte.precio_servicio}}</td>
-                                <td class="fw-medium {% if parte.diferencia <0 %}text-danger{% endif %}">{{parte.diferencia}}</td>
+                                <td class="fw-medium {% if parte.diferencia < 0 %}text-danger{% endif %}">{{parte.diferencia}}</td>
 
                             </tr>
                         {% empty %}
@@ -61,7 +61,7 @@
                     <tfoot>
                         {% if partes %}
                         <tr>
-                            <td class="fw-medium" colspan="2">Total Partes: {{partes.size}}</td>
+                            <td class="fw-medium" colspan="2">Total Partes: {{partes.paginator.count}}</td>
                             <td class="fw-medium" colspan="2">Total Horas: {{total_horas}} H. {{total_minutos}} min.</td>
                             <td class="fw-medium"colspan="2">Total Precio:</td>
                             <td class="fw-bold">{{total_usuario}}</td>
