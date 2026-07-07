@@ -9,7 +9,7 @@
             <div class="list-toolbar">
                 <span class="list-title">
                     <i class="bi bi-file-earmark-text me-1 text-primary"></i>
-                    Informes de Partes de Trabajo
+                    Actividad del Trabajador
                 </span>
                 {% include "informes/trabajo/list_form.html" %}
             </div>
@@ -18,32 +18,23 @@
                 <table class="table mb-0">
                     <thead>
                         <tr>
-                            <th>Fecha Inicio</th>
-                            <th>Fecha Fin</th>
                             <th>Usuario</th>
+                            <th>Número de Partes</th>
                             <th>Horas</th>
-                            <th>Cliente</th>
-                            <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for parte in  partes%}
+                        {% for usuario in  usuarios_informes%}
                             <tr>
-                                <td class="fw-medium">{{parte.fecha_creacion}}</td>
-                                <td class="fw-medium">{{parte.fecha_finalizacion}}</td>
-                                <td class="text-muted">{{parte.usuario_asignado}}</td>
+                                <td class="fw-medium">{{usuario.username}}</td>
+                                <td class="text-muted">{{usuario.num_partes}}</td>
                                 <td class="text-muted">
                                     <!--Se supone que debe mostrar horas y minutos con X de redondeo llamando al metodo-->
-                                    {% with horas_min=parte.calcular_horas%}
+                                    {% with horas_min=usuario.total_horas%}
                                         Horas: {{horas_min.0}}
                                         Minutos: {{horas_min.1}}
                                     {% endwith %}
                                 </td>
-                                <td class="text-muted">{{parte.cliente}}</td>
-                                <td class="text-end">
-                                    <!--Visualizar pdf o Borrar-->
-                                </td>
-
                             </tr>
                         {% endfor %}
                     </tbody>

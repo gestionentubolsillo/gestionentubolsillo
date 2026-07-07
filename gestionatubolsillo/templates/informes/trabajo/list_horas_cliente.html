@@ -9,7 +9,7 @@
             <div class="list-toolbar">
                 <span class="list-title">
                     <i class="bi bi-file-earmark-text me-1 text-primary"></i>
-                    Informes de Partes de Trabajo
+                    Horas por Cliente
                 </span>
                 {% include "informes/trabajo/list_form.html" %}
             </div>
@@ -23,7 +23,7 @@
                             <th>Usuario</th>
                             <th>Horas</th>
                             <th>Cliente</th>
-                            <th class="text-end">Acciones</th>
+                            <th>Servicio</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,9 +40,7 @@
                                     {% endwith %}
                                 </td>
                                 <td class="text-muted">{{parte.cliente}}</td>
-                                <td class="text-end">
-                                    <!--Visualizar pdf o Borrar-->
-                                </td>
+                                <td class="text-muted">{{parte.servicio}}</td>
 
                             </tr>
                         {% endfor %}

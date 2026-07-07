@@ -1,5 +1,6 @@
 {% extends "navbar.html" %}
 {% load query_filters %}
+{% load basic_math %}
 
 {% block body %}
 {% include "backoffice/sidemenu.html" %}
@@ -9,7 +10,7 @@
             <div class="list-toolbar">
                 <span class="list-title">
                     <i class="bi bi-file-earmark-text me-1 text-primary"></i>
-                    Informes de Partes de Trabajo
+                    Horas Por Trabajador
                 </span>
                 {% include "informes/trabajo/list_form.html" %}
             </div>
@@ -23,7 +24,10 @@
                             <th>Usuario</th>
                             <th>Horas</th>
                             <th>Cliente</th>
-                            <th class="text-end">Acciones</th>
+                            <th>Servicio</th>
+                            <th>Precio Usuario</th>
+                            <th>Precio Servicio</th>
+                            <th>Diferencia Precios</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,13 +44,35 @@
                                     {% endwith %}
                                 </td>
                                 <td class="text-muted">{{parte.cliente}}</td>
-                                <td class="text-end">
-                                    <!--Visualizar pdf o Borrar-->
-                                </td>
+                                <td class="text-muted">{{parte.servicio}}</td>
+                                <td class="text-muted">{{parte.precio_usuario}}</td>
+                                <td class="text-muted">{{parte.precio_servicio}}</td>
+                                <td class="fw-medium">{{parte.precio_servicio| substract:parte.precio_usuario}}</td>
 
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-3">
+                                    <i class="bi bi-people me-1"></i>No se encontraron Partes de Trabajo
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
+                    <tfoot>
+                        {% if partes %}
+                        <tr>
+                            <td class="fw-medium" colspan="2">Total Partes: {{partes.count}}</td>
+                            <td class="fw-medium" colspan="2">Total Horas:{{total_horas}}</td>
+                            <td class="fw-medium"colspan="2">Total Precio:</td>
+                            <td class="fw-bold">{{total_usuario}}</td>
+                            <td class="fw-bold">{{total_servicio}}</td>
+                            <td class="fw-bold {% if diferencia < 0 %}text-danger
+                            {% else %}text-success
+                            {% endif %}">{{diferencia}}</td>
+                        </tr>
+                        {% endif %}
+                        
+                    </tfoot>
                 </table>
             </div>
 
