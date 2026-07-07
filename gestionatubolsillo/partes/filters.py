@@ -32,7 +32,30 @@ def _filter_parte(request:HttpRequest)-> tuple[dict, dict]:
     return filtros, exclusiones
 
 
-def filtra_partes_trabajo(request:HttpRequest)-> tuple[dict, dict]:
+def filtra_partes_trabajo(request:HttpRequest)-> tuple[dict, dict, list]:
+    """
+    Constructor de filtros y exclusiones para 
+    Queries de objetos de `Parte_Trabajo`
+    a partir de los parámetros GET de la request.
+
+    Params
+    ----------------------------------------------------
+    request: HttpRequest
+        - empresa: Default request.user.empresa
+        - fecha_inicio: nullable
+        - fecha_fin: nullable
+        - usuario_asignado_id: nullable
+        - cliente_id: nullable
+        - servicio_id: nullable
+
+    Return
+    ----------------------------------------------------
+    tuple[dict,dict,dict]
+        (filtros,exclusiones):
+        - filtros: **kwargs a pasar a Query.filter()
+        - exclusiones: **kwargs a pasar a Query.exclude()
+        - related: *args a pasar a Query.select_related() para evitar problemas de Queries N+1
+    """
     filtros, exclusiones = _filter_parte(request)
 
     servicio_id = request.GET.get('servicio_id')
@@ -40,7 +63,9 @@ def filtra_partes_trabajo(request:HttpRequest)-> tuple[dict, dict]:
         servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
         filtros['servicio'] = servicio
 
-    return filtros, exclusiones
+    related_fields = ['servicio','usuario_asignado','cliente']
+
+    return filtros, exclusiones, related_fields
 
 def filtra_partes_incidencia(request:HttpRequest)-> tuple[dict, dict]:
     return _filter_parte(request)
