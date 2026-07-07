@@ -37,7 +37,7 @@ def list_partes_trabajo(request:HttpRequest):
     filtros, exclusiones = filtra_partes_trabajo(request)
     partes = Parte_Trabajo.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
-    return render(request,'list_trabajo.html',context)
+    return render(request,'informes/trabajo/list.html',context)
     
 
 
@@ -77,7 +77,7 @@ def create_parte_trabajo(request:HttpRequest):
     template = loader.get_template('informes/trabajo/form.html')
     allowed_users = User.objects.filter(cuenta=user.cuenta, is_active=True)
     allowed_clientes = Cliente.objects.filter(cuenta=user.cuenta)
-    context = {'usuarios': allowed_users, 'clientes': allowed_clientes}
+    context = {'usuarios': allowed_users, 'clientes': allowed_clientes, 'action':'create'}
     if request.method == 'POST':
         #Aquí se procesaría el formulario de creación de parte de trabajo
         cliente_id = request.POST.get('cliente_id')
@@ -194,10 +194,10 @@ def create_inf_acuda(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_parte_trabajo)
 def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
-    template = loader.get_template('informes/trabajo/actividad_form.html')
+    template = loader.get_template('informes/trabajo/actividad.html')
     parte = Parte_Trabajo.objects.filter(ParteTrabajoID=p_trabajo_id).first()
     lineas = parte.lineas_parte_trabajo
-    context = {'parte':parte,'lineas':lineas}
+    context = {'parte':parte,'lineas':lineas, 'action':'view'}
     if request.method == 'POST':
         actividad = request.POST.get('actividad')
         fecha_registrada = request.POST.get('fecha')

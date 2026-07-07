@@ -10,6 +10,8 @@ urlpatterns = [
     path('backoffice/incidencias',views.view_parte_incidencia),
     path('backoffice/acudas',views.view_parte_acuda),
 
+    path('backoffice/partes_trabajo/create',views.create_parte_trabajo),
+
     #Rutas desde informes
     
     path('backoffice/informes',views.dashboard_informes),

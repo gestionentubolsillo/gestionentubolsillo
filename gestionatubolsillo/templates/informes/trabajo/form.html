@@ -1,0 +1,126 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+    {% if action == 'create' %}
+    <div class="main-content">
+        <div class="form-card">
+
+            <div class="form-card-header">
+                <i class="bi bi-clipboard2-check text-primary"></i>
+                <span class="form-card-title">Nuevo Parte de Trabajo</span>
+            </div>
+
+            <div class="form-card-body">
+                <form method="post" action="/backoffice/partes_trabajo/create" id="form-parte-trabajo">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="cliente_id">
+                            Cliente <span class="text-danger">*</span>
+                        </label>
+                        <select id="cliente_id" name="cliente_id" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona un cliente...</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.ClienteID }}">{{ cliente.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="usuario_id">
+                            Usuario asignado <span class="text-danger">*</span>
+                        </label>
+                        <select id="usuario_id" name="usuario_id" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona un usuario...</option>
+                            {% for usuario in usuarios %}
+                                <option value="{{ usuario.UserID }}">{{ usuario.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="servicio_id">
+                            Servicio <span class="text-danger">*</span>
+                        </label>
+                        <select id="servicio_id" name="servicio_id" class="form-select form-select-sm" required disabled>
+                            <option value="" disabled selected>Selecciona primero un cliente</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="fecha_registrada">
+                            Fecha y hora
+                        </label>
+                        <input type="datetime-local" id="fecha_registrada" name="fecha_registrada" class="form-control form-control-sm" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="observaciones">
+                            Observaciones
+                        </label>
+                        <textarea id="observaciones" name="observaciones" class="form-control form-control-sm" rows="4" placeholder="Describe el trabajo realizado..."></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="form-parte-trabajo" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>Crear Parte de Trabajo
+                </button>
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+
+    {% if action == 'view' %}
+    {% endif %}
+</main>
+
+<script>
+    const clienteSelect = document.getElementById('cliente_id');
+    const servicioSelect = document.getElementById('servicio_id');
+
+    if (clienteSelect && servicioSelect) {
+        clienteSelect.addEventListener('change', function () {
+            const clienteId = this.value;
+            servicioSelect.innerHTML = '<option value="" disabled selected>Cargando...</option>';
+            servicioSelect.disabled = true;
+
+            if (!clienteId) {
+                servicioSelect.innerHTML = '<option value="" disabled selected>Selecciona primero un cliente</option>';
+                return;
+            }
+
+            fetch('/ajax/get_servicios_por_cliente/' + clienteId)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('No se pudieron cargar los servicios');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const servicios = Array.isArray(data) ? data : (data.servicios || []);
+                    servicioSelect.innerHTML = '<option value="" disabled selected>Selecciona un servicio</option>';
+
+                    servicios.forEach(servicio => {
+                        const option = document.createElement('option');
+                        option.value = servicio.ServicioID;
+                        option.textContent = servicio.nombre;
+                        servicioSelect.appendChild(option);
+                    });
+
+                    servicioSelect.disabled = false;
+                })
+                .catch(() => {
+                    servicioSelect.innerHTML = '<option value="" disabled selected>Error al cargar servicios</option>';
+                    servicioSelect.disabled = true;
+                });
+        });
+    }
+</script>
+{% endblock body %}
