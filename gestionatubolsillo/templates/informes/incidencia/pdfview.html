@@ -8,13 +8,15 @@
   <table class="tabla-cabecera">
     <tr>
       <td class="celda-logo">
-        <img src="{{ logo_url }}" alt="Logo" class="logo">
+        {% if parte.foto %}
+          <img src="{{ parte.foto.url }}" alt="Logo" class="logo">
+        {% endif %}
       </td>
       <td class="celda-titulo">
         <h1>PARTE DE<br>INCIDENCIA</h1>
       </td>
       <td class="celda-numero">
-        Num. {{ numero_parte }}
+        Num. {{ parte.ParteIncidenciaID }}
       </td>
     </tr>
   </table>
@@ -23,20 +25,22 @@
   <table class="tabla-datos">
     <tr>
       <td class="col-izq">
-        <p>Fecha: {{ fecha|date:"d/m/Y" }}</p>
-        <p>Hora inicio: {{ hora_inicio|time:"H:i:s" }}</p>
+        {% with fecha_incidencia=parte.fecha_hora_incidencia|default:parte.fecha_creacion %}
+          <p>Fecha: {{ fecha_incidencia|date:"d/m/Y" }}</p>
+          <p>Hora inicio: {{ fecha_incidencia|time:"H:i:s" }}</p>
+        {% endwith %}
       </td>
       <td class="col-der">
-        <p>Trabajador: {{ trabajador }}</p>
-        <p>Cliente: {{ cliente }}</p>
+        <p>Trabajador: {{ parte.usuario_asignado.username|default:"Sin asignar" }}</p>
+        <p>Cliente: {{ parte.cliente.nombre|default:"Sin cliente" }}</p>
       </td>
     </tr>
   </table>
 
   {# ---------- DESCRIPCIÓN ---------- #}
   <div class="seccion-titulo seccion-titulo-centrada">DESCRIPCIÓN</div>
-  <div class="bloque-descripcion">
-    <p class="texto-libre">{{ descripcion|linebreaksbr }}</p>
+  <div class="bloque-descripcion" style="min-height: 6em; padding: 8px 10px; border: 1px solid #000; border-top: none; box-sizing: border-box; margin-bottom: 14px;">
+    <p class="texto-libre" style="margin: 0;">{{ parte.texto_incidencia|default:"Sin descripción"|linebreaksbr }}</p>
   </div>
 
   {# ---------- FIRMA + FOTO ---------- #}
@@ -45,25 +49,22 @@
       <td class="firma-celda">
         <p class="firma-etiqueta">FIRMA</p>
         <div class="recuadro-firma">
-          {% if firma_b64 %}
-            <img src="{{ firma_b64 }}" alt="Firma" class="img-firma">
-          {% endif %}
         </div>
       </td>
       <td class="firma-celda">
         <p class="firma-etiqueta">FOTO</p>
         <div class="recuadro-firma">
-          {% if foto_b64 %}
-            <img src="{{ foto_b64 }}" alt="Foto de la incidencia" class="img-firma">
+          {% if parte.foto %}
+            <img src="{{ parte.foto.url }}" alt="Foto de la incidencia" class="img-firma">
           {% endif %}
         </div>
       </td>
     </tr>
   </table>
 
-  {% if finalizado %}
+  {% if parte.fecha_finalizacion %}
   <p class="meta-cierre">
-    Documento finalizado el {{ fecha_finalizacion|date:"d/m/Y H:i" }}
+    Documento finalizado el {{ parte.fecha_finalizacion|date:"d/m/Y H:i" }}
   </p>
   {% endif %}
 

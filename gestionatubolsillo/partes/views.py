@@ -6,6 +6,7 @@ from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.views.decorators.http import require_POST
 from django.template import loader
+from django.template.loader import render_to_string
 from django.core.paginator import Paginator
 from users.models import User, can_access_backoffice
 from django.contrib import messages
@@ -50,7 +51,7 @@ def list_partes_incidencia(request:HttpRequest):
     filtros, exclusiones = filtra_partes_incidencia(request)
     partes = Parte_Incidencia.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
-    return render(request,'list_incidencia.html',context)
+    return render(request,'informes/incidencia/list.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -149,7 +150,7 @@ def create_parte_incidencia(request:HttpRequest):
         created_at = now()
         fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
 
-        incidencia = build_parte_incidencia(data={
+        build_parte_incidencia(data={
             'general':{
                 'usuario_asignado':User.objects.get(UserID=usuario_id),
                 'cliente':Cliente.objects.get(ClienteID=cliente_id),
@@ -260,9 +261,17 @@ def view_parte_trabajo(request:HttpRequest, parte_id):
     context = {'parte': parte, 'lineas': parte.lineas_parte_trabajo.all()}
     return render(request, 'informes/trabajo/pdfview.html', context)
 
-def view_parte_incidencia(request:HttpRequest):
-    context = {}
-    return render(request,'informes/incidencia/pdfview.html',context)
+def view_parte_incidencia(request:HttpRequest, parte_id:int):
+    parte = Parte_Incidencia.objects.filter(ParteIncidenciaID=parte_id).select_related(
+        'usuario_creador', 'usuario_asignado', 'cliente', 'empresa'
+    ).first()
+
+    if not parte:
+        messages.error(request, 'No se encontró la incidencia solicitada.', extra_tags='error')
+        return redirect('/backoffice/partes_incidencia')
+
+    context = {'parte': parte}
+    return render(request, 'informes/incidencia/pdfview.html', context)
 
 def view_parte_acuda(request:HttpRequest):
     context = {}
