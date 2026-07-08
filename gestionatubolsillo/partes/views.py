@@ -131,6 +131,49 @@ def cerrar_parte_trabajo(request:HttpRequest,parte_id):
     return redirect(f'/backoffice/partes/{parte_id}')
 
 @login_required
+@require_POST
+@user_passes_test(can_CRUD_parte_trabajo)
+def relevar_usuario_parte_trabajo(request:HttpRequest,parte_id):
+    parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).first()
+    if not parte:
+        messages.error(request, 'No se encontró el parte de trabajo solicitado.', extra_tags='error')
+        return redirect('/backoffice/partes_trabajo')
+
+    usuario_relevo_id = request.POST.get('usuario_id')
+    fecha_relevo = request.POST.get('fecha_hora_relevo') or request.POST.get('fecha_relevo')
+
+    usuario_relevo = None
+    if usuario_relevo_id:
+        usuario_relevo = User.objects.filter(UserID=usuario_relevo_id).first()
+
+    relevo_at = datetime.strptime(fecha_relevo, '%Y-%m-%dT%H:%M') if fecha_relevo else now()
+    usuario_saliente : User = parte.usuario_asignado
+
+    parte.usuario_relevo = usuario_relevo
+    parte.fecha_hora_relevo = relevo_at
+    parte.fecha_hora_relevo_registrada = relevo_at
+    if usuario_relevo:
+        parte.usuario_asignado = usuario_relevo
+    parte.save()
+
+    if usuario_saliente and usuario_relevo:
+        extra_info = f'{usuario_saliente.username} releva al {usuario_relevo.username}'
+    elif usuario_relevo:
+        extra_info = f'Relevo asignado a {usuario_relevo.username}'
+    else:
+        extra_info = 'Relevo sin usuario asociado'
+
+    Linea_Parte_Trabajo.objects.create(
+        actividad='Relevo',
+        extra_info=extra_info,
+        fecha_creacion=relevo_at,
+        fecha_registrada=relevo_at,
+        parte_trabajo=parte,
+    )
+
+    return redirect(f'/backoffice/partes/{parte_id}')
+
+@login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_parte_incidencia)
 def create_parte_incidencia(request:HttpRequest):

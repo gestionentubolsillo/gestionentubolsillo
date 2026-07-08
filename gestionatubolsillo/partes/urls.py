@@ -13,6 +13,7 @@ urlpatterns = [
     path('backoffice/partes_trabajo/create',views.create_parte_trabajo),
     path('backoffice/partes_trabajo/<int:p_trabajo_id>/actividades',views.add_actividad_to_parte_trabajo, name='add_actividad_to_parte_trabajo'),
     path('backoffice/partes_trabajo/<int:parte_id>/close',views.cerrar_parte_trabajo, name='cerrar_parte_trabajo'),
+    path('backoffice/partes_trabajo/<int:parte_id>/relevar',views.relevar_usuario_parte_trabajo,name='relevar_usuario_parte_trabajo'),
 
     path('backoffice/partes_incidencia/create',views.create_parte_incidencia),
     #Rutas desde informes

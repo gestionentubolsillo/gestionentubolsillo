@@ -168,6 +168,30 @@
                 </form>
                 {% endif %}
 
+                {% if not parte.fecha_finalizacion and not parte.usuario_relevo %}
+                <hr class="my-4" />
+
+                <h6 class="fw-bold mb-3">Asignar relevo</h6>
+                <form method="post" action="{% url 'relevar_usuario_parte_trabajo' parte.ParteTrabajoID %}" id="form-relevo-parte-trabajo">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="usuario_relevo_id">Usuario relevo <span class="text-danger">*</span></label>
+                        <select id="usuario_relevo_id" name="usuario_id" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona un usuario...</option>
+                            {% for usuario in usuarios %}
+                                <option value="{{ usuario.UserID }}">{{ usuario.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="fecha_hora_relevo">Fecha y hora del relevo</label>
+                        <input type="datetime-local" id="fecha_hora_relevo" name="fecha_hora_relevo" class="form-control form-control-sm" />
+                    </div>
+                </form>
+                {% endif %}
+
                 {% if not parte.fecha_finalizacion %}
                 <hr class="my-4" />
 
@@ -180,7 +204,7 @@
                         <select id="actividad" name="actividad" class="form-select form-select-sm" required>
                             <option value="" disabled selected>Selecciona una actividad...</option>
                             {% for value, label in choices %}
-                                {% if value != 'Inicio' and value != 'Finalización' %}
+                                {% if value not in 'Inicio,Finalización,Relevo' %}
                                     <option value="{{ value }}">{{ label }}</option>
                                 {% endif %}
                             {% endfor %}
@@ -208,6 +232,11 @@
                 <button type="submit" form="form-cerrar-parte" class="btn btn-outline-success btn-sm">
                     <i class="bi bi-lock-fill me-1"></i>Cerrar parte
                 </button>
+                {% if not parte.usuario_relevo and not parte.fecha_finalizacion %}
+                <button type="submit" form="form-relevo-parte-trabajo" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-arrow-left-right me-1"></i>Asignar relevo
+                </button>
+                {% endif %}
                 <button type="submit" form="form-linea-parte-trabajo" class="btn btn-primary btn-sm">
                     <i class="bi bi-check-lg me-1"></i>Guardar línea
                 </button>
