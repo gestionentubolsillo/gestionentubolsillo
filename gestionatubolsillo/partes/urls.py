@@ -6,12 +6,13 @@ urlpatterns = [
     path('backoffice/partes_incidencia',views.list_partes_incidencia),
     path('backoffice/informes_acuda',views.list_inf_acuda),
     path('backoffice/partes_inspeccion',views.list_partes_inspeccion),
-    path('backoffice/partes',views.view_parte_trabajo),
+    path('backoffice/partes/<int:parte_id>',views.view_parte_trabajo),
     path('backoffice/incidencias',views.view_parte_incidencia),
     path('backoffice/acudas',views.view_parte_acuda),
 
     path('backoffice/partes_trabajo/create',views.create_parte_trabajo),
-
+    path('backoffice/partes_trabajo/<int:p_trabajo_id>/actividades',views.add_actividad_to_parte_trabajo, name='add_actividad_to_parte_trabajo'),
+    path('backoffice/partes_trabajo/<int:parte_id>/close',views.cerrar_parte_trabajo, name='cerrar_parte_trabajo'),
     #Rutas desde informes
     
     path('backoffice/informes',views.dashboard_informes),

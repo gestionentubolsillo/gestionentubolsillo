@@ -78,6 +78,143 @@
     {% endif %}
 
     {% if action == 'view' %}
+    <div class="main-content">
+        <div class="form-card">
+            <div class="form-card-header">
+                <i class="bi bi-clipboard2-check text-primary"></i>
+                <span class="form-card-title">Detalle del Parte de Trabajo</span>
+            </div>
+
+            <div class="form-card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Cliente</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.cliente.nombre|default:"Sin cliente" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Usuario asignado</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.usuario_asignado.username|default:"Sin asignar" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Usuario creador</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.usuario_creador.username|default:"Sin creador" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Servicio</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.servicio.nombre|default:"Sin servicio" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha de creación</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha registrada</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.fecha_inicio_registrada|date:"d/m/Y H:i"|default:"No registrada" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha de finalización</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.fecha_finalizacion|date:"d/m/Y H:i"|default:"Sin finalizar" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Empresa</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.empresa.nombre|default:"Sin empresa" }}</p>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Observaciones</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.observaciones|default:"Sin observaciones" }}</p>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <h6 class="fw-bold mb-3">Líneas del parte de trabajo</h6>
+                {% if lineas %}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Actividad</th>
+                                <th>Información adicional</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for linea in lineas %}
+                            <tr>
+                                <td>{{ linea.fecha_registrada|date:"d/m/Y H:i" }}</td>
+                                <td>{{ linea.get_actividad_display|default:linea.actividad }}</td>
+                                <td>{{ linea.extra_info|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-light border mb-0">
+                    No hay líneas registradas para este parte todavía.
+                </div>
+                {% endif %}
+
+                {% if not parte.fecha_finalizacion %}
+                <hr class="my-4" />
+
+                <h6 class="fw-bold mb-3">Cerrar parte</h6>
+                <form method="post" action="{% url 'cerrar_parte_trabajo' parte.ParteTrabajoID %}" id="form-cerrar-parte">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label" for="fecha_fin">Fecha y hora de finalización</label>
+                        <input type="datetime-local" id="fecha_fin" name="fecha_fin" class="form-control form-control-sm" />
+                    </div>
+                </form>
+                {% endif %}
+
+                {% if not parte.fecha_finalizacion %}
+                <hr class="my-4" />
+
+                <h6 class="fw-bold mb-3">Añadir nueva línea</h6>
+                <form method="post" action="{% url 'add_actividad_to_parte_trabajo' parte.ParteTrabajoID %}" id="form-linea-parte-trabajo">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="actividad">Actividad <span class="text-danger">*</span></label>
+                        <select id="actividad" name="actividad" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona una actividad...</option>
+                            {% for value, label in choices %}
+                                {% if value != 'Inicio' and value != 'Finalización' %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="extra">Información adicional</label>
+                        <textarea id="extra" name="extra" class="form-control form-control-sm" rows="3" placeholder="Añade detalles o comentarios..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="fecha">Fecha y hora</label>
+                        <input type="datetime-local" id="fecha" name="fecha" class="form-control form-control-sm" />
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                {% if not parte.fecha_finalizacion %}
+                <button type="submit" form="form-cerrar-parte" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-lock-fill me-1"></i>Cerrar parte
+                </button>
+                <button type="submit" form="form-linea-parte-trabajo" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>Guardar línea
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
     {% endif %}
 </main>
 

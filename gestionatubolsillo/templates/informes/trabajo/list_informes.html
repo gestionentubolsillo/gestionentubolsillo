@@ -23,7 +23,6 @@
                             <th>Usuario</th>
                             <th>Horas</th>
                             <th>Cliente</th>
-                            <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -43,15 +42,12 @@
                                     Parte Abierto
                                     {% else %}
                                     {% with horas_min=parte.calcular_horas%}
-                                        Horas: {{horas_min.0}}
-                                        Minutos: {{horas_min.1}}
+                                        {{horas_min.horas}} H.
+                                        {{horas_min.minutos}} min.
                                     {% endwith %}
                                     {% endif %}
                                 </td>
                                 <td class="text-muted">{{parte.cliente}}</td>
-                                <td class="text-end">
-                                    <!--Visualizar pdf o Borrar-->
-                                </td>
 
                             </tr>
                         {% endfor %}

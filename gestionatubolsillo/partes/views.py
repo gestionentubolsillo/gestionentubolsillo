@@ -4,12 +4,13 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest,HttpResponse, JsonResponse
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,user_passes_test
+from django.views.decorators.http import require_POST
 from django.template import loader
 from django.core.paginator import Paginator
 from users.models import User, can_access_backoffice
 from django.contrib import messages
 from django.db.models import Count, Sum, Q, F, ExpressionWrapper, DurationField, FloatField, Value
-from django.db.models.functions import Extract, Coalesce
+from django.db.models.functions import Extract, Coalesce, Round, Cast
 #Mucha info sale mas rentable importarlo todo
 from .models import *
 from empresas.models import Empresa
@@ -92,7 +93,7 @@ def create_parte_trabajo(request:HttpRequest):
             return HttpResponse(template.render(context,request))
         created_at = now()
         fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
-        parte_trabajo = build_parte_trabajo(data={
+        build_parte_trabajo(data={
             'general':{
                 'usuario_asignado': User.objects.get(UserID=usuario_id),
                 'cliente': Cliente.objects.get(ClienteID=cliente_id),
@@ -106,6 +107,27 @@ def create_parte_trabajo(request:HttpRequest):
 
     elif request.method == 'GET':
         return HttpResponse(template.render(context,request))
+
+@login_required
+@require_POST
+@user_passes_test(can_CRUD_parte_trabajo)
+def cerrar_parte_trabajo(request:HttpRequest,parte_id):
+    parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).first()
+    ended_at = now()
+    fecha_fin_registrada = request.POST.get('fecha_fin')
+    if not fecha_fin_registrada:
+        fecha_fin_registrada = ended_at
+    parte.fecha_finalizacion = ended_at
+    parte.fecha_finalizacion_registrada = fecha_fin_registrada
+    parte.save()
+
+    linea_fin = Linea_Parte_Trabajo()
+    linea_fin.actividad = 'Finalización'
+    linea_fin.fecha_creacion = ended_at
+    linea_fin.fecha_registrada = fecha_fin_registrada
+    linea_fin.parte_trabajo = parte
+    linea_fin.save()
+    return redirect(f'/backoffice/partes/{parte_id}')
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -195,10 +217,15 @@ def create_inf_acuda(request:HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_parte_trabajo)
 def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
-    template = loader.get_template('informes/trabajo/actividad.html')
+    template = loader.get_template('informes/trabajo/form.html')
     parte = Parte_Trabajo.objects.filter(ParteTrabajoID=p_trabajo_id).first()
-    lineas = parte.lineas_parte_trabajo
-    context = {'parte':parte,'lineas':lineas, 'action':'view'}
+    if not parte:
+        messages.error(request, 'No se encontró el parte de trabajo solicitado.', extra_tags='error')
+        return redirect('/backoffice/partes_trabajo')
+
+    lineas = parte.lineas_parte_trabajo.all()
+    choices = Linea_Parte_Trabajo._meta.get_field('actividad').choices
+    context = {'parte':parte,'lineas':lineas, 'action':'view','choices':choices}
     if request.method == 'POST':
         actividad = request.POST.get('actividad')
         fecha_registrada = request.POST.get('fecha')
@@ -209,21 +236,29 @@ def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
         created_at = now()
         fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
 
-        nueva_linea = build_linea_parte_trabajo(data={
+        build_linea_parte_trabajo(data={
             'actividad':actividad,
             'extra_info':extra_info,
             'fecha_registrada':fecha,
             'parte_trabajo':parte
         },created_at=created_at)
-        return redirect('/backoffice/partes_trabajo')
+        return redirect(f'/backoffice/partes_trabajo/{p_trabajo_id}/actividades')
 
     if request.method == 'GET':
         return HttpResponse(template.render(context,request))
 
 #Necesario indagar más en estas caracteristicas
-def view_parte_trabajo(request:HttpRequest):
-    context = {}
-    return render(request,'informes/trabajo/pdfview.html',context)
+def view_parte_trabajo(request:HttpRequest, parte_id):
+    parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).select_related(
+        'usuario_creador', 'usuario_asignado', 'cliente', 'empresa', 'servicio'
+    ).first()
+
+    if not parte:
+        messages.error(request, 'No se encontró el parte de trabajo solicitado.', extra_tags='error')
+        return redirect('/backoffice/partes_trabajo')
+
+    context = {'parte': parte, 'lineas': parte.lineas_parte_trabajo.all()}
+    return render(request, 'informes/trabajo/pdfview.html', context)
 
 def view_parte_incidencia(request:HttpRequest):
     context = {}
@@ -269,11 +304,17 @@ def list_informes_informe_trabajo_horas_tecnico(request:HttpRequest):
         )
     ).annotate(
         precio_servicio=ExpressionWrapper(
-                Coalesce(F('horas_decimal'), Value(0.0)) * F('servicio__precio_por_hora'),
+                Round(
+                    Cast(Coalesce(F('horas_decimal'), Value(0.0)), FloatField()) * Cast(F('servicio__precio_por_hora'), FloatField()),
+                    2
+                ),
                 output_field=FloatField()
             ),
             precio_usuario=ExpressionWrapper(
-                Coalesce(F('horas_decimal'), Value(0.0)) * F('usuario_asignado__precio_hora'),
+                Round(
+                    Cast(Coalesce(F('horas_decimal'), Value(0.0)), FloatField()) * Cast(F('usuario_asignado__precio_hora'), FloatField()),
+                    2
+                ),
                 output_field=FloatField()
             ),
     ).annotate(
@@ -298,7 +339,7 @@ def list_informes_informe_trabajo_horas_tecnico(request:HttpRequest):
         'total_minutos':total_minutos,
         'total_servicio':total_servicio,
         'total_usuario':total_usuario,
-        'diferencia': total_servicio-total_usuario
+        'diferencia': round(total_servicio-total_usuario,2)
     })
     return render(request,'informes/trabajo/list_horas_tecnico.html',context)
 
@@ -325,9 +366,14 @@ def list_informes_informe_trabajo_resumen(request:HttpRequest):
 
 
 def list_informes_informe_acuda_cliente(request:HttpRequest):
-    pass
+    filtros, exclusiones = filtra_informes_acuda(request)
+    partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by(-'fecha_creacion')
+    context = paginate_informes(request,partes)
+    return render(request,'',context)
 
 def list_informes_informe_acuda_tecnico(request:HttpRequest):
+    filtros, exclusiones = filtra_informes_acuda(request)
+    partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by(-'fecha_creacion')
     pass
 
 @login_required

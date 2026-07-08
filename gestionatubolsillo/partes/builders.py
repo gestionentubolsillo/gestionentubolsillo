@@ -36,6 +36,13 @@ def build_parte_trabajo(data: ParteTrabajoData,user:User,created_at:datetime,fec
     parte.servicio = data.get('servicio')
     parte.observaciones = data.get('observaciones')
     parte.save()
+
+    linea = Linea_Parte_Trabajo()
+    linea.actividad = 'Inicio'
+    linea.fecha_registrada = parte.fecha_inicio_registrada
+    linea.fecha_creacion = parte.fecha_creacion
+    linea.parte_trabajo = parte
+    linea.save()
     
     return parte
 

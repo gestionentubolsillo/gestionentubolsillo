@@ -43,8 +43,8 @@
                                     Parte Abierto
                                     {% else %}
                                     {% with horas_min=parte.calcular_horas%}
-                                        Horas: {{horas_min.0}}
-                                        Minutos: {{horas_min.1}}
+                                        {{horas_min.horas}} H.
+                                        {{horas_min.minutos}} min.
                                     {% endwith %}
                                     {% endif %}
                                     

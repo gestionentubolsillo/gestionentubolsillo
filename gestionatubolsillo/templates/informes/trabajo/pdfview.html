@@ -8,13 +8,13 @@
   <table class="tabla-cabecera">
     <tr>
       <td class="celda-logo">
-        <img src="{{ logo_url }}" alt="Logo" class="logo">
+        <img src="{{ logo_url|default:'' }}" alt="Logo" class="logo">
       </td>
       <td class="celda-titulo">
         <h1>PARTE DE<br>TRABAJO</h1>
       </td>
       <td class="celda-numero">
-        Num. {{ numero_parte }}
+        Num. {{ parte.ParteTrabajoID }}
       </td>
     </tr>
   </table>
@@ -24,15 +24,14 @@
   <table class="tabla-datos">
     <tr>
       <td class="col-izq">
-        <p>Fecha: {{ fecha|date:"d/m/Y" }}</p>
-        <p>Hora inicio: {{ hora_inicio|time:"H:i:s" }}</p>
-        <p>Hora fin: {{ hora_fin|time:"H:i:s" }}</p>
+        <p>Fecha: {{ parte.fecha_inicio_registrada|default:parte.fecha_creacion|date:"d/m/Y" }}</p>
+        <p>Hora inicio: {{ parte.fecha_inicio_registrada|default:parte.fecha_creacion|time:"H:i:s" }}</p>
+        <p>Hora fin: {{ parte.fecha_finalizacion|default:None|time:"H:i:s" }}</p>
       </td>
       <td class="col-der">
-        <p>Trabajador: {{ trabajador }}</p>
-        {# cliente y servicio: contenido de usuario, SIN |safe #}
-        <p>Cliente: {{ cliente }}</p>
-        <p>Servicio: {{ servicio }}</p>
+        <p>Trabajador: {{ parte.usuario_asignado.username|default:"Sin asignar" }}</p>
+        <p>Cliente: {{ parte.cliente.nombre|default:"Sin cliente" }}</p>
+        <p>Servicio: {{ parte.servicio.nombre|default:"Sin servicio" }}</p>
       </td>
     </tr>
   </table>
@@ -46,10 +45,10 @@
       </tr>
     </thead>
     <tbody>
-      {% for item in actividades %}
+      {% for linea in parte.lineas_parte_trabajo.all %}
       <tr>
-        <td class="td-hora">{{ item.hora|time:"H:i:s" }}</td>
-        <td class="td-actividad">{{ item.descripcion }}</td>
+        <td class="td-hora">{{ linea.fecha_registrada|default:linea.fecha_creacion|time:"H:i:s" }}</td>
+        <td class="td-actividad">{{ linea.extra_info|default:linea.get_actividad_display|default:linea.actividad|default:"Sin descripción" }}</td>
       </tr>
       {% empty %}
       <tr>
@@ -65,9 +64,9 @@
     <tr>
       <td colspan="2" class="relevo">
         Relevado a las
-        <span class="campo-rellenar">{{ relevo_hora|default:"_______" }}</span>
+        <span class="campo-rellenar">{{ parte.fecha_hora_relevo_registrada|default:"" }}</span>
         horas por D.
-        <span class="campo-rellenar campo-largo">{{ relevo_nombre|default:"" }}</span>
+        <span class="campo-rellenar campo-largo">{{ parte.usuario_relevo.username|default:"" }}</span>
       </td>
     </tr>
     <tr>
@@ -91,8 +90,7 @@
     <tr>
       <td class="observaciones-celda">
         <p class="firma-etiqueta">Observaciones:</p>
-        {# observaciones: contenido de usuario, SIN |safe #}
-        <p class="texto-libre">{{ observaciones|linebreaksbr }}</p>
+        <p class="texto-libre">{{ parte.observaciones|default:""|linebreaksbr }}</p>
       </td>
       <td class="inspeccion-celda">
         <p class="firma-etiqueta">Inspeccionado por:</p>
@@ -108,9 +106,9 @@
   </p>
 
   {# ---------- PIE DE CIERRE (estado / trazabilidad) ---------- #}
-  {% if finalizado %}
+  {% if parte.fecha_finalizacion %}
   <p class="meta-cierre">
-    Documento finalizado el {{ fecha_finalizacion|date:"d/m/Y H:i" }}
+    Documento finalizado el {{ parte.fecha_finalizacion|date:"d/m/Y H:i" }}
   </p>
   {% endif %}
 

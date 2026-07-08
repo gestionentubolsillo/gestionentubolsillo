@@ -35,19 +35,30 @@
                         {% for parte in  partes%}
                             <tr>
                                 <td class="fw-medium">{{parte.fecha_creacion}}</td>
-                                <td class="fw-medium">{{parte.fecha_finalizacion}}</td>
+                                <td class="fw-medium">{{parte.fecha_finalizacion | default:"Parte Abierto"}}</td>
                                 <td class="text-muted">{{parte.usuario_asignado}}</td>
                                 <td class="text-muted">
                                     <!--Se supone que debe mostrar horas y minutos con X de redondeo llamando al metodo-->
+                                    {% if parte.fecha_finalizacion is None %}
+                                    Parte Abierto
+                                    {% else %}
                                     {% with horas_min=parte.calcular_horas%}
-                                        Horas: {{horas_min.0}}
-                                        Minutos: {{horas_min.1}}
+                                        {{horas_min.horas}} H.
+                                        {{horas_min.minutos}} min.
                                     {% endwith %}
+                                    {% endif %}
                                 </td>
                                 <td class="text-muted">{{parte.cliente}}</td>
                                 <td class="text-muted">{{parte.servicio}}</td>
                                 <td class="text-end">
-                                    <!--Visualizar pdf o Borrar-->
+                                    <div class="d-flex gap-1 justify-content-end">
+                                        <a href="/backoffice/partes_trabajo/{{ parte.ParteTrabajoID }}/actividades" class="action-btn" title="Ver parte">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="/backoffice/partes/{{ parte.ParteTrabajoID }}" class="action-btn" title="Ver PDF">
+                                            <i class="bi bi-file-earmark-pdf"></i>
+                                        </a>
+                                    </div>
                                 </td>
 
                             </tr>
