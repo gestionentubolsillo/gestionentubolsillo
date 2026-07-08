@@ -48,7 +48,7 @@
       {% for linea in parte.lineas_parte_trabajo.all %}
       <tr>
         <td class="td-hora">{{ linea.fecha_registrada|default:linea.fecha_creacion|time:"H:i:s" }}</td>
-        <td class="td-actividad">{{ linea.extra_info|default:linea.get_actividad_display|default:linea.actividad|default:"Sin descripción" }}</td>
+        <td class="td-actividad">{{linea.get_actividad_display|default:linea.actividad|default:"Sin descripción" }}{% if linea.extra_info %} - {{linea.extra_info}}{% endif %}</td>
       </tr>
       {% empty %}
       <tr>
