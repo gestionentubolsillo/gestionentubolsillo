@@ -17,48 +17,16 @@
       Sugerencias
     </span>
 
-    <!-- Búsqueda por nombre -->
-    <form method="get" action="" class="search-box mb-0 d-flex gap-2 ">
+    <form method="get" action="" class="search-box mb-0 d-flex gap-2">
       <i class="bi bi-search"></i>
-      <select name="usuario_creador_id" class="form-select form-select-sm" style="min-width: 160px;">
-        <option value="" selected>Filtro por usuario...</option>
-        {% for usuario in  usuarios%}
-          <option value="{{usuario.UserID}}">{{usuario.username}}</option>
-        {% endfor %}
-      </select>
-      Desde
-      <input
-        type="datetime-local"
-        name="fecha_inicio"
-        class="form-control form-control-sm"
-      />
-      Hasta
-      <input
-        type="datetime-local"
-        name="fecha_fin"
-        class="form-control form-control-sm"
-      />
-      <select name="estado" class="form-select form-select-sm" style="min-width: 160px;">
-        <option value="" selected>Filtro por estado...</option>
-        {% for valor, etiqueta in estados %}
-          <option value="{{valor}}">{{etiqueta}}</option>
-        {% endfor %}
-      </select>
-      <select name="user_ref_id" class="form-select form-select-sm" style="min-width: 160px;">
-        <option value="" selected>Filtro por referente...</option>
-        {% for usuario in  usuarios%}
-          <option value="{{usuario.UserID}}">{{usuario.username}}</option>
-        {% endfor %}
-      </select>
-      <select name="empresa_id" class="form-select form-select-sm" style="min-width: 160px;">
-        <option value="" selected>Filtro por empresa...</option>
-        {% for empresa in  empresas%}
-          <option value="{{empresa.EmpresaID}}">{{empresa.nombre}}</option>
-        {% endfor %}
-      </select>
+      {% include "searchforms/by_user.html" %}
+      {% include "searchforms/by_range_of_dates.html" %}
+      {% include "searchforms/by_estado.html" %}
+      {% include "searchforms/by_referente.html" %}
+      {% include "searchforms/by_empresa.html" %}
       <button type="submit" class="btn btn-primary btn-sm">
-            <i class="bi bi-search"></i>
-        </button>
+        <i class="bi bi-search"></i>
+      </button>
     </form>
     <!-- Botón ver listados - mostrar solo si tiene permiso minimo de vista-->
      {% if  perm_lectura%}

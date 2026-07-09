@@ -1,0 +1,6 @@
+<select name="cliente" id="id_cliente" class="form-select form-select-sm" style="min-width: 200px;">
+    <option value="" disable selected>Seleccione un cliente</option>
+    {% for cliente in clientes %}
+        <option value="{{ cliente.ClienteID }}">{{ cliente.nombre }}</option>
+    {% endfor %}
+</select>
