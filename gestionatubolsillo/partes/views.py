@@ -20,9 +20,7 @@ from servicios.models import Servicio
 from centrales.models import Central
 
 from .paginators import paginate_informes, paginate_informes_trabajo_resumen
-from .validators import validate_parte_acuda
-from .builders import build_parte_acuda
-from .filters import filtra_partes_trabajo, filtra_partes_incidencia, filtra_partes_inspeccion, filtra_informes_acuda
+from .filters import filtra_partes_trabajo, filtra_partes_inspeccion, filtra_informes_acuda
 # Create your views here.
 DEFAULT_PAGINATION_PARTES = 25
 @login_required

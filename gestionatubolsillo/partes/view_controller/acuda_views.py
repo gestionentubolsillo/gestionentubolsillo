@@ -74,3 +74,10 @@ def view_parte_acuda(request:HttpRequest, parte_id:int):
 
     context = {'parte': parte}
     return render(request, 'informes/acuda/pdfview.html', context)
+
+def parte_acuda_details(request:HttpRequest,parte_id:int):
+    parte = Informe_Acuda.objects.filter(InformeAcudaID=parte_id).select_related(
+        'usuario_creador', 'usuario_asignado', 'cliente', 'empresa', 'central'
+    ).first()
+    context = {'parte': parte, 'action':'view'}
+    return render(request, 'informes/acuda/form.html', context)

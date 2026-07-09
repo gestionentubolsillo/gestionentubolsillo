@@ -19,25 +19,30 @@ urlpatterns = [
     #Acuda
     path('backoffice/informes_acuda',acuda_views.list_inf_acuda),
     path('backoffice/informes_acuda/create',acuda_views.create_inf_acuda),
+    path('backoffice/informes_acuda/<int:parte_id>',acuda_views.parte_acuda_details),
     path('backoffice/acudas/<int:parte_id>',acuda_views.view_parte_acuda),
 
 
     #Inspeccion
     path('backoffice/partes_inspeccion',views.list_partes_inspeccion),
     
-    #Rutas desde informes
-    
+    #General
     path('backoffice/informes',views.dashboard_informes),
-    path('backoffice/informes/trabajo',views.list_informes_informe_trabajo),
+    #path('backoffice/informes/nfc',views.list_informes_informe_nfc),
+    #path('backoffice/informes/almacen',views.list_informes_informe_almacen),
     #path('backoffice/informes/incidencias',views.list_informes_informe_incidencia),
-    #path('backoffice/informes/acudas',views.list_informes_informe_acuda),
+
+    #General Trabajo
+    path('backoffice/informes/trabajo',views.list_informes_informe_trabajo),
     path('backoffice/informes/trabajo/horas_cliente',views.list_informes_informe_trabajo_horas_cliente),
     path('backoffice/informes/trabajo/horas_tecnico',views.list_informes_informe_trabajo_horas_tecnico),
     path('backoffice/informes/trabajo/resumen_tecnico',views.list_informes_informe_trabajo_resumen),
+
+    #General Acudas
+    #path('backoffice/informes/acudas',views.list_informes_informe_acuda),
     #path('backoffice/informes/acudas/cliente',views.list_informes_informe_acuda_cliente),
     #path('backoffice/informes/acudas/tecnico',views.list_informes_informe_acuda_tecnico),
-    #path('backoffice/informes/nfc',views.list_informes_informe_nfc),
-    #path('backoffice/informes/almacen',views.list_informes_informe_almacen),
+    
 
     #Rutas de ayuda de js forms
     path('ajax/get_servicios_por_cliente/<int:cliente_id>',views.get_servicios_por_cliente),
