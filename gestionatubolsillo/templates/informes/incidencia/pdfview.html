@@ -1,0 +1,72 @@
+{% extends "informes/base_informe.html" %}
+{% block titulo_informe %}INCIDENCIA{% endblock %}
+
+{% block contenido %}
+<div class="informe-incidencia">
+
+  {# ---------- CABECERA ---------- #}
+  <table class="tabla-cabecera">
+    <tr>
+      <td class="celda-logo">
+        {% if parte.foto %}
+          <img src="{{ parte.foto.url }}" alt="Logo" class="logo">
+        {% endif %}
+      </td>
+      <td class="celda-titulo">
+        <h1>PARTE DE<br>INCIDENCIA</h1>
+      </td>
+      <td class="celda-numero">
+        Num. {{ parte.ParteIncidenciaID }}
+      </td>
+    </tr>
+  </table>
+
+  {# ---------- DATOS BÁSICOS ---------- #}
+  <table class="tabla-datos">
+    <tr>
+      <td class="col-izq">
+        {% with fecha_incidencia=parte.fecha_hora_incidencia|default:parte.fecha_creacion %}
+          <p>Fecha: {{ fecha_incidencia|date:"d/m/Y" }}</p>
+          <p>Hora inicio: {{ fecha_incidencia|time:"H:i:s" }}</p>
+        {% endwith %}
+      </td>
+      <td class="col-der">
+        <p>Trabajador: {{ parte.usuario_asignado.username|default:"Sin asignar" }}</p>
+        <p>Cliente: {{ parte.cliente.nombre|default:"Sin cliente" }}</p>
+      </td>
+    </tr>
+  </table>
+
+  {# ---------- DESCRIPCIÓN ---------- #}
+  <div class="seccion-titulo seccion-titulo-centrada">DESCRIPCIÓN</div>
+  <div class="bloque-descripcion" style="min-height: 6em; padding: 8px 10px; border: 1px solid #000; border-top: none; box-sizing: border-box; margin-bottom: 14px;">
+    <p class="texto-libre" style="margin: 0;">{{ parte.texto_incidencia|default:"Sin descripción"|linebreaksbr }}</p>
+  </div>
+
+  {# ---------- FIRMA + FOTO ---------- #}
+  <table class="tabla-cierre">
+    <tr>
+      <td class="firma-celda">
+        <p class="firma-etiqueta">FIRMA</p>
+        <div class="recuadro-firma">
+        </div>
+      </td>
+      <td class="firma-celda">
+        <p class="firma-etiqueta">FOTO</p>
+        <div class="recuadro-firma">
+          {% if parte.foto %}
+            <img src="{{ parte.foto.url }}" alt="Foto de la incidencia" class="img-firma">
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  {% if parte.fecha_finalizacion %}
+  <p class="meta-cierre">
+    Documento finalizado el {{ parte.fecha_finalizacion|date:"d/m/Y H:i" }}
+  </p>
+  {% endif %}
+
+</div>
+{% endblock %}

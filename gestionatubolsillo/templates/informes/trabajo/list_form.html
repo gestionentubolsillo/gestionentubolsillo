@@ -1,0 +1,71 @@
+<form method="get_digit" action="" class="search-box mb-0 d-flex gap-2">
+      <i class="bi bi-search"></i>
+      <input
+        type="datetime-local" class="form-control form-control-sm"
+        name="fecha_inicio"
+        placeholder="Buscar por fecha de inicio..."
+      />
+      <input
+        type="datetime-local" class="form-control form-control-sm"
+        name="fecha_fin"
+        placeholder="Buscar por fecha de fin..."
+      />
+      <select name="cliente" id="id_cliente" class="form-select form-select-sm" style="min-width: 200px;">
+        <option value="" disable selected>Seleccione un cliente</option>
+        {% for cliente in clientes %}
+          <option value="{{ cliente.ClienteID }}">{{ cliente.nombre }}</option>
+        {% endfor %}
+        </select>
+        <select name="servicio" id="id_servicio" class="form-select form-select-sm" disabled style="min-width: 200px;">
+            <option value="" disable selected>Seleccione primero un cliente</option>
+        </select>
+
+      <button type="submit" class="btn btn-primary btn-sm">
+            <i class="bi bi-search"></i>
+        </button>
+    </form>
+
+<script>
+    const clienteSelect = document.getElementById('id_cliente');
+    const servicioSelect = document.getElementById('id_servicio');
+
+    clienteSelect.addEventListener('change', function() {
+        const clienteId = this.value;
+        console.log('Cliente seleccionado:', clienteId);
+
+        // Limpiar el select de servicios
+        servicioSelect.innerHTML = '<option value="" disable selected>Cargando...</option>';
+        servicioSelect.disabled = true;
+
+        if (!clienteId) {
+            servicioSelect.innerHTML = '<option value="" disable selected>Seleccione primero un cliente</option>';
+            return;
+        }
+
+        fetch('/ajax/get_servicios_por_cliente/' + clienteId)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No se pudieron cargar los servicios');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const servicios = Array.isArray(data) ? data : (data.servicios || []);
+                servicioSelect.innerHTML = '<option value="" disable selected>Seleccione un servicio</option>';
+
+                servicios.forEach(servicio => {
+                    const option = document.createElement('option');
+                    option.value = servicio.ServicioID;
+                    option.textContent = servicio.nombre;
+                    servicioSelect.appendChild(option);
+                });
+
+                servicioSelect.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error al obtener los servicios:', error);
+                servicioSelect.innerHTML = '<option value="" disable selected>Error al cargar servicios</option>';
+                servicioSelect.disabled = true;
+            });
+    });
+</script>

@@ -1,0 +1,116 @@
+{% extends "informes/base_informe.html" %}
+{% block titulo_informe %}PARTE DE TRABAJO{% endblock %}
+
+{% block contenido %}
+<div class="parte-trabajo">
+
+  {# ---------- CABECERA ---------- #}
+  <table class="tabla-cabecera">
+    <tr>
+      <td class="celda-logo">
+        <img src="{{ logo_url|default:'' }}" alt="Logo" class="logo">
+      </td>
+      <td class="celda-titulo">
+        <h1>PARTE DE<br>TRABAJO</h1>
+      </td>
+      <td class="celda-numero">
+        Num. {{ parte.ParteTrabajoID }}
+      </td>
+    </tr>
+  </table>
+
+  {# ---------- BLOQUE INICIO DE TURNO ---------- #}
+  <div class="seccion-titulo">Cumplimentar al inicio del turno</div>
+  <table class="tabla-datos">
+    <tr>
+      <td class="col-izq">
+        <p>Fecha: {{ parte.fecha_inicio_registrada|default:parte.fecha_creacion|date:"d/m/Y" }}</p>
+        <p>Hora inicio: {{ parte.fecha_inicio_registrada|default:parte.fecha_creacion|time:"H:i:s" }}</p>
+        <p>Hora fin: {{ parte.fecha_finalizacion|default:None|time:"H:i:s" }}</p>
+      </td>
+      <td class="col-der">
+        <p>Trabajador: {{ parte.usuario_asignado.username|default:"Sin asignar" }}</p>
+        <p>Cliente: {{ parte.cliente.nombre|default:"Sin cliente" }}</p>
+        <p>Servicio: {{ parte.servicio.nombre|default:"Sin servicio" }}</p>
+      </td>
+    </tr>
+  </table>
+
+  {# ---------- TABLA DE ACTIVIDAD ---------- #}
+  <table class="tabla-actividad">
+    <thead>
+      <tr>
+        <th class="th-hora">HORA</th>
+        <th class="th-actividad">ACTIVIDAD</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for linea in parte.lineas_parte_trabajo.all %}
+      <tr>
+        <td class="td-hora">{{ linea.fecha_registrada|default:linea.fecha_creacion|time:"H:i:s" }}</td>
+        <td class="td-actividad">{{linea.get_actividad_display|default:linea.actividad|default:"Sin descripción" }}{% if linea.extra_info %} - {{linea.extra_info}}{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="2" class="sin-actividad">Sin actividad registrada</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {# ---------- BLOQUE FIN DE TURNO ---------- #}
+  <div class="seccion-titulo">Cumplimentar al finalizar del turno</div>
+  <table class="tabla-cierre">
+    <tr>
+      <td colspan="2" class="relevo">
+        Relevado a las
+        <span class="campo-rellenar">{{ parte.fecha_hora_relevo_registrada|default:"" }}</span>
+        horas por D.
+        <span class="campo-rellenar campo-largo">{{ parte.usuario_relevo.username|default:"" }}</span>
+      </td>
+    </tr>
+    <tr>
+      <td class="firma-celda">
+        <p class="firma-etiqueta">TRABAJADOR SALIENTE:</p>
+        <div class="recuadro-firma">
+          {% if firma_saliente_b64 %}
+            <img src="{{ firma_saliente_b64 }}" alt="Firma trabajador saliente" class="img-firma">
+          {% endif %}
+        </div>
+      </td>
+      <td class="firma-celda">
+        <p class="firma-etiqueta">TRABAJADOR ENTRANTE:</p>
+        <div class="recuadro-firma">
+          {% if firma_entrante_b64 %}
+            <img src="{{ firma_entrante_b64 }}" alt="Firma trabajador entrante" class="img-firma">
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="observaciones-celda">
+        <p class="firma-etiqueta">Observaciones:</p>
+        <p class="texto-libre">{{ parte.observaciones|default:""|linebreaksbr }}</p>
+      </td>
+      <td class="inspeccion-celda">
+        <p class="firma-etiqueta">Inspeccionado por:</p>
+        <p>{{ inspeccionado_por|default:"" }}</p>
+      </td>
+    </tr>
+  </table>
+
+  {# ---------- TEXTO LEGAL FIJO ---------- #}
+  <p class="texto-legal">
+    Dejo anotado todo lo acontecido en mi Turno, e informo de las incidencias observadas e instrucciones
+    temporales recibidas, haciéndome responsable de todo el material utilizado durante mi Servicio
+  </p>
+
+  {# ---------- PIE DE CIERRE (estado / trazabilidad) ---------- #}
+  {% if parte.fecha_finalizacion %}
+  <p class="meta-cierre">
+    Documento finalizado el {{ parte.fecha_finalizacion|date:"d/m/Y H:i" }}
+  </p>
+  {% endif %}
+
+</div>
+{% endblock %}
