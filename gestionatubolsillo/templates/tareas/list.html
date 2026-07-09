@@ -19,35 +19,10 @@
     <!-- Búsqueda por nombre -->
     <form method="get" action="" class="search-box mb-0 d-flex gap-2">
       <i class="bi bi-search"></i>
-      <select name="usuario" class="form-select form-select-sm" style="min-width: 160px;">
-        <option value="" selected>Filtro por usuario...</option>
-        {% for usuario in  usuarios%}
-          <option value="{{usuario.UserID}}">{{usuario.username}}</option>
-        {% endfor %}
-      </select>
-      Desde
-      <input
-        type="datetime-local"
-        name="fecha_inicio"
-        class="form-control form-control-sm"
-      />
-      Hasta
-      <input
-        type="datetime-local"
-        name="fecha_fin"
-        class="form-control form-control-sm"
-      />
-      <select name="estado" class="form-select form-select-sm" style="min-width: 160px;">
-        <option value="" selected>Filtro por estado...</option>
-        {% for valor, etiqueta in estados %}
-          <option value="{{valor}}">{{etiqueta}}</option>
-        {% endfor %}
-      </select>
-      <select name="urgencia" class="form-select form-select-sm" style="min-width: 160px;">
-        <option value="" selected>Filtro por urgencia...</option>
-        <option value="0">Normal</option>
-        <option value="1">Urgente</option>
-      </select>
+      {% include "searchforms/by_user.html" %}
+      {% include "searchforms/by_range_of_dates.html" %}
+      {% include "searchforms/by_estado.html" %}
+      {% include "searchforms/by_urgencia.html" %}
       <button type="submit" class="btn btn-primary btn-sm">
             <i class="bi bi-search"></i>
         </button>
@@ -149,7 +124,7 @@
     </table>
   </div>
 
-  {% include "footers.pagination.html" %}
+  {% include "footers/pagination.html" %}
 
         </div>
     </div>

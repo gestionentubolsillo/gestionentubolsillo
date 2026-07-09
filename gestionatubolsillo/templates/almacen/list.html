@@ -15,20 +15,7 @@
       Productos de Almacén
     </span>
 
-    <!-- Búsqueda por nombre -->
-    <form method="get" action="" class="search-box mb-0 d-flex gap-2">
-      <i class="bi bi-search"></i>
-      <input
-        type="text"
-        name="q"
-        class="form-control form-control-sm"
-        placeholder="Buscar por nombre..."
-        value="Ejemplo S.L."
-      />
-      <button type="submit" class="btn btn-primary btn-sm">
-            <i class="bi bi-search"></i>
-        </button>
-    </form>
+    {% include "searchforms/by_name.html" %}
 
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
     {% if perm_escritura %}

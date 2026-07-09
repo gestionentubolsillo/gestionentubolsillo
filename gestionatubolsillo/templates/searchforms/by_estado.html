@@ -1,0 +1,6 @@
+<select name="estado" class="form-select form-select-sm" style="min-width: 160px;">
+    <option value="" selected>Filtro por estado...</option>
+    {% for valor, etiqueta in estados %}
+        <option value="{{valor}}">{{etiqueta}}</option>
+    {% endfor %}
+</select>
