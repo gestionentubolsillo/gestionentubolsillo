@@ -1,21 +1,30 @@
 from django.urls import path
 from . import views
+from .view_controller import trabajo_views, incidencia_views, acuda_views
 urlpatterns = [
     #Rutas para diferentes tipos de partes
-    path('backoffice/partes_trabajo',views.list_partes_trabajo),
-    path('backoffice/partes_incidencia',views.list_partes_incidencia),
-    path('backoffice/informes_acuda',views.list_inf_acuda),
+    #Trabajo
+    path('backoffice/partes_trabajo',trabajo_views.list_partes_trabajo),
+    path('backoffice/partes_trabajo/create',trabajo_views.create_parte_trabajo),
+    path('backoffice/partes_trabajo/<int:p_trabajo_id>/actividades',trabajo_views.add_actividad_to_parte_trabajo, name='add_actividad_to_parte_trabajo'),
+    path('backoffice/partes_trabajo/<int:parte_id>/close',trabajo_views.cerrar_parte_trabajo, name='cerrar_parte_trabajo'),
+    path('backoffice/partes_trabajo/<int:parte_id>/relevar',trabajo_views.relevar_usuario_parte_trabajo,name='relevar_usuario_parte_trabajo'),
+    path('backoffice/partes/<int:parte_id>',trabajo_views.view_parte_trabajo),
+
+    #Incidencia
+    path('backoffice/partes_incidencia',incidencia_views.list_partes_incidencia),
+    path('backoffice/partes_incidencia/create',incidencia_views.create_parte_incidencia),
+    path('backoffice/incidencias/<int:parte_id>',incidencia_views.view_parte_incidencia),
+
+    #Acuda
+    path('backoffice/informes_acuda',acuda_views.list_inf_acuda),
+    path('backoffice/informes_acuda/create',acuda_views.create_inf_acuda),
+    path('backoffice/acudas/<int:parte_id>',acuda_views.view_parte_acuda),
+
+
+    #Inspeccion
     path('backoffice/partes_inspeccion',views.list_partes_inspeccion),
-    path('backoffice/partes/<int:parte_id>',views.view_parte_trabajo),
-    path('backoffice/incidencias/<int:parte_id>',views.view_parte_incidencia),
-    path('backoffice/acudas',views.view_parte_acuda),
-
-    path('backoffice/partes_trabajo/create',views.create_parte_trabajo),
-    path('backoffice/partes_trabajo/<int:p_trabajo_id>/actividades',views.add_actividad_to_parte_trabajo, name='add_actividad_to_parte_trabajo'),
-    path('backoffice/partes_trabajo/<int:parte_id>/close',views.cerrar_parte_trabajo, name='cerrar_parte_trabajo'),
-    path('backoffice/partes_trabajo/<int:parte_id>/relevar',views.relevar_usuario_parte_trabajo,name='relevar_usuario_parte_trabajo'),
-
-    path('backoffice/partes_incidencia/create',views.create_parte_incidencia),
+    
     #Rutas desde informes
     
     path('backoffice/informes',views.dashboard_informes),

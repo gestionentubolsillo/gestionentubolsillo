@@ -20,8 +20,8 @@ from servicios.models import Servicio
 from centrales.models import Central
 
 from .paginators import paginate_informes, paginate_informes_trabajo_resumen
-from .validators import validate_parte_trabajo, validate_linea_parte_trabajo, validate_parte_incidencia, validate_parte_acuda
-from .builders import build_parte_trabajo, build_linea_parte_trabajo, build_parte_incidencia, build_parte_acuda
+from .validators import validate_parte_acuda
+from .builders import build_parte_acuda
 from .filters import filtra_partes_trabajo, filtra_partes_incidencia, filtra_partes_inspeccion, filtra_informes_acuda
 # Create your views here.
 DEFAULT_PAGINATION_PARTES = 25
@@ -31,27 +31,7 @@ DEFAULT_PAGINATION_PARTES = 25
 def dashboard_informes(request:HttpRequest):
     #Vista que lista los diferentes enlaces para consulta de los diferentes tipos de informe
     context = {}
-    return render(request,'informes/general.html',context)
-
-@login_required
-@user_passes_test(can_access_backoffice)
-@user_passes_test(can_view_parte_trabajo)
-def list_partes_trabajo(request:HttpRequest):
-    filtros, exclusiones, related_fields = filtra_partes_trabajo(request)
-    partes = Parte_Trabajo.objects.select_related(*related_fields).filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
-    context = paginate_informes(request,partes)
-    return render(request,'informes/trabajo/list.html',context)
-    
-
-
-@login_required
-@user_passes_test(can_access_backoffice)
-@user_passes_test(can_view_parte_incidencia)
-def list_partes_incidencia(request:HttpRequest):
-    filtros, exclusiones = filtra_partes_incidencia(request)
-    partes = Parte_Incidencia.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
-    context = paginate_informes(request,partes)
-    return render(request,'informes/incidencia/list.html',context)
+    return render(request,'informes/general.html',context)  
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -61,153 +41,6 @@ def list_partes_inspeccion(request:HttpRequest):
     partes = Parte_Inspeccion.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
     return render(request,'list_inspeccion.html',context)
-
-
-@login_required
-@user_passes_test(can_access_backoffice)
-@user_passes_test(can_view_acuda)
-def list_inf_acuda(request:HttpRequest):
-    filtros, exclusiones = filtra_informes_acuda(request)
-    partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
-    context = paginate_informes(request,partes)
-    return render(request,'list_acuda.html',context)
-
-@login_required
-@user_passes_test(can_access_backoffice)
-@user_passes_test(can_CRUD_parte_trabajo)
-def create_parte_trabajo(request:HttpRequest):
-    user : User = request.user
-    template = loader.get_template('informes/trabajo/form.html')
-    allowed_users = User.objects.filter(cuenta=user.cuenta, is_active=True)
-    allowed_clientes = Cliente.objects.filter(cuenta=user.cuenta)
-    context = {'usuarios': allowed_users, 'clientes': allowed_clientes, 'action':'create'}
-    if request.method == 'POST':
-        #Aquí se procesaría el formulario de creación de parte de trabajo
-        cliente_id = request.POST.get('cliente_id')
-        servicio_id = request.POST.get('servicio_id')
-        usuario_id = request.POST.get('usuario_id')
-        observaciones = request.POST.get('observaciones','')
-        fecha_registrada = request.POST.get('fecha_registrada',None)
-
-        errors = validate_parte_trabajo(request, cliente_id, servicio_id, usuario_id)
-        if errors:
-            return HttpResponse(template.render(context,request))
-        created_at = now()
-        fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
-        build_parte_trabajo(data={
-            'general':{
-                'usuario_asignado': User.objects.get(UserID=usuario_id),
-                'cliente': Cliente.objects.get(ClienteID=cliente_id),
-                'empresa': User.objects.get(UserID=usuario_id).empresa
-            },
-            'servicio': Servicio.objects.get(ServicioID=servicio_id),
-            'observaciones': observaciones
-        }, user=user,created_at=created_at, fecha_inicio_registrada=fecha)
-
-        return redirect('/backoffice/partes_trabajo')
-
-    elif request.method == 'GET':
-        return HttpResponse(template.render(context,request))
-
-@login_required
-@require_POST
-@user_passes_test(can_CRUD_parte_trabajo)
-def cerrar_parte_trabajo(request:HttpRequest,parte_id):
-    parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).first()
-    ended_at = now()
-    fecha_fin_registrada = request.POST.get('fecha_fin')
-    if not fecha_fin_registrada:
-        fecha_fin_registrada = ended_at
-    parte.fecha_finalizacion = ended_at
-    parte.fecha_finalizacion_registrada = fecha_fin_registrada
-    parte.save()
-
-    linea_fin = Linea_Parte_Trabajo()
-    linea_fin.actividad = 'Finalización'
-    linea_fin.fecha_creacion = ended_at
-    linea_fin.fecha_registrada = fecha_fin_registrada
-    linea_fin.parte_trabajo = parte
-    linea_fin.save()
-    return redirect(f'/backoffice/partes/{parte_id}')
-
-@login_required
-@require_POST
-@user_passes_test(can_CRUD_parte_trabajo)
-def relevar_usuario_parte_trabajo(request:HttpRequest,parte_id):
-    parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).first()
-    if not parte:
-        messages.error(request, 'No se encontró el parte de trabajo solicitado.', extra_tags='error')
-        return redirect('/backoffice/partes_trabajo')
-
-    usuario_relevo_id = request.POST.get('usuario_id')
-    fecha_relevo = request.POST.get('fecha_hora_relevo') or request.POST.get('fecha_relevo')
-
-    usuario_relevo = None
-    if usuario_relevo_id:
-        usuario_relevo = User.objects.filter(UserID=usuario_relevo_id).first()
-
-    relevo_at = datetime.strptime(fecha_relevo, '%Y-%m-%dT%H:%M') if fecha_relevo else now()
-    usuario_saliente : User = parte.usuario_asignado
-
-    parte.usuario_relevo = usuario_relevo
-    parte.fecha_hora_relevo = relevo_at
-    parte.fecha_hora_relevo_registrada = relevo_at
-    if usuario_relevo:
-        parte.usuario_asignado = usuario_relevo
-    parte.save()
-
-    if usuario_saliente and usuario_relevo:
-        extra_info = f'{usuario_saliente.username} releva al {usuario_relevo.username}'
-    elif usuario_relevo:
-        extra_info = f'Relevo asignado a {usuario_relevo.username}'
-    else:
-        extra_info = 'Relevo sin usuario asociado'
-
-    Linea_Parte_Trabajo.objects.create(
-        actividad='Relevo',
-        extra_info=extra_info,
-        fecha_creacion=relevo_at,
-        fecha_registrada=relevo_at,
-        parte_trabajo=parte,
-    )
-
-    return redirect(f'/backoffice/partes/{parte_id}')
-
-@login_required
-@user_passes_test(can_access_backoffice)
-@user_passes_test(can_CRUD_parte_incidencia)
-def create_parte_incidencia(request:HttpRequest):
-    user : User = request.user
-    template = loader.get_template('informes/incidencia/form.html')
-    allowed_users = User.objects.filter(cuenta=user.cuenta, is_active=True)
-    allowed_clientes = Cliente.objects.filter(cuenta=user.cuenta)
-    context = {'usuarios':allowed_users,'clientes':allowed_clientes}
-    if request.method == 'POST':
-        cliente_id = request.POST.get('cliente_id')
-        usuario_id = request.POST.get('usuario_id')
-        observaciones = request.POST.get('observaciones','')
-        fecha_registrada = request.POST.get('fecha_registrada',None)
-        errors = validate_parte_incidencia(request,cliente_id,usuario_id,observaciones)
-        if errors:
-            return HttpResponse(template.render(context,request))
-        created_at = now()
-        fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
-
-        build_parte_incidencia(data={
-            'general':{
-                'usuario_asignado':User.objects.get(UserID=usuario_id),
-                'cliente':Cliente.objects.get(ClienteID=cliente_id),
-                'empresa': User.objects.get(UserID=usuario_id).empresa
-            },
-            'fecha_hora_incidencia':fecha,
-            'texto_incidencia':observaciones
-        },user=user,created_at=created_at)
-
-        return redirect('/backoffice/partes_incidencia')
-    elif request.method == 'GET':
-        return HttpResponse(template.render(context,request))
-
-
 
 #Para la inspeccion el inspector que crea el parte no necesita tener acceso al backoffice
 """
@@ -227,100 +60,6 @@ def create_parte_inspeccion(request:HttpRequest):
     elif request.method == 'GET':
         return HttpResponse(template.render(context,request))
 
-@login_required
-@user_passes_test(can_CRUD_acuda)
-def create_inf_acuda(request:HttpRequest):
-    user:User = request.user
-    template = loader.get_template('informes/acuda/form.html')
-    allowed_users = User.objects.filter(cuenta=user.cuenta, is_active=True)
-    allowed_clientes = Cliente.objects.filter(cuenta=user.cuenta)
-    context = {'usuarios':allowed_users,'clientes':allowed_clientes}
-    if request.method == 'POST':
-        cliente_id = request.POST.get('cliente_id')
-        usuario_id = request.POST.get('usuario_id')
-        central_id = request.POST.get('central_id')
-        descripcion = request.POST.get('descripcion','')
-        errors = validate_parte_acuda(request,cliente_id,usuario_id,central_id,descripcion)
-        if errors:
-            return HttpResponse(template.render(context,request))
-        created_at = now()
-        parte = build_parte_acuda(data={
-            'general':{
-                'usuario_asignado':User.objects.get(UserID=usuario_id),
-                'cliente':Cliente.objects.get(ClienteID=cliente_id),
-                'empresa':User.objects.get(UserID=usuario_id).empresa
-            },
-            'central':Central.objects.get(CentralID=central_id),
-            'descripcion':descripcion
-        },user=user,created_at=created_at)
-        return redirect('/backoffice/informes_acuda')
-    elif request.method == 'GET':
-        return HttpResponse(template.render(context,request))
-
-@login_required
-@user_passes_test(can_access_backoffice)
-@user_passes_test(can_CRUD_parte_trabajo)
-def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
-    template = loader.get_template('informes/trabajo/form.html')
-    parte = Parte_Trabajo.objects.filter(ParteTrabajoID=p_trabajo_id).first()
-    if not parte:
-        messages.error(request, 'No se encontró el parte de trabajo solicitado.', extra_tags='error')
-        return redirect('/backoffice/partes_trabajo')
-
-    lineas = parte.lineas_parte_trabajo.all()
-    choices = Linea_Parte_Trabajo._meta.get_field('actividad').choices
-    context = {'parte':parte,'lineas':lineas, 'action':'view','choices':choices}
-    if request.method == 'POST':
-        actividad = request.POST.get('actividad')
-        fecha_registrada = request.POST.get('fecha')
-        extra_info = request.POST.get('extra')
-        errors = validate_linea_parte_trabajo(request,actividad)
-        if errors:
-            return HttpResponse(template.render(context,request))
-        created_at = now()
-        fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
-
-        build_linea_parte_trabajo(data={
-            'actividad':actividad,
-            'extra_info':extra_info,
-            'fecha_registrada':fecha,
-            'parte_trabajo':parte
-        },created_at=created_at)
-        return redirect(f'/backoffice/partes_trabajo/{p_trabajo_id}/actividades')
-
-    if request.method == 'GET':
-        return HttpResponse(template.render(context,request))
-
-#Necesario indagar más en estas caracteristicas
-def view_parte_trabajo(request:HttpRequest, parte_id):
-    parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).select_related(
-        'usuario_creador', 'usuario_asignado', 'cliente', 'empresa', 'servicio'
-    ).first()
-
-    if not parte:
-        messages.error(request, 'No se encontró el parte de trabajo solicitado.', extra_tags='error')
-        return redirect('/backoffice/partes_trabajo')
-
-    context = {'parte': parte, 'lineas': parte.lineas_parte_trabajo.all()}
-    return render(request, 'informes/trabajo/pdfview.html', context)
-
-def view_parte_incidencia(request:HttpRequest, parte_id:int):
-    parte = Parte_Incidencia.objects.filter(ParteIncidenciaID=parte_id).select_related(
-        'usuario_creador', 'usuario_asignado', 'cliente', 'empresa'
-    ).first()
-
-    if not parte:
-        messages.error(request, 'No se encontró la incidencia solicitada.', extra_tags='error')
-        return redirect('/backoffice/partes_incidencia')
-
-    context = {'parte': parte}
-    return render(request, 'informes/incidencia/pdfview.html', context)
-
-def view_parte_acuda(request:HttpRequest):
-    context = {}
-    return render(request,'informes/acuda/pdfview.html',context)
-
- 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
