@@ -13,29 +13,7 @@
                 <form method="post" action="/backoffice/partes_incidencia/create" id="form-parte-incidencia">
                     {% csrf_token %}
 
-                    <div class="mb-3">
-                        <label class="form-label" for="cliente_id">
-                            Cliente <span class="text-danger">*</span>
-                        </label>
-                        <select id="cliente_id" name="cliente_id" class="form-select form-select-sm" required>
-                            <option value="" disabled selected>Selecciona un cliente...</option>
-                            {% for cliente in clientes %}
-                                <option value="{{ cliente.ClienteID }}">{{ cliente.nombre }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label" for="usuario_id">
-                            Usuario asignado <span class="text-danger">*</span>
-                        </label>
-                        <select id="usuario_id" name="usuario_id" class="form-select form-select-sm" required>
-                            <option value="" disabled selected>Selecciona un usuario...</option>
-                            {% for usuario in usuarios %}
-                                <option value="{{ usuario.UserID }}">{{ usuario.username }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                    {% include "informes/general_form.html" %}
 
                     <div class="mb-3">
                         <label class="form-label" for="fecha_registrada">
