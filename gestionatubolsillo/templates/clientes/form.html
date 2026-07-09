@@ -284,70 +284,16 @@
                                 </div>
                             {% endif %}
                         </div>
-
                         <div class="table-responsive">
                             <form method="post"
                                   action="/backoffice/clientes/{{cliente.ClienteID}}/servicios/remove"
-                                  id="form-remove-clientes">
+                                  id="form-remove-servicios">
                                   {% csrf_token %}
                                   <table class="table mb-0">
-                                    <thead>
-                                        <tr>
-                                            {% if perm_escritura%}
-                                                <th style="width:2.5rem;">
-                                                <input type="checkbox" class="form-check-input" id="check-all" title="Seleccionar todos">
-                                                </th>
-                                            {% endif %}
-                                            <th>Nombre</th>
-                                            <th>Correo</th>
-                                            <th>Precio Por Hora</th>
-                                            <th>Activo</th>
-                                            <th class="text-end">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!--Cambiar por paginacion mas adelante-->
-                                        {% for servicio in servicios %}
-                                            <tr>
-                                            {% if perm_escritura %}
-                                                <td>
-                                                    <input type="checkbox"
-                                                       class="form-check-input check-cliente"
-                                                       name="servicios_ids"
-                                                       value="{{ servicio.ServicioID }}">
-                                                </td>
-                                            {% endif %}
-                                            
-                                                <td class="fw-medium">{{servicio.nombre}}</td>
-                                                <td class="text-muted">{{servicio.mail_de_contacto}}</td>
-                                                <td class="text-muted">{{servicio.precio_por_hora}}</td>
-                                                <td class="text-muted">{{servicio.is_active}}</td>
-                                                <td class="text-end">
-                                                    <div class="d-flex gap-1 justify-content-end">
-
-                                                    <!-- Ver: permiso view_only o create_modify -->
-                                                    {% if perm_lectura %}
-                                                        <a href="/backoffice/servicios/{{servicio.ServicioID}}" class="action-btn" title="Ver">
-                                                            <i class="bi bi-eye"></i>
-                                                        </a>
-                                                    {% endif %}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            {% empty %}
-                                            <tr>
-                                                <td colspan="6" class="text-center text-muted py-3">
-                                                    <i class="bi bi-people me-1"></i>Este cliente no tiene servicios asignados
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-
-                                    </tbody>
+                                    {% include "servicios/external_list.html" %}
                                 </table>
                             </form>
-                            
                         </div>
-
                          {% include "footers/pagination.html" %}
                     </div>
             </div>
@@ -358,39 +304,5 @@
     
 </main>
 
-<script>
-// Seleccionar todos los checkboxes
-const checkAll = document.getElementById('check-all');
-const btnRemoveBulk = document.getElementById('btn-remove-bulk');
-const formRemove = document.getElementById('form-remove-clientes');
-
-if (checkAll) {
-    checkAll.addEventListener('change', () => {
-        document.querySelectorAll('.check-cliente').forEach(cb => cb.checked = checkAll.checked);
-        actualizarBtnBulk();
-    });
-}
-
-document.querySelectorAll('.check-cliente').forEach(cb => {
-    cb.addEventListener('change', () => {
-        const total = document.querySelectorAll('.check-cliente').length;
-        const marcados = document.querySelectorAll('.check-cliente:checked').length;
-        if (checkAll) checkAll.checked = total === marcados;
-        actualizarBtnBulk();
-    });
-});
-
-function actualizarBtnBulk() {
-    if (!btnRemoveBulk) return;
-    const haySeleccionados = document.querySelectorAll('.check-cliente:checked').length > 0;
-    btnRemoveBulk.disabled = !haySeleccionados;
-}
-
-if (btnRemoveBulk) {
-    btnRemoveBulk.addEventListener('click', () => {
-        const haySeleccionados = document.querySelectorAll('.check-cliente:checked').length > 0;
-        if (haySeleccionados) formRemove.submit();
-    });
-}
-</script>
+{% include "servicios/script_remove_servicios.html" %}
 {% endblock body %}

@@ -1,0 +1,35 @@
+<script>
+// Seleccionar todos los checkboxes
+const checkAll = document.getElementById('check-all');
+const btnRemoveBulk = document.getElementById('btn-remove-bulk');
+const formRemove = document.getElementById('form-remove-servicios');
+
+if (checkAll) {
+    checkAll.addEventListener('change', () => {
+        document.querySelectorAll('.check-servicio').forEach(cb => cb.checked = checkAll.checked);
+        actualizarBtnBulk();
+    });
+}
+
+document.querySelectorAll('.check-servicio').forEach(cb => {
+    cb.addEventListener('change', () => {
+        const total = document.querySelectorAll('.check-servicio').length;
+        const marcados = document.querySelectorAll('.check-servicio:checked').length;
+        if (checkAll) checkAll.checked = total === marcados;
+        actualizarBtnBulk();
+    });
+});
+
+function actualizarBtnBulk() {
+    if (!btnRemoveBulk) return;
+    const haySeleccionados = document.querySelectorAll('.check-servicio:checked').length > 0;
+    btnRemoveBulk.disabled = !haySeleccionados;
+}
+
+if (btnRemoveBulk) {
+    btnRemoveBulk.addEventListener('click', () => {
+        const haySeleccionados = document.querySelectorAll('.check-servicio:checked').length > 0;
+        if (haySeleccionados) formRemove.submit();
+    });
+}
+</script>
