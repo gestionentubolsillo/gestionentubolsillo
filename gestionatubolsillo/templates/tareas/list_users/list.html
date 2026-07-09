@@ -1,5 +1,4 @@
 {% extends "navbar.html" %}
-{% load query_filters %}
 {% load permisos_tags %}
 
 
@@ -79,52 +78,7 @@
     </table>
   </div>
 
-  <!-- FOOTER: info de resultados + paginación -->
-  <div class="list-footer">
-    <span class="results-info">
-        Mostrando <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> de <strong>{{ page_obj.paginator.count }}</strong> resultados
-    </span>
-
-    <nav aria-label="Paginación">
-      <ul class="pagination mb-0">
-
-        <!-- Anterior -->
-         {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?{{ request.GET.urlencode|addstr:"&page=1"|remove_duplicated_get_params}}">
-                    Primera
-                </a>
-            </li>
-            <li class="page-item">
-                  <a class="page-link" href="?{{ request.GET.urlencode|addstr:"&page="|addstr:page_obj.previous_page_number|remove_duplicated_get_params }}">{{ page_obj.previous_page_number }}</a>
-              </li>
-        {% else %}
-            <li class="page-item disabled">
-                <a class="page-link" href="#" tabindex="-1">Primera</a>
-            </li>
-         {% endif %}
-        
-
-        <!-- Página Actual -->
-        <li class="page-item active"><a class="page-link" href="?{{ request.GET.urlencode|addstr:"&page="|addstr:page_obj.number|remove_duplicated_get_params }}">{{ page_obj.number }}</a></li>
-
-        <!-- Siguiente -->
-        {% if page_obj.has_next %}
-              <li class="page-item">
-                  <a class="page-link" href="?{{ request.GET.urlencode|addstr:"&page="|addstr:page_obj.next_page_number|remove_duplicated_get_params }}">{{ page_obj.next_page_number }}</a>
-              </li>
-              <li class="page-item">
-                  <a class="page-link" href="?{{ request.GET.urlencode|addstr:"&page="|addstr:page_obj.paginator.num_pages|remove_duplicated_get_params }}">Última</a>
-              </li>
-        {% else %}
-              <li class="page-item disabled">
-                  <a class="page-link" href="#" tabindex="-1">Última</a>
-              </li>
-        {% endif %}
-
-      </ul>
-    </nav>
-  </div>
+  {% include "footers/pagination.html" %}
 
         </div>
     </div>
