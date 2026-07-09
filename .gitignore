@@ -30,3 +30,5 @@ dmypy.json
 *.vsix
 
 media/
+
+.sonar/
