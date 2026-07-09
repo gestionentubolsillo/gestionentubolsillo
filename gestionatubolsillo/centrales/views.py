@@ -29,7 +29,7 @@ def list_centrales(request: HttpRequest):
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_centrales)
 def create_central(request: HttpRequest):
-    _create_or_modify_central(request)
+    return _create_or_modify_central(request)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -39,7 +39,7 @@ def edit_central(request: HttpRequest, central_id):
     auth_error = validate_auth_central(request,central)
     if auth_error:
         return auth_error
-    _create_or_modify_central(request,central)
+    return _create_or_modify_central(request,central)
 
 @login_required
 @user_passes_test(can_access_backoffice)

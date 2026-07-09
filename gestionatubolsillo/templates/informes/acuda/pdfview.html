@@ -1,0 +1,57 @@
+{% extends "informes/base_informe.html" %}
+
+{% block titulo_informe %}INFORME DE ACUDA{% endblock %}
+
+{% block contenido %}
+<div class="informe-acuda">
+
+  <table class="tabla-cabecera">
+    <tr>
+      <td class="celda-logo">
+        <img src="{{ logo_url|default:'' }}" alt="Logo" class="logo">
+      </td>
+      <td class="celda-titulo">
+        <h1>INFORME DE<br>ACUDA</h1>
+      </td>
+      <td class="celda-numero">
+        Num. {{ parte.InformeAcudaID }}
+      </td>
+    </tr>
+  </table>
+
+  <div class="seccion-titulo">Datos del informe</div>
+  <table class="tabla-datos">
+    <tr>
+      <td class="col-izq">
+        <p><strong>Fecha:</strong> {{ parte.fecha_creacion|date:"d/m/Y H:i" }}</p>
+        <p><strong>Cliente:</strong> {{ parte.cliente.nombre|default:"Sin cliente" }}</p>
+        <p><strong>Central receptora:</strong> {{ parte.central.nombre|default:"Sin central" }}</p>
+      </td>
+      <td class="col-der">
+        <p><strong>Vigilante:</strong> {{ parte.usuario_asignado.username|default:"Sin asignar" }}</p>
+        <p><strong>Empresa:</strong> {{ parte.empresa.nombre|default:"Sin empresa" }}</p>
+      </td>
+    </tr>
+  </table>
+
+  <div class="seccion-titulo seccion-titulo-centrada">DESCRIPCIÓN</div>
+  <div class="bloque-descripcion" style="min-height: 6em; padding: 8px 10px; border: 1px solid #000; border-top: none; box-sizing: border-box; margin-bottom: 14px;">
+    <p class="texto-libre">{{ parte.descripcion|default:"Sin descripción"|linebreaksbr }}</p>
+  </div>
+
+  {# ---------- FIRMA ---------- #}
+  <div class="seccion-titulo seccion-titulo-centrada">FIRMA</div>
+  <div class="recuadro-firma recuadro-firma-ancho">
+    {% if firma_b64 %}
+      <img src="{{ firma_b64 }}" alt="Firma" class="img-firma">
+    {% endif %}
+  </div>
+
+  {% if finalizado %}
+  <p class="meta-cierre">
+    Documento finalizado el {{ parte.fecha_finalizacion|date:"d/m/Y H:i" }}
+  </p>
+  {% endif %}
+
+</div>
+{% endblock %}

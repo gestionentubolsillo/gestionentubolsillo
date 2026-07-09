@@ -1,0 +1,67 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+    <div class="main-content">
+        <div class="form-card">
+            <div class="form-card-header">
+                <i class="bi bi-exclamation-triangle text-primary"></i>
+                <span class="form-card-title">Nueva Incidencia</span>
+            </div>
+
+            <div class="form-card-body">
+                <form method="post" action="/backoffice/partes_incidencia/create" id="form-parte-incidencia">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="cliente_id">
+                            Cliente <span class="text-danger">*</span>
+                        </label>
+                        <select id="cliente_id" name="cliente_id" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona un cliente...</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.ClienteID }}">{{ cliente.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="usuario_id">
+                            Usuario asignado <span class="text-danger">*</span>
+                        </label>
+                        <select id="usuario_id" name="usuario_id" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona un usuario...</option>
+                            {% for usuario in usuarios %}
+                                <option value="{{ usuario.UserID }}">{{ usuario.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="fecha_registrada">
+                            Fecha y hora
+                        </label>
+                        <input type="datetime-local" id="fecha_registrada" name="fecha_registrada" class="form-control form-control-sm" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="observaciones">
+                            Incidencia <span class="text-danger">*</span>
+                        </label>
+                        <textarea id="observaciones" name="observaciones" class="form-control form-control-sm" rows="5" placeholder="Describe la incidencia..." required></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="form-parte-incidencia" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>Crear Incidencia
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock body %}

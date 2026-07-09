@@ -86,6 +86,21 @@ class User(AbstractUser):
 
     cuenta = models.ForeignKey(Cuenta,on_delete=models.SET_NULL,related_name='usuarios',null=True,blank=True)
 
+    @property
+    def calcular_horas_totales(self, minutos_redondeo:int | None = None)->dict | None:
+        total_horas = getattr(self, 'total_horas', None)
+        if total_horas is None:
+            return None
+        
+        total_seconds = int(total_horas.total_seconds())
+        if minutos_redondeo is not None:
+            total_seconds = (total_seconds // (minutos_redondeo * 60)) * minutos_redondeo * 60
+
+        horas = total_seconds // 3600
+        minutos = (total_seconds % 3600) // 60
+
+        return {'horas': horas, 'minutos': minutos}
+
 class PermisosModulo(models.Model):
     MODULOS = [
         ('USR', 'Usuarios'),

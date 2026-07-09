@@ -1,0 +1,92 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+    <div class="main-content">
+        <div class="list-card">
+
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Tipo de Informe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-center p-3">
+                                <a href="/backoffice/informes/trabajo" class="btn btn-outline-primary btn-sm w-100 px-4">
+                                    Partes de Trabajo
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center p-3">
+                                <a href="/backoffice/informes/trabajo/resumen_tecnico" class="btn btn-outline-primary btn-sm w-100 px-4">
+                                    Partes de Trabajo por Actividad del Trabajador
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center p-3">
+                                <a href="/backoffice/informes/trabajo/horas_cliente" class="btn btn-outline-primary btn-sm w-100 px-4">
+                                    Partes de Trabajo por Horas por Cliente
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center p-3">
+                                <a href="/backoffice/informes/trabajo/horas_tecnico" class="btn btn-outline-primary btn-sm w-100 px-4">
+                                    Partes de Trabajo por Horas por Trabajador
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center p-3">
+                                <a href="/backoffice/informes/incidencias" class="btn btn-outline-primary btn-sm w-100 px-4">
+                                    Partes de Incidencias
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center p-3">
+                                <a href="/backoffice/informes/acuda" class="btn btn-outline-primary btn-sm w-100 px-4">
+                                    Informes de Acuda
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center p-3">
+                                <a href="/backoffice/informes/acudas/cliente" class="btn btn-outline-primary btn-sm w-100 px-4">
+                                    Informes de Acuda por Cliente
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center p-3">
+                                <a href="/backoffice/informes/acudas/tecnico" class="btn btn-outline-primary btn-sm w-100 px-4">
+                                    Informes de Acuda por Trabajador
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center p-3">
+                                <a href="/backoffice/informes/nfc" class="btn btn-outline-primary btn-sm w-100 px-4">
+                                    Servicios de NFC
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center p-3">
+                                <a href="/backoffice/informes/almacen" class="btn btn-outline-primary btn-sm w-100 px-4">
+                                    Gestión de Almacén
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock body %}

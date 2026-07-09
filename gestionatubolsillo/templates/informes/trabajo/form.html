@@ -1,0 +1,292 @@
+{% extends "navbar.html" %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+    {% if action == 'create' %}
+    <div class="main-content">
+        <div class="form-card">
+
+            <div class="form-card-header">
+                <i class="bi bi-clipboard2-check text-primary"></i>
+                <span class="form-card-title">Nuevo Parte de Trabajo</span>
+            </div>
+
+            <div class="form-card-body">
+                <form method="post" action="/backoffice/partes_trabajo/create" id="form-parte-trabajo">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="cliente_id">
+                            Cliente <span class="text-danger">*</span>
+                        </label>
+                        <select id="cliente_id" name="cliente_id" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona un cliente...</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.ClienteID }}">{{ cliente.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="usuario_id">
+                            Usuario asignado <span class="text-danger">*</span>
+                        </label>
+                        <select id="usuario_id" name="usuario_id" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona un usuario...</option>
+                            {% for usuario in usuarios %}
+                                <option value="{{ usuario.UserID }}">{{ usuario.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="servicio_id">
+                            Servicio <span class="text-danger">*</span>
+                        </label>
+                        <select id="servicio_id" name="servicio_id" class="form-select form-select-sm" required disabled>
+                            <option value="" disabled selected>Selecciona primero un cliente</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="fecha_registrada">
+                            Fecha y hora
+                        </label>
+                        <input type="datetime-local" id="fecha_registrada" name="fecha_registrada" class="form-control form-control-sm" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="observaciones">
+                            Observaciones
+                        </label>
+                        <textarea id="observaciones" name="observaciones" class="form-control form-control-sm" rows="4" placeholder="Describe el trabajo realizado..."></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                <button type="submit" form="form-parte-trabajo" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>Crear Parte de Trabajo
+                </button>
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+
+    {% if action == 'view' %}
+    <div class="main-content">
+        <div class="form-card">
+            <div class="form-card-header">
+                <i class="bi bi-clipboard2-check text-primary"></i>
+                <span class="form-card-title">Detalle del Parte de Trabajo</span>
+            </div>
+
+            <div class="form-card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Cliente</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.cliente.nombre|default:"Sin cliente" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Usuario asignado</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.usuario_asignado.username|default:"Sin asignar" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Usuario creador</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.usuario_creador.username|default:"Sin creador" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Servicio</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.servicio.nombre|default:"Sin servicio" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha de creación</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha registrada</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.fecha_inicio_registrada|date:"d/m/Y H:i"|default:"No registrada" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha de finalización</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.fecha_finalizacion|date:"d/m/Y H:i"|default:"Sin finalizar" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Empresa</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.empresa.nombre|default:"Sin empresa" }}</p>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Observaciones</label>
+                        <p class="form-control form-control-sm bg-light mb-0">{{ parte.observaciones|default:"Sin observaciones" }}</p>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <h6 class="fw-bold mb-3">Líneas del parte de trabajo</h6>
+                {% if lineas %}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Actividad</th>
+                                <th>Información adicional</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for linea in lineas %}
+                            <tr>
+                                <td>{{ linea.fecha_registrada|date:"d/m/Y H:i" }}</td>
+                                <td>{{ linea.get_actividad_display|default:linea.actividad }}</td>
+                                <td>{{ linea.extra_info|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-light border mb-0">
+                    No hay líneas registradas para este parte todavía.
+                </div>
+                {% endif %}
+
+                {% if not parte.fecha_finalizacion %}
+                <hr class="my-4" />
+
+                <h6 class="fw-bold mb-3">Cerrar parte</h6>
+                <form method="post" action="{% url 'cerrar_parte_trabajo' parte.ParteTrabajoID %}" id="form-cerrar-parte">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label" for="fecha_fin">Fecha y hora de finalización</label>
+                        <input type="datetime-local" id="fecha_fin" name="fecha_fin" class="form-control form-control-sm" />
+                    </div>
+                </form>
+                {% endif %}
+
+                {% if not parte.fecha_finalizacion and not parte.usuario_relevo %}
+                <hr class="my-4" />
+
+                <h6 class="fw-bold mb-3">Asignar relevo</h6>
+                <form method="post" action="{% url 'relevar_usuario_parte_trabajo' parte.ParteTrabajoID %}" id="form-relevo-parte-trabajo">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="usuario_relevo_id">Usuario relevo <span class="text-danger">*</span></label>
+                        <select id="usuario_relevo_id" name="usuario_id" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona un usuario...</option>
+                            {% for usuario in usuarios %}
+                                <option value="{{ usuario.UserID }}">{{ usuario.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="fecha_hora_relevo">Fecha y hora del relevo</label>
+                        <input type="datetime-local" id="fecha_hora_relevo" name="fecha_hora_relevo" class="form-control form-control-sm" />
+                    </div>
+                </form>
+                {% endif %}
+
+                {% if not parte.fecha_finalizacion %}
+                <hr class="my-4" />
+
+                <h6 class="fw-bold mb-3">Añadir nueva línea</h6>
+                <form method="post" action="{% url 'add_actividad_to_parte_trabajo' parte.ParteTrabajoID %}" id="form-linea-parte-trabajo">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label" for="actividad">Actividad <span class="text-danger">*</span></label>
+                        <select id="actividad" name="actividad" class="form-select form-select-sm" required>
+                            <option value="" disabled selected>Selecciona una actividad...</option>
+                            {% for value, label in choices %}
+                                {% if value not in 'Inicio,Finalización,Relevo' %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="extra">Información adicional</label>
+                        <textarea id="extra" name="extra" class="form-control form-control-sm" rows="3" placeholder="Añade detalles o comentarios..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="fecha">Fecha y hora</label>
+                        <input type="datetime-local" id="fecha" name="fecha" class="form-control form-control-sm" />
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+
+            <div class="form-card-footer">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+                {% if not parte.fecha_finalizacion %}
+                <button type="submit" form="form-cerrar-parte" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-lock-fill me-1"></i>Cerrar parte
+                </button>
+                {% if not parte.usuario_relevo and not parte.fecha_finalizacion %}
+                <button type="submit" form="form-relevo-parte-trabajo" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-arrow-left-right me-1"></i>Asignar relevo
+                </button>
+                {% endif %}
+                <button type="submit" form="form-linea-parte-trabajo" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i>Guardar línea
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</main>
+
+<script>
+    const clienteSelect = document.getElementById('cliente_id');
+    const servicioSelect = document.getElementById('servicio_id');
+
+    if (clienteSelect && servicioSelect) {
+        clienteSelect.addEventListener('change', function () {
+            const clienteId = this.value;
+            servicioSelect.innerHTML = '<option value="" disabled selected>Cargando...</option>';
+            servicioSelect.disabled = true;
+
+            if (!clienteId) {
+                servicioSelect.innerHTML = '<option value="" disabled selected>Selecciona primero un cliente</option>';
+                return;
+            }
+
+            fetch('/ajax/get_servicios_por_cliente/' + clienteId)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('No se pudieron cargar los servicios');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const servicios = Array.isArray(data) ? data : (data.servicios || []);
+                    servicioSelect.innerHTML = '<option value="" disabled selected>Selecciona un servicio</option>';
+
+                    servicios.forEach(servicio => {
+                        const option = document.createElement('option');
+                        option.value = servicio.ServicioID;
+                        option.textContent = servicio.nombre;
+                        servicioSelect.appendChild(option);
+                    });
+
+                    servicioSelect.disabled = false;
+                })
+                .catch(() => {
+                    servicioSelect.innerHTML = '<option value="" disabled selected>Error al cargar servicios</option>';
+                    servicioSelect.disabled = true;
+                });
+        });
+    }
+</script>
+{% endblock body %}

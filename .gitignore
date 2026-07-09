@@ -31,4 +31,5 @@ dmypy.json
 
 media/
 
+#Sonar
 .sonar/
