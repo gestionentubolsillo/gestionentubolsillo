@@ -1,0 +1,52 @@
+{% load permisos_tags %}
+
+{% permiso user 'NFC' as perm_lectura%}
+{% permiso user 'NFC' '2' as perm_escritura%}
+
+<thead>
+    <tr>
+        {% if perm_escritura %}
+            <th style="width:2.5rem;">
+                <input type="checkbox" class="form-check-input" id="check-all" title="Seleccionar todos">
+            </th>
+        {% endif %}
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Precio por hora</th>
+        <th>Activo</th>
+        <th class="text-end">Acciones</th>
+    </tr>
+</thead>
+<tbody>
+    {% for servicio in servicios %}
+        <tr>
+        {% if perm_escritura %}
+            <td>
+                <input type="checkbox"
+                    class="form-check-input check-servicio"
+                    name="servicios_ids"
+                    value="{{ servicio.ServicioID }}">
+            </td>
+        {% endif %}
+            <td class="fw-medium">{{servicio.nombre}}</td>
+            <td class="text-muted">{{servicio.mail_de_contacto}}</td>
+            <td class="text-muted">{{servicio.precio_por_hora}}</td>
+            <td class="text-muted">{{servicio.is_active}}</td>
+            <td class="text-end">
+                <div class="d-flex gap-1 justify-content-end">
+                    {% if perm_lectura %}
+                        <a href="/backoffice/servicios/{{servicio.ServicioID}}" class="action-btn" title="Ver">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="6" class="text-center text-muted py-3">
+                <i class="bi bi-people me-1"></i>No existen Servicios Asignados
+            </td>
+        </tr>
+    {% endfor %}
+</tbody>
