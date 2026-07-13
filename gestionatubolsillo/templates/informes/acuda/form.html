@@ -54,27 +54,27 @@
             <div class="form-card-body">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">Cliente</label>
+                        <p class="form-label">Cliente</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ parte.cliente.nombre|default:"Sin cliente" }}</p>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Técnico</label>
+                        <p class="form-label">Técnico</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ parte.usuario_asignado.username|default:"Sin asignar" }}</p>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Central receptora</label>
+                        <p class="form-label">Central receptora</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ parte.central.nombre|default:"Sin central" }}</p>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Fecha</label>
+                        <p class="form-label">Fecha</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ parte.fecha_creacion|date:"d/m/Y H:i" }}</p>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Empresa</label>
+                        <p class="form-label">Empresa</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ parte.empresa.nombre|default:"Sin empresa" }}</p>
                     </div>
                     <div class="col-12">
-                        <label class="form-label">Descripción</label>
+                        <p class="form-label">Descripción</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ parte.descripcion|default:"Sin descripción"|linebreaksbr }}</p>
                     </div>
                 </div>
