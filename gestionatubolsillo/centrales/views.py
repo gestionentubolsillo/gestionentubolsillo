@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.template import loader
 from django.shortcuts import render, redirect
 from django.http import HttpRequest,HttpResponse
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.contrib.auth.decorators import login_required, user_passes_test
 from users.models import can_access_backoffice, User
 from .models import Central, can_view_centrales, can_CRUD_centrales
@@ -19,6 +20,7 @@ from .validators import validate_central, validate_auth_central
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_centrales)
+@require_GET
 def list_centrales(request: HttpRequest):
     filtros, exclusiones = filter_centrales(request)
     centrales = Central.objects.filter(**filtros).exclude(**exclusiones).order_by('CentralID')
@@ -28,12 +30,14 @@ def list_centrales(request: HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_centrales)
+@require_http_methods(["GET","POST"])
 def create_central(request: HttpRequest):
     return _create_or_modify_central(request)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_centrales)
+@require_http_methods(["GET","POST"])
 def edit_central(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
     auth_error = validate_auth_central(request,central)
@@ -44,6 +48,7 @@ def edit_central(request: HttpRequest, central_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_centrales)
+@require_POST
 def delete_central(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
     auth_error = validate_auth_central(request,central)
@@ -56,6 +61,7 @@ def delete_central(request: HttpRequest, central_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_centrales)
+@require_GET
 def central_details(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
     auth_error = validate_auth_central(request,central)
