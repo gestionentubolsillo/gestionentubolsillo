@@ -47,9 +47,7 @@
                                   action="/backoffice/users/{{usuario.UserID}}/services/remove"
                                   id="form-remove-servicios">
                                   {% csrf_token %}
-                                  <table class="table mb-0">
                                     {% include "servicios/external_list.html" %}
-                                </table>
 
                                 
             <div class="form-card-footer">

@@ -3,6 +3,7 @@
 {% permiso user 'NFC' as perm_lectura%}
 {% permiso user 'NFC' '2' as perm_escritura%}
 
+<table class="table mb-0">
 <thead>
     <tr>
         {% if perm_escritura %}
@@ -50,3 +51,4 @@
         </tr>
     {% endfor %}
 </tbody>
+</table>
