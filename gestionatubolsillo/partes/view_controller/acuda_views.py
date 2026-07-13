@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.shortcuts import render, redirect
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from users.models import User, can_access_backoffice
 
 from partes.models import Informe_Acuda, can_view_acuda, can_CRUD_acuda
@@ -21,6 +21,7 @@ from centrales.models import Central
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_acuda)
+@require_GET
 def list_inf_acuda(request:HttpRequest):
     filtros, exclusiones = filtra_informes_acuda(request)
     partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
@@ -29,6 +30,7 @@ def list_inf_acuda(request:HttpRequest):
 
 @login_required
 @user_passes_test(can_CRUD_acuda)
+@require_http_methods(["GET","POST"])
 def create_inf_acuda(request:HttpRequest):
     user:User = request.user
     template = loader.get_template('informes/acuda/form.html')
@@ -63,6 +65,7 @@ def create_inf_acuda(request:HttpRequest):
     elif request.method == 'GET':
         return HttpResponse(template.render(context,request))
 
+@require_GET
 def view_parte_acuda(request:HttpRequest, parte_id:int):
     parte = Informe_Acuda.objects.filter(InformeAcudaID=parte_id).select_related(
         'usuario_creador', 'usuario_asignado', 'cliente', 'empresa', 'central'
@@ -75,6 +78,7 @@ def view_parte_acuda(request:HttpRequest, parte_id:int):
     context = {'parte': parte}
     return render(request, 'informes/acuda/pdfview.html', context)
 
+@require_GET
 def parte_acuda_details(request:HttpRequest,parte_id:int):
     parte = Informe_Acuda.objects.filter(InformeAcudaID=parte_id).select_related(
         'usuario_creador', 'usuario_asignado', 'cliente', 'empresa', 'central'

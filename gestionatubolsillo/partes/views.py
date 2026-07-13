@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest,HttpResponse, JsonResponse
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,user_passes_test
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.template import loader
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator
@@ -26,6 +26,7 @@ DEFAULT_PAGINATION_PARTES = 25
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
+@require_GET
 def dashboard_informes(request:HttpRequest):
     #Vista que lista los diferentes enlaces para consulta de los diferentes tipos de informe
     context = {}
@@ -34,6 +35,7 @@ def dashboard_informes(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_parte_inspeccion)
+@require_GET
 def list_partes_inspeccion(request:HttpRequest):
     filtros, exclusiones = filtra_partes_inspeccion(request)
     partes = Parte_Inspeccion.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
@@ -47,6 +49,7 @@ Este método de momento no se trabajará
 """
 @login_required
 @user_passes_test(can_CRUD_parte_inspeccion)
+@require_http_methods(["GET","POST"])
 def create_parte_inspeccion(request:HttpRequest):
     user:User = request.user
     template = loader.get_template('informes/inspeccion/form.html')
@@ -61,6 +64,7 @@ def create_parte_inspeccion(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
+@require_GET
 def list_informes_informe_trabajo(request:HttpRequest):
     filtros, exclusiones, related_fields = filtra_partes_trabajo(request)
     partes = Parte_Trabajo.objects.select_related(*related_fields).filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
@@ -70,6 +74,7 @@ def list_informes_informe_trabajo(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
+@require_GET
 def list_informes_informe_trabajo_horas_cliente(request:HttpRequest):
     filtros, exclusiones, related_fields = filtra_partes_trabajo(request)
     partes = Parte_Trabajo.objects.select_related(*related_fields).filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
@@ -79,6 +84,7 @@ def list_informes_informe_trabajo_horas_cliente(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
+@require_GET
 def list_informes_informe_trabajo_horas_tecnico(request:HttpRequest):
     filtros, exclusiones,related_fields = filtra_partes_trabajo(request)
     partes = Parte_Trabajo.objects.select_related(*related_fields).filter(**filtros).exclude(**exclusiones).annotate(
@@ -135,6 +141,7 @@ def list_informes_informe_trabajo_horas_tecnico(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
+@require_GET
 def list_informes_informe_trabajo_resumen(request:HttpRequest):
     #No se filtran partes, sino usuarios asignados a los partes para mostrar total de partes asociados al usuario y horas totales de los partes
     filtros, exclusiones, _ = filtra_partes_trabajo(request)
@@ -153,13 +160,14 @@ def list_informes_informe_trabajo_resumen(request:HttpRequest):
     context = paginate_informes_trabajo_resumen(request,usuarios_asignados)
     return render(request,'informes/trabajo/list_resumen.html',context)
 
-
+@require_GET
 def list_informes_informe_acuda_cliente(request:HttpRequest):
     filtros, exclusiones = filtra_informes_acuda(request)
     partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
     return render(request,'informes/acuda/list.html',context)
 
+@require_GET
 def list_informes_informe_acuda_tecnico(request:HttpRequest):
     filtros, exclusiones = filtra_informes_acuda(request)
     partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
@@ -168,6 +176,7 @@ def list_informes_informe_acuda_tecnico(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_informes)
+@require_GET
 def get_servicios_por_cliente(request:HttpRequest,cliente_id):
     #Vista que devuelve los servicios asociados a un cliente, para ser usados en un select de un formulario
     servicios = Servicio.objects.filter(clientes__ClienteID = cliente_id).values('ServicioID','nombre').distinct()
@@ -177,6 +186,7 @@ def get_servicios_por_cliente(request:HttpRequest,cliente_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_parte_trabajo)
+@require_GET
 def get_servicios_por_cliente_y_usuario(request:HttpRequest,cliente_id,usuario_id):
     #Vista que devuelve los servicios asociados a un cliente y a un usuario, para ser usados en un select de formulario creacion de parte de trabajo
     servicios = Servicio.objects.filter(clientes__ClienteID = cliente_id, users__UserID = usuario_id).values('ServicioID','nombre').distinct()
