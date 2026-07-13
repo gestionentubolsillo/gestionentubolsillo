@@ -156,13 +156,13 @@ def list_informes_informe_trabajo_resumen(request:HttpRequest):
 
 def list_informes_informe_acuda_cliente(request:HttpRequest):
     filtros, exclusiones = filtra_informes_acuda(request)
-    partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by(-'fecha_creacion')
+    partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
-    return render(request,'',context)
+    return render(request,'informes/acuda/list.html',context)
 
 def list_informes_informe_acuda_tecnico(request:HttpRequest):
     filtros, exclusiones = filtra_informes_acuda(request)
-    partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by(-'fecha_creacion')
+    partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     pass
 
 @login_required

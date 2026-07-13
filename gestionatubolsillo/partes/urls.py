@@ -40,7 +40,7 @@ urlpatterns = [
 
     #General Acudas
     #path('backoffice/informes/acudas',views.list_informes_informe_acuda),
-    #path('backoffice/informes/acudas/cliente',views.list_informes_informe_acuda_cliente),
+    path('backoffice/informes/acudas/cliente',views.list_informes_informe_acuda_cliente),
     #path('backoffice/informes/acudas/tecnico',views.list_informes_informe_acuda_tecnico),
     
 
