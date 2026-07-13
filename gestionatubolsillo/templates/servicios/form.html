@@ -358,7 +358,7 @@
                     <div class="list-toolbar">
                         <!--Busqueda por Nombre (Añadir en futuro busqueda por select de provincia y municipio)-->
                         <form method="get" action="" class="search-box mb-0 d-flex gap-2">
-                            {% include "searchforms/by_name.html" %}
+                            {% include "searchforms/by_name.html" %} scope="col"
                             <button type="submit" class="btn btn-primary btn-sm">
                                 <i class="bi bi-search"></i>
                             </button>
@@ -392,11 +392,11 @@
                                                 <input type="checkbox" class="form-check-input" id="check-all" title="Seleccionar todos">
                                                 </th>
                                             {% endif %}
-                                            <th>Nombre</th>
-                                            <th>Correo</th>
-                                            <th>Direccion</th>
-                                            <th>Telefono</th>
-                                            <th class="text-end">Acciones</th>
+                                            <th scope="col">Nombre</th>
+                                            <th scope="col">Correo</th>
+                                            <th scope="col">Direccion</th>
+                                            <th scope="col">Telefono</th>
+                                            <th scope="col" class="text-end">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>

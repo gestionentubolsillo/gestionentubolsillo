@@ -17,15 +17,15 @@
                 <table class="table mb-0">
                     <thead>
                         <tr>
-                            <th>Fecha Inicio</th>
-                            <th>Fecha Fin</th>
-                            <th>Usuario</th>
-                            <th>Horas</th>
-                            <th>Cliente</th>
-                            <th>Servicio</th>
-                            <th>Precio Usuario</th>
-                            <th>Precio Servicio</th>
-                            <th>Diferencia Precios</th>
+                            <th scope="col">Fecha Inicio</th>
+                            <th scope="col">Fecha Fin</th>
+                            <th scope="col">Usuario</th>
+                            <th scope="col">Horas</th>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Servicio</th>
+                            <th scope="col">Precio Usuario</th>
+                            <th scope="col">Precio Servicio</th>
+                            <th scope="col">Diferencia Precios</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -63,7 +63,7 @@
                     <tfoot>
                         {% if partes %}
                         <tr>
-                            <td class="fw-medium" colspan="2">Total Partes: {{partes.paginator.count}}</td>
+                            <td class=" scope="col"" colspan="2">Total Partes: {{partes.paginator.count}}</td>
                             <td class="fw-medium" colspan="2">Total Horas: {{total_horas}} H. {{total_minutos}} min.</td>
                             <td class="fw-medium"colspan="2">Total Precio:</td>
                             <td class="fw-bold">{{total_usuario}}</td>
