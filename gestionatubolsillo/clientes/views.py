@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from .decorators import cli_login_required
 from django.template import loader
 from django.http import HttpResponse, HttpRequest
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.contrib import messages
 from users.models import User, can_access_backoffice
 from .models import Cliente,user_client,can_view_clientes,can_CRUD_clientes
@@ -23,6 +24,7 @@ from .validators import validate_client, validate_user_client,validate_servicios
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_clientes)
+@require_GET
 def list_clientes(request:HttpRequest):
 
     filtros, exclusiones = filtra_clientes(request)
@@ -34,6 +36,7 @@ def list_clientes(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_clientes)
+@require_http_methods(["GET","POST"])
 def create_client(request:HttpRequest):
     return _create_or_modify_cliente(request)
 
@@ -41,6 +44,7 @@ def create_client(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_clientes)
+@require_http_methods(["GET","POST"])
 def edit_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
@@ -51,6 +55,7 @@ def edit_client(request:HttpRequest,client_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_clientes)
+@require_GET
 def client_details(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
@@ -62,6 +67,7 @@ def client_details(request:HttpRequest,client_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_clientes)
+@require_POST
 def delete_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
     auth_error = validate_auth_client(request,cliente)
@@ -74,6 +80,7 @@ def delete_client(request:HttpRequest,client_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_clientes)
+@require_http_methods(["GET","POST"])
 def create_user_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
     auth_error = validate_auth_client(request,cliente)
@@ -85,6 +92,7 @@ def create_user_client(request:HttpRequest,client_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_clientes)
+@require_http_methods(["GET","POST"])
 def edit_user_client(request:HttpRequest,client_id,user_client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
     auth_error = validate_auth_client(request,cliente)
@@ -100,6 +108,7 @@ def edit_user_client(request:HttpRequest,client_id,user_client_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_clientes)
+@require_POST
 def delete_user_client(request:HttpRequest,client_id,user_client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
     auth_error = validate_auth_client(request,cliente)
@@ -116,6 +125,7 @@ def delete_user_client(request:HttpRequest,client_id,user_client_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_clientes)
+@require_GET
 def user_client_details(request:HttpRequest,client_id,user_client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
     auth_error = validate_auth_client(request,cliente)
@@ -134,6 +144,7 @@ def user_client_details(request:HttpRequest,client_id,user_client_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_clientes)
+@require_GET
 def list_user_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(id=client_id).first()
     auth_error = validate_auth_client(request,cliente)
@@ -146,6 +157,7 @@ def list_user_client(request:HttpRequest,client_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_servicios)
+@require_http_methods(["GET","POST"])
 def add_servicios_to_cliente(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
@@ -156,6 +168,7 @@ def add_servicios_to_cliente(request:HttpRequest,client_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_servicios)
+@require_POST
 def remove_servicios_to_cliente(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
