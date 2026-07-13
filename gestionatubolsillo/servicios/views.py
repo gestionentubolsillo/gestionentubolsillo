@@ -1,5 +1,6 @@
 from django.shortcuts import render,redirect
 from django.http import HttpRequest,HttpResponse
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.utils.timezone import now
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -24,6 +25,7 @@ from enum import Enum
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_servicios)
+@require_GET
 def list_servicios(request:HttpRequest):
 
     filtros, exclusiones = filtra_servicios(request)
@@ -35,12 +37,14 @@ def list_servicios(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_servicios)
+@require_http_methods(["GET","POST"])
 def create_servicio(request:HttpRequest):
     return _create_or_update_servicio(request=request)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_servicios)
+@require_http_methods(["GET","POST"])
 def edit_servicio(request:HttpRequest,servicio_id):
     servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
 
@@ -53,6 +57,7 @@ def edit_servicio(request:HttpRequest,servicio_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_servicios)
+@require_GET
 def servicio_details(request:HttpRequest,servicio_id):
     servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
 
@@ -66,6 +71,7 @@ def servicio_details(request:HttpRequest,servicio_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_servicios)
+@require_POST
 def delete_servicio(request:HttpRequest,servicio_id):
     servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
 
@@ -80,6 +86,7 @@ def delete_servicio(request:HttpRequest,servicio_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_servicios)
+@require_http_methods(["GET","POST"])
 def add_clientes_to_servicio(request:HttpRequest,servicio_id):
     servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
 
@@ -93,6 +100,7 @@ def add_clientes_to_servicio(request:HttpRequest,servicio_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_servicios)
+@require_http_methods(["GET","POST"])
 def remove_clientes_to_servicio(request:HttpRequest,servicio_id):
     servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
 

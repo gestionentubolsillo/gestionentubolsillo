@@ -1,5 +1,6 @@
 from django.shortcuts import redirect, render
 from django.http import HttpRequest,HttpResponse
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.contrib.auth.decorators import login_required, user_passes_test
 from users.models import can_access_backoffice, User
 from .models import MedioAuxiliar, can_view_medios_auxiliares, can_CRUD_medios_auxiliares
@@ -21,6 +22,7 @@ def validate_medio_auxiliar(request:HttpRequest,nombre)->bool:
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_medios_auxiliares)
+@require_GET
 def list_medios_auxiliares(request:HttpRequest):
     user:User = request.user
     medios_auxiliares = MedioAuxiliar.objects.filter(usuario_creador_id = user.UserID)
@@ -40,6 +42,7 @@ def list_medios_auxiliares(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_medios_auxiliares)
+@require_http_methods(["GET","POST"])
 def create_medio_auxiliar(request:HttpRequest):
     if request.method == 'POST':
         created_at = now()
@@ -63,6 +66,7 @@ def create_medio_auxiliar(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_medios_auxiliares)
+@require_http_methods(["GET","POST"])
 def edit_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     if request.method == 'POST':
@@ -89,6 +93,7 @@ def edit_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_medios_auxiliares)
+@require_POST
 def delete_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     medio_auxiliar.delete()
@@ -98,6 +103,7 @@ def delete_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_medios_auxiliares)
+@require_GET
 def medio_auxiliar_details(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     if not medio_auxiliar:

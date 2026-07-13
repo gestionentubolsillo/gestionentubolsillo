@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.shortcuts import render, redirect
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from users.models import User, can_access_backoffice
 
 from partes.models import Parte_Incidencia,can_view_parte_incidencia,can_CRUD_parte_incidencia
@@ -21,6 +21,7 @@ from clientes.models import Cliente
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_parte_incidencia)
+@require_GET
 def list_partes_incidencia(request:HttpRequest):
     filtros, exclusiones = filtra_partes_incidencia(request)
     partes = Parte_Incidencia.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
@@ -30,6 +31,7 @@ def list_partes_incidencia(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_parte_incidencia)
+@require_http_methods(["GET","POST"])
 def create_parte_incidencia(request:HttpRequest):
     user : User = request.user
     template = loader.get_template('informes/incidencia/form.html')
@@ -61,6 +63,7 @@ def create_parte_incidencia(request:HttpRequest):
     elif request.method == 'GET':
         return HttpResponse(template.render(context,request))
     
+@require_GET
 def view_parte_incidencia(request:HttpRequest, parte_id:int):
     parte = Parte_Incidencia.objects.filter(ParteIncidenciaID=parte_id).select_related(
         'usuario_creador', 'usuario_asignado', 'cliente', 'empresa'

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.template import loader
 from django.http import HttpResponse, HttpRequest
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.contrib import messages
 from django.core.paginator import Paginator
 from users.models import can_access_backoffice, User
@@ -20,6 +21,7 @@ from .builders import create_bulk_tareas, build_listado_users
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_tareas)
+@require_GET
 def list_tareas(request:HttpRequest):
 
     data:QueryFilterData = {
@@ -43,6 +45,7 @@ def list_tareas(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_tareas)
+@require_http_methods(["GET","POST"])
 def create_tarea(request:HttpRequest):
     user:User = request.user
     users_allowed = User.objects.filter(cuenta=user.cuenta)
@@ -84,6 +87,7 @@ def create_tarea(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_tareas)
+@require_POST
 def delete_tarea(request:HttpRequest,tarea_id):
     tarea = Tarea.objects.filter(TareaID=tarea_id).first()
     auth_error = validate_auth_tarea(request,tarea)
@@ -97,6 +101,7 @@ def delete_tarea(request:HttpRequest,tarea_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_tareas)
+@require_POST
 def change_state_tarea(request:HttpRequest,tarea_id):
     tarea = Tarea.objects.filter(TareaID=tarea_id).first()
     auth_error = validate_auth_tarea(request,tarea)
@@ -112,6 +117,7 @@ def change_state_tarea(request:HttpRequest,tarea_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_tareas)
+@require_GET
 def details_tarea(request:HttpRequest,tarea_id):
     tarea = Tarea.objects.filter(TareaID=tarea_id).first()
     auth_error = validate_auth_tarea(request,tarea)
@@ -126,6 +132,7 @@ def details_tarea(request:HttpRequest,tarea_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_tareas)
+@require_http_methods(["GET","POST"])
 def create_list_usuarios(request:HttpRequest):
     template = loader.get_template('tareas/list_users/form.html')
     user:User = request.user
@@ -148,6 +155,7 @@ def create_list_usuarios(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_tareas)
+@require_http_methods(["GET","POST"])
 def edit_list_usuarios(request:HttpRequest,lista_id):
     template = loader.get_template('tareas/list_users/form.html')
     user:User = request.user
@@ -170,6 +178,7 @@ def edit_list_usuarios(request:HttpRequest,lista_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_tareas)
+@require_GET
 def lista_listados_de_usuarios(request:HttpRequest):
     user : User = request.user
     listas = ListadoUsers.objects.filter(cuenta=user.cuenta).annotate(num_users=Count('usuarios',distinct=True))

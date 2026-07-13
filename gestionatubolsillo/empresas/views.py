@@ -4,8 +4,8 @@ from users.models import can_access_backoffice
 from .models import Empresa, can_CRUD_empresas, can_view_empresas
 from django.template import loader
 from django.http import HttpResponse, HttpRequest
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.contrib import messages
-from django.core.paginator import Paginator
 from users.models import User
 
 from .filters import filtra_empresa
@@ -18,12 +18,14 @@ from .builders import build_empresa
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_empresas)
+@require_http_methods(["GET","POST"])
 def create_empresa(request:HttpRequest):
     return _create_or_modify_empresa(request)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_empresas)
+@require_GET
 def list_empresas(request:HttpRequest):
     filtros, exclusiones = filtra_empresa(request)
     list_empresas = Empresa.objects.filter(**filtros).exclude(**exclusiones).order_by('EmpresaID')
@@ -33,6 +35,7 @@ def list_empresas(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_empresas)
+@require_GET
 def details_empresa(request,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
 
@@ -49,6 +52,7 @@ def details_empresa(request,empresa_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_empresas)
+@require_http_methods(["GET","POST"])
 def edit_empresa(request : HttpRequest,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
     auth_error = validate_auth_empresa(request,empresa)
@@ -60,6 +64,7 @@ def edit_empresa(request : HttpRequest,empresa_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_empresas)
+@require_POST
 def delete_empresa(request:HttpRequest,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
     auth_error = validate_auth_empresa(request,empresa)

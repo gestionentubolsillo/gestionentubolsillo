@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.shortcuts import render, redirect
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST,require_GET,require_http_methods
 from users.models import User, can_access_backoffice
 
 from  partes.models import Parte_Trabajo, Linea_Parte_Trabajo, can_view_parte_trabajo, can_CRUD_parte_trabajo
@@ -22,6 +22,7 @@ from datetime import datetime
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_parte_trabajo)
+@require_GET
 def list_partes_trabajo(request:HttpRequest):
     filtros, exclusiones, related_fields = filtra_partes_trabajo(request)
     partes = Parte_Trabajo.objects.select_related(*related_fields).filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
@@ -33,6 +34,7 @@ def list_partes_trabajo(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_parte_trabajo)
+@require_http_methods(["GET","POST"])
 def create_parte_trabajo(request:HttpRequest):
     user : User = request.user
     template = loader.get_template('informes/trabajo/form.html')
@@ -71,6 +73,7 @@ def create_parte_trabajo(request:HttpRequest):
 @login_required
 @require_POST
 @user_passes_test(can_CRUD_parte_trabajo)
+@require_POST
 def cerrar_parte_trabajo(request:HttpRequest,parte_id):
     parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).first()
     ended_at = now()
@@ -92,6 +95,7 @@ def cerrar_parte_trabajo(request:HttpRequest,parte_id):
 @login_required
 @require_POST
 @user_passes_test(can_CRUD_parte_trabajo)
+@require_POST
 def relevar_usuario_parte_trabajo(request:HttpRequest,parte_id):
     parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).first()
     if not parte:
@@ -135,6 +139,7 @@ def relevar_usuario_parte_trabajo(request:HttpRequest,parte_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_parte_trabajo)
+@require_http_methods(["GET","POST"])
 def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
     template = loader.get_template('informes/trabajo/form.html')
     parte = Parte_Trabajo.objects.filter(ParteTrabajoID=p_trabajo_id).first()
@@ -167,6 +172,7 @@ def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
         return HttpResponse(template.render(context,request))
 
 #Necesario indagar más en estas caracteristicas
+@require_GET
 def view_parte_trabajo(request:HttpRequest, parte_id):
     parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).select_related(
         'usuario_creador', 'usuario_asignado', 'cliente', 'empresa', 'servicio'

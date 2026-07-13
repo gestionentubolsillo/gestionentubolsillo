@@ -3,11 +3,13 @@ from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as auth_login
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.urls import reverse
 from django.template import loader
 from clientes.models import user_client
 
 # Create your views here.
+@require_http_methods(["GET","POST"])
 def login(request:HttpRequest):
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
@@ -30,7 +32,7 @@ def login(request:HttpRequest):
         return HttpResponse(template.render(context, request))
 
 
-
+@require_http_methods(["GET","POST"])
 def login_cli(request:HttpRequest):
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
@@ -60,7 +62,7 @@ def login_cli(request:HttpRequest):
             return redirect(reverse('home'))
         return HttpResponse(template.render(context, request))       
 
-
+@require_POST
 def logout_view(request:HttpRequest):
     logout(request)
     return redirect('/')

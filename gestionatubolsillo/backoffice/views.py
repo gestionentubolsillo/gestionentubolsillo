@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpRequest
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from users.models import User
 from django.utils.timezone import localdate, make_aware
 from sugerencias.models import Sugerencia
@@ -8,6 +9,7 @@ from datetime import datetime, time, timedelta
 
 # Create your views here.
 
+@require_GET
 def show_backoffice(request:HttpRequest):
     user : User = request.user
     if not user.is_authenticated:

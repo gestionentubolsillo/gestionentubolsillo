@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpRequest,HttpResponse
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.contrib.auth.decorators import login_required, user_passes_test
 from users.models import can_access_backoffice, User
 from .models import Sugerencia, can_view_sugerencias, can_CRUD_sugerencias
@@ -22,6 +23,7 @@ from .builders import build_sugerencia
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_sugerencias)
+@require_GET
 def list_sugerencias(request: HttpRequest):
 
     filtros, exclusiones=filtra_sugerencias(request)
@@ -32,6 +34,7 @@ def list_sugerencias(request: HttpRequest):
 #Listado de sugerencias creadas por el usuario, independientemente de si tiene acceso al backoffice
 @login_required
 @user_passes_test(can_view_sugerencias)
+@require_GET
 def list_own_sugerencias(request: HttpRequest):
 
     filtros, exclusiones = filtra_sugerencias(request,filter_only_self=True)
@@ -42,6 +45,7 @@ def list_own_sugerencias(request: HttpRequest):
 #No es necesario acceder al backoffice para crear sugerencias
 @login_required
 @user_passes_test(can_CRUD_sugerencias)
+@require_http_methods(["GET","POST"])
 def create_sugerencia(request:HttpRequest):
     user:User = request.user
     allowed_users = User.objects.filter(cuenta=user.cuenta)
@@ -77,6 +81,7 @@ def create_sugerencia(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_sugerencias)
+@require_POST
 def update_estado_sugerencia(request:HttpRequest, sugerencia_id):
     sugerencia = Sugerencia.objects.filter(SugerenciaID=sugerencia_id).first()
     auth_error = validate_auth_sugerencia(request,sugerencia)
@@ -91,6 +96,7 @@ def update_estado_sugerencia(request:HttpRequest, sugerencia_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_sugerencias)
+@require_POST
 def delete_sugerencia(request:HttpRequest, sugerencia_id):
     sugerencia = Sugerencia.objects.filter(SugerenciaID=sugerencia_id).first()
     auth_error = validate_auth_sugerencia(request,sugerencia)
@@ -104,6 +110,7 @@ def delete_sugerencia(request:HttpRequest, sugerencia_id):
 
 @login_required
 @user_passes_test(can_view_sugerencias)
+@require_GET
 def details_sugerencia(request:HttpRequest,sugerencia_id):
     sugerencia = Sugerencia.objects.filter(SugerenciaID=sugerencia_id).first()
     auth_error = validate_auth_sugerencia(request,sugerencia)
