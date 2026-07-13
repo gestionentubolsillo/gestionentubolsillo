@@ -1,5 +1,6 @@
 from django.shortcuts import redirect, render
 from django.http import HttpRequest,HttpResponse
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.contrib.auth.decorators import login_required, user_passes_test
 from users.models import can_access_backoffice, User
 from .models import Delegacion
@@ -17,6 +18,7 @@ from .validators import validate_delegacion, validate_auth_delegacion
 # Create your views here.
 @login_required
 @user_passes_test(can_access_backoffice)
+@require_GET
 def list_delegaciones(request: HttpRequest):
     
     filtros,exclusiones = filter_delegaciones(request)
@@ -24,11 +26,13 @@ def list_delegaciones(request: HttpRequest):
     context = paginate_delegaciones(request,delegaciones)
     return render(request,'delegaciones/list.html',context)
 
+@require_http_methods(["GET","POST"])
 def create_delegacion(request: HttpRequest):
     return _create_or_modify_delegacion(request)
     
 @login_required
 @user_passes_test(can_access_backoffice)
+@require_POST
 def delete_delegacion(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
     auth_error = validate_auth_delegacion(request,delegacion)
@@ -40,6 +44,7 @@ def delete_delegacion(request: HttpRequest, delegacion_id):
 
 @login_required
 @user_passes_test(can_access_backoffice)
+@require_http_methods(["GET","POST"])
 def edit_delegacion(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
     auth_error = validate_auth_delegacion(request,delegacion)
@@ -50,6 +55,7 @@ def edit_delegacion(request: HttpRequest, delegacion_id):
 
 @login_required
 @user_passes_test(can_access_backoffice)
+@require_GET
 def delegacion_details(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
     auth_error = validate_auth_delegacion(request,delegacion)
