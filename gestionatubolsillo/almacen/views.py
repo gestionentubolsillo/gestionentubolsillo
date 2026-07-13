@@ -1,5 +1,6 @@
 from django.shortcuts import redirect, render
 from django.http import HttpRequest,HttpResponse
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.contrib.auth.decorators import login_required, user_passes_test
 from users.models import can_access_backoffice, User
 from .models import Almacen_Item, can_view_almacen, can_CRUD_almacen
@@ -27,6 +28,7 @@ def validate_almacen_item(request:HttpRequest,nombre,stock,precio_unitario)->boo
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_almacen)
+@require_GET
 def list_almacen(request: HttpRequest):
     user:User = request.user
     almacen_items = Almacen_Item.objects.filter(usuario_creador_id = user.UserID)
@@ -46,6 +48,7 @@ def list_almacen(request: HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_almacen)
+@require_http_methods(["GET","POST"])
 def create_almacen_item(request: HttpRequest):
     if request.method == 'POST':
         created_at = now()
@@ -77,6 +80,7 @@ def create_almacen_item(request: HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_almacen)
+@require_http_methods(["GET","POST"])
 def edit_almacen_item(request: HttpRequest, item_id):
     almacen_item = Almacen_Item.objects.filter(AlmacenID=item_id).first()
     if request.method == 'POST':
@@ -111,6 +115,7 @@ def edit_almacen_item(request: HttpRequest, item_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_almacen)
+@require_POST
 def delete_almacen_item(request: HttpRequest, item_id):
     almacen_item = Almacen_Item.objects.filter(AlmacenID=item_id).first()
     almacen_item.delete()
@@ -120,6 +125,7 @@ def delete_almacen_item(request: HttpRequest, item_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_almacen)
+@require_GET
 def almacen_item_details(request: HttpRequest, item_id):
     almacen_item = Almacen_Item.objects.filter(AlmacenID=item_id).first()
     if not almacen_item:
