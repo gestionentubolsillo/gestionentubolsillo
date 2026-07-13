@@ -77,6 +77,8 @@ def create_tarea(request:HttpRequest):
             errors = validate_users_assigned(request)
             if errors:
                 return HttpResponse(template.render(context,request))
+            users_asigned_id :list[int] = [uid for uid in request.POST.getlist('users_id') if uid]
+            users = User.objects.filter(UserID__in=users_asigned_id)
             
             create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)
         return redirect('/backoffice/tareas')

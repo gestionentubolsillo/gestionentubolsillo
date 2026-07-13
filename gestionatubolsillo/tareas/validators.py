@@ -71,7 +71,7 @@ def validate_list_users(request:HttpRequest,nombre,list_users)->bool:
 
 def validate_users_assigned(request:HttpRequest)->bool:
     errors = False
-    users_asigned_id :int = [uid for uid in request.POST.getlist('users_id') if uid]
+    users_asigned_id :list[int] = [uid for uid in request.POST.getlist('users_id') if uid]
     users_asigned = User.objects.filter(UserID__in=users_asigned_id)
     if not users_asigned:
         messages.error(request,"Debe indicar un usuario válido",extra_tags='error')
