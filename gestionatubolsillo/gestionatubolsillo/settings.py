@@ -25,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(key='DJANGO_PROD_KEY',default='django-insecure-kfimq*euyia8n!z6z7m9k_*d#-81c=ip8(t!tvt$js84wpq2qo')
+SECRET_KEY = os.getenv(key='DJANGO_PROD_KEY',default=os.getenv(key='DJANGO_DEV_KEY'))
 
 #Fernet Key for obfuscation purposes
 SALT_KEY = os.getenv(key='FERNET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv(key='DEBUG_MODE') == 'True'
 
 ALLOWED_HOSTS = []
 
