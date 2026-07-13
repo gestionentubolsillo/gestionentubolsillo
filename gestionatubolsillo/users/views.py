@@ -9,7 +9,7 @@ from empresas.models import Empresa
 from decimal import Decimal
 from servicios.models import can_CRUD_servicios, Servicio
 from django.utils.timezone import now
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.db.models.manager import BaseManager
 from enum import Enum
 from django.views.decorators.clickjacking import xframe_options_sameorigin
@@ -26,12 +26,14 @@ from .validators import validate_user,validate_user_edit,validate_services_of_us
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
+@require_http_methods(["GET","POST"])
 def create_user(request:HttpRequest):
     return _create_or_modify_user(request)
 
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_users)
+@require_GET
 def lista_users(request:HttpRequest):
     
     filtros, exclusiones = filter_users(request)
@@ -43,6 +45,7 @@ def lista_users(request:HttpRequest):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_users)
+@require_GET
 def user_details(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
     if not user:
@@ -59,6 +62,7 @@ def user_details(request:HttpRequest,user_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
+@require_http_methods(["GET","POST"])
 def edit_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
     auth_error = validate_account_access(request, user)
@@ -71,6 +75,7 @@ def edit_user(request:HttpRequest,user_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
+@require_POST
 def delete_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
     auth_error = validate_account_access(request, user)
@@ -84,6 +89,7 @@ def delete_user(request:HttpRequest,user_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
+@require_http_methods(["GET","POST"])
 def alter_user_permissions(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
     auth_error = validate_account_access(request, user)
@@ -136,6 +142,7 @@ def alter_user_permissions(request:HttpRequest,user_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_users)
+@require_GET
 def view_user_permissions(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
     if not user:
@@ -167,6 +174,7 @@ TODO: Poder eliminar servicios del usuario
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
+@require_http_methods(["GET","POST"])
 def assign_services_to_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
     auth_error = validate_account_access(request, user)
@@ -179,6 +187,7 @@ def assign_services_to_user(request:HttpRequest,user_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_users)
+@require_GET
 def list_services_of_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
     auth_error = validate_account_access(request, user)
@@ -205,6 +214,7 @@ def remove_services_to_user(request:HttpRequest,user_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_users)
+@require_GET
 def list_cuadrantes_of_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
     auth_error = validate_account_access(request, user)
@@ -219,6 +229,7 @@ def list_cuadrantes_of_user(request:HttpRequest,user_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_users)
+@require_GET
 def cuadrante_details(request:HttpRequest,user_id,cuadrante_id):
     user = User.objects.filter(UserID=user_id).first()
     auth_error = validate_account_access(request, user)
@@ -233,6 +244,7 @@ def cuadrante_details(request:HttpRequest,user_id,cuadrante_id):
     return render(request,'account/users/cuadrantes/form.html',context)
 
 @xframe_options_sameorigin
+@require_GET
 def show_cuadrante_pdf(request:HttpRequest,user_id,cuadrante_id):
     user = User.objects.filter(UserID=user_id).first()
     auth_error = validate_account_access(request, user)
@@ -254,6 +266,7 @@ def show_cuadrante_pdf(request:HttpRequest,user_id,cuadrante_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
+@require_http_methods(["GET","POST"])
 def create_cuadrante(request:HttpRequest,user_id):
     template = loader.get_template('account/users/cuadrantes/form.html')
     
@@ -293,6 +306,7 @@ def create_cuadrante(request:HttpRequest,user_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
+@require_POST
 def delete_cuadrante(request:HttpRequest,user_id,cuadrante_id):
     user = User.objects.filter(UserID=user_id).first()
     auth_error = validate_account_access(request, user)
@@ -311,6 +325,7 @@ def delete_cuadrante(request:HttpRequest,user_id,cuadrante_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_users)
+@require_GET
 def list_tareas_user(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
     if not user:
