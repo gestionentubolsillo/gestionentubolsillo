@@ -20,7 +20,7 @@ from servicios.models import Servicio
 from centrales.models import Central
 
 from .paginators import paginate_informes, paginate_informes_trabajo_resumen
-from .filters import filtra_partes_trabajo, filtra_partes_inspeccion, filtra_informes_acuda
+from .filters import filtra_partes_trabajo, filtra_partes_inspeccion, filtra_informes_acuda, filtra_partes_incidencia
 # Create your views here.
 DEFAULT_PAGINATION_PARTES = 25
 @login_required
@@ -171,7 +171,22 @@ def list_informes_informe_acuda_cliente(request:HttpRequest):
 def list_informes_informe_acuda_tecnico(request:HttpRequest):
     filtros, exclusiones = filtra_informes_acuda(request)
     partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
-    pass
+    context = paginate_informes(request,partes)
+    return render(request,'informes/acuda/list.html',context)
+
+@require_GET
+def list_informes_informe_acuda(request:HttpRequest):
+    filtros, exclusiones = filtra_informes_acuda(request)
+    partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
+    context = paginate_informes(request,partes)
+    return render(request,'informes/acuda/list.html',context)
+
+@require_GET
+def list_informes_informe_incidencia(request:HttpRequest):
+    filtros, exclusiones = filtra_partes_incidencia(request)
+    partes = Parte_Incidencia.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
+    context = paginate_informes(request,partes)
+    return render(request,'informes/incidencia/list.html',context)
 
 @login_required
 @user_passes_test(can_access_backoffice)
