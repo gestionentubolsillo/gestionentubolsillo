@@ -28,9 +28,7 @@ urlpatterns = [
     
     #General
     path('backoffice/informes',views.dashboard_informes),
-    #path('backoffice/informes/nfc',views.list_informes_informe_nfc),
-    #path('backoffice/informes/almacen',views.list_informes_informe_almacen),
-    #path('backoffice/informes/incidencias',views.list_informes_informe_incidencia),
+    path('backoffice/informes/incidencias',views.list_informes_informe_incidencia),
 
     #General Trabajo
     path('backoffice/informes/trabajo',views.list_informes_informe_trabajo),
@@ -39,9 +37,9 @@ urlpatterns = [
     path('backoffice/informes/trabajo/resumen_tecnico',views.list_informes_informe_trabajo_resumen),
 
     #General Acudas
-    #path('backoffice/informes/acudas',views.list_informes_informe_acuda),
+    path('backoffice/informes/acudas',views.list_informes_informe_acuda),
     path('backoffice/informes/acudas/cliente',views.list_informes_informe_acuda_cliente),
-    #path('backoffice/informes/acudas/tecnico',views.list_informes_informe_acuda_tecnico),
+    path('backoffice/informes/acudas/tecnico',views.list_informes_informe_acuda_tecnico),
     
 
     #Rutas de ayuda de js forms
