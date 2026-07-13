@@ -4,6 +4,8 @@ from clientes.models import Cliente
 from users.models import User
 from servicios.models import Servicio
 from centrales.models import Central
+from .models import Parte
+from django.shortcuts import redirect
 
 
 def validate_parte_trabajo(request: HttpRequest, cliente_id: int, servicio_id: int, usuario_id: int) -> bool:
@@ -72,3 +74,12 @@ def _validate_common_partes(request:HttpRequest,cliente_id:int,usuario_id:int)->
         messages.error(request, "El usuario no pertenece a la misma empresa que el cliente.", extra_tags='error')
         errors = True
     return errors
+
+def validate_auth_parte(request:HttpRequest,parte:Parte, not_found_route:str):
+    logged_user : User = request.user
+    if not parte:
+        messages.error(request, 'No se encontró el informe solicitado.', extra_tags='error')
+        return redirect(not_found_route)
+    if logged_user.cuenta != parte.cuenta:
+        return redirect("/AuthError")
+    return None

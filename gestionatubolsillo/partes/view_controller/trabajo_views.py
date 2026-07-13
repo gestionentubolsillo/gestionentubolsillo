@@ -12,12 +12,13 @@ from  partes.models import Parte_Trabajo, Linea_Parte_Trabajo, can_view_parte_tr
 from partes.paginators import paginate_informes
 from partes.filters import filtra_partes_trabajo
 from partes.builders import build_parte_trabajo, build_linea_parte_trabajo
-from partes.validators import validate_parte_trabajo,validate_linea_parte_trabajo
+from partes.validators import validate_parte_trabajo,validate_linea_parte_trabajo, validate_auth_parte
 
 from clientes.models import Cliente
 from servicios.models import Servicio
 from datetime import datetime
 
+ERROR_NOT_FOUND_REDIRECT = '/backoffice/partes_trabajo'
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -76,6 +77,9 @@ def create_parte_trabajo(request:HttpRequest):
 @require_POST
 def cerrar_parte_trabajo(request:HttpRequest,parte_id):
     parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).first()
+    auth_error = validate_auth_parte(request,parte,ERROR_NOT_FOUND_REDIRECT)
+    if auth_error:
+        return auth_error
     ended_at = now()
     fecha_fin_registrada = request.POST.get('fecha_fin')
     if not fecha_fin_registrada:
@@ -98,9 +102,9 @@ def cerrar_parte_trabajo(request:HttpRequest,parte_id):
 @require_POST
 def relevar_usuario_parte_trabajo(request:HttpRequest,parte_id):
     parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).first()
-    if not parte:
-        messages.error(request, 'No se encontró el parte de trabajo solicitado.', extra_tags='error')
-        return redirect('/backoffice/partes_trabajo')
+    auth_error = validate_auth_parte(request,parte,ERROR_NOT_FOUND_REDIRECT)
+    if auth_error:
+        return auth_error
 
     usuario_relevo_id = request.POST.get('usuario_id')
     fecha_relevo = request.POST.get('fecha_hora_relevo') or request.POST.get('fecha_relevo')
@@ -143,9 +147,9 @@ def relevar_usuario_parte_trabajo(request:HttpRequest,parte_id):
 def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
     template = loader.get_template('informes/trabajo/form.html')
     parte = Parte_Trabajo.objects.filter(ParteTrabajoID=p_trabajo_id).first()
-    if not parte:
-        messages.error(request, 'No se encontró el parte de trabajo solicitado.', extra_tags='error')
-        return redirect('/backoffice/partes_trabajo')
+    auth_error = validate_auth_parte(request,parte,ERROR_NOT_FOUND_REDIRECT)
+    if auth_error:
+        return auth_error
 
     lineas = parte.lineas_parte_trabajo.all()
     choices = Linea_Parte_Trabajo._meta.get_field('actividad').choices
@@ -178,9 +182,9 @@ def view_parte_trabajo(request:HttpRequest, parte_id):
         'usuario_creador', 'usuario_asignado', 'cliente', 'empresa', 'servicio'
     ).first()
 
-    if not parte:
-        messages.error(request, 'No se encontró el parte de trabajo solicitado.', extra_tags='error')
-        return redirect('/backoffice/partes_trabajo')
+    auth_error = validate_auth_parte(request,parte,ERROR_NOT_FOUND_REDIRECT)
+    if auth_error:
+        return auth_error
 
     context = {'parte': parte, 'lineas': parte.lineas_parte_trabajo.all()}
     return render(request, 'informes/trabajo/pdfview.html', context)
