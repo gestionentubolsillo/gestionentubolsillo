@@ -11,12 +11,13 @@ from users.models import User, can_access_backoffice
 from partes.models import Informe_Acuda, can_view_acuda, can_CRUD_acuda
 from partes.filters import filtra_informes_acuda
 from partes.paginators import paginate_informes
-from partes.validators import validate_parte_acuda
+from partes.validators import validate_parte_acuda, validate_auth_parte
 from partes.builders import build_parte_acuda
 
 from clientes.models import Cliente
 from centrales.models import Central
 
+ERROR_NOT_FOUND_REDIRECT = '/backoffice/informes_acuda'
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -52,7 +53,7 @@ def create_inf_acuda(request:HttpRequest):
         if errors:
             return HttpResponse(template.render(context,request))
         created_at = now()
-        parte = build_parte_acuda(data={
+        build_parte_acuda(data={
             'general':{
                 'usuario_asignado':User.objects.get(UserID=usuario_id),
                 'cliente':Cliente.objects.get(ClienteID=cliente_id),
@@ -71,9 +72,9 @@ def view_parte_acuda(request:HttpRequest, parte_id:int):
         'usuario_creador', 'usuario_asignado', 'cliente', 'empresa', 'central'
     ).first()
 
-    if not parte:
-        messages.error(request, 'No se encontró el informe de Acuda solicitado.', extra_tags='error')
-        return redirect('/backoffice/informes_acuda')
+    auth_error = validate_auth_parte(request,parte,ERROR_NOT_FOUND_REDIRECT)
+    if auth_error:
+        return auth_error
 
     context = {'parte': parte}
     return render(request, 'informes/acuda/pdfview.html', context)
@@ -83,5 +84,8 @@ def parte_acuda_details(request:HttpRequest,parte_id:int):
     parte = Informe_Acuda.objects.filter(InformeAcudaID=parte_id).select_related(
         'usuario_creador', 'usuario_asignado', 'cliente', 'empresa', 'central'
     ).first()
+    auth_error = validate_auth_parte(request,parte,ERROR_NOT_FOUND_REDIRECT)
+    if auth_error:
+        return auth_error
     context = {'parte': parte, 'action':'view'}
     return render(request, 'informes/acuda/form.html', context)

@@ -12,11 +12,12 @@ from partes.models import Parte_Incidencia,can_view_parte_incidencia,can_CRUD_pa
 from partes.filters import filtra_partes_incidencia
 from partes.paginators import paginate_informes
 from partes.builders import build_parte_incidencia
-from partes.validators import validate_parte_incidencia
+from partes.validators import validate_parte_incidencia, validate_auth_parte
 
 from datetime import datetime
 from clientes.models import Cliente
 
+ERROR_NOT_FOUND_REDIRECT = '/backoffice/partes_incidencia'
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -69,9 +70,9 @@ def view_parte_incidencia(request:HttpRequest, parte_id:int):
         'usuario_creador', 'usuario_asignado', 'cliente', 'empresa'
     ).first()
 
-    if not parte:
-        messages.error(request, 'No se encontró la incidencia solicitada.', extra_tags='error')
-        return redirect('/backoffice/partes_incidencia')
+    auth_error = validate_auth_parte(request,parte,ERROR_NOT_FOUND_REDIRECT)
+    if auth_error:
+        return auth_error
 
     context = {'parte': parte}
     return render(request, 'informes/incidencia/pdfview.html', context)
