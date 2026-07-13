@@ -8,16 +8,12 @@
             <div class="list-toolbar">
                 <span class="list-title">
                     <i class="bi bi-file-earmark-text me-1 text-primary"></i>
-                    Informes de Acuda
+                    Informes de Partes de Incidencia
                 </span>
-<<<<<<< HEAD
-                {% include "informes/acuda/search_form.html" %}
-=======
                 {% include "informes/incidencia/search_form.html" %}
->>>>>>> master
 
-                <a href="/backoffice/informes_acuda/create" class="btn btn-primary btn-sm ms-auto">
-                    <i class="bi bi-plus-lg me-1"></i> Nueva Acuda
+                <a href="/backoffice/partes_incidencia/create" class="btn btn-primary btn-sm ms-auto">
+                    <i class="bi bi-plus-lg me-1"></i> Nueva Incidencia
                 </a>
             </div>
 
@@ -28,7 +24,6 @@
                             <th>Fecha</th>
                             <th>Usuario</th>
                             <th>Cliente</th>
-                            <th>Central</th>
                             <th>Texto</th>
                             <th class="text-end">Acciones</th>
                         </tr>
@@ -36,17 +31,16 @@
                     <tbody>
                         {% for parte in  partes%}
                             <tr>
-                                <td class="fw-medium">{{parte.fecha_creacion}}</td>
+                                <td class="fw-medium">{{parte.fecha_hora_incidencia}}</td>
                                 <td class="text-muted">{{parte.usuario_asignado}}</td>
                                 <td class="text-muted">{{parte.cliente}}</td>
-                                <td class="text-muted">{{parte.central}}</td>
-                                <td class="text-muted">{{parte.descripcion}}</td>
+                                <td class="text-muted">{{parte.texto_incidencia}}</td>
                                 <td class="text-end">
                                     <div class="d-flex gap-1 justify-content-end">
-                                        <a href="/backoffice/informes_acuda/{{ parte.InformeAcudaID }}" class="action-btn" title="Ver parte">
+                                        <a href="/backoffice/partes_incidencia/{{ parte.ParteIncidenciaID }}" class="action-btn" title="Ver parte">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="/backoffice/acudas/{{ parte.InformeAcudaID }}" class="action-btn" title="Ver PDF" target="_blank" rel="noopener noreferrer">
+                                        <a href="/backoffice/incidencias/{{ parte.ParteIncidenciaID }}" class="action-btn" title="Ver PDF">
                                             <i class="bi bi-file-earmark-pdf"></i>
                                         </a>
                                     </div>
