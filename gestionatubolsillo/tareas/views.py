@@ -65,22 +65,26 @@ def create_tarea(request:HttpRequest):
 
         empresas_ids = [eid for eid in request.POST.getlist('empresas_ids') if eid]
         listas_usuarios_ids = [luid for luid in request.POST.getlist('listas_ids') if luid] 
+        try:
 
-        if empresas_ids:
-            users = User.objects.filter(empresa_id__in=empresas_ids).distinct()
-            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)
+            if empresas_ids:
+                users = User.objects.filter(empresa_id__in=empresas_ids,cuenta=user.cuenta).distinct()
+                create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)
 
-        elif listas_usuarios_ids:
-            users = User.objects.filter(listados__id__in=listas_usuarios_ids).distinct()
-            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)                  
-        else:
-            errors = validate_users_assigned(request)
-            if errors:
-                return HttpResponse(template.render(context,request))
-            users_asigned_id :list[int] = [uid for uid in request.POST.getlist('users_id') if uid]
-            users = User.objects.filter(UserID__in=users_asigned_id)
+            elif listas_usuarios_ids:
+                users = User.objects.filter(listados__id__in=listas_usuarios_ids,cuenta=user.cuenta).distinct()
+                create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)                  
+            else:
+                errors = validate_users_assigned(request)
+                if errors:
+                    return HttpResponse(template.render(context,request))
+                users_asigned_id :list[int] = [uid for uid in request.POST.getlist('users_id') if uid]
+                users = User.objects.filter(UserID__in=users_asigned_id,cuenta=user.cuenta)
             
-            create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)
+                create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)
+        except ValueError:
+            messages.error(request,"Error Inesperado, intente de nuevo", extra_tags='error')
+            return HttpResponse(template.render(context,request))
         return redirect('/backoffice/tareas')
     
     elif request.method == 'GET':

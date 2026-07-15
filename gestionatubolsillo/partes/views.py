@@ -160,26 +160,27 @@ def list_informes_informe_trabajo_resumen(request:HttpRequest):
     context = paginate_informes_trabajo_resumen(request,usuarios_asignados)
     return render(request,'informes/trabajo/list_resumen.html',context)
 
+ACUDA_LIST_TEMPLATE = 'informes/acuda/list.html'
 @require_GET
 def list_informes_informe_acuda_cliente(request:HttpRequest):
     filtros, exclusiones = filtra_informes_acuda(request)
     partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
-    return render(request,'informes/acuda/list.html',context)
+    return render(request,ACUDA_LIST_TEMPLATE,context)
 
 @require_GET
 def list_informes_informe_acuda_tecnico(request:HttpRequest):
     filtros, exclusiones = filtra_informes_acuda(request)
     partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
-    return render(request,'informes/acuda/list.html',context)
+    return render(request,ACUDA_LIST_TEMPLATE,context)
 
 @require_GET
 def list_informes_informe_acuda(request:HttpRequest):
     filtros, exclusiones = filtra_informes_acuda(request)
     partes = Informe_Acuda.objects.filter(**filtros).exclude(**exclusiones).order_by('-fecha_creacion')
     context = paginate_informes(request,partes)
-    return render(request,'informes/acuda/list.html',context)
+    return render(request,ACUDA_LIST_TEMPLATE,context)
 
 @require_GET
 def list_informes_informe_incidencia(request:HttpRequest):
