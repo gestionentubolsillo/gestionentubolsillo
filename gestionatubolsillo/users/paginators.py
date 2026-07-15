@@ -29,7 +29,7 @@ def paginate_servicios_users(request:HttpRequest,user:User):
     global DEFAULT_PAGINATION_USER_SERVICES
     n_services = request.GET.get('n_services', DEFAULT_PAGINATION_USER_SERVICES)
 
-    servicios = Servicio.objects.filter(users=user)
+    servicios = Servicio.objects.filter(users=user).order_by('ServicioID')
 
     paginacion = Paginator(servicios, n_services)
     page_obj = paginacion.get_page(n_pagina)
