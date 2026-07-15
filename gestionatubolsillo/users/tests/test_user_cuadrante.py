@@ -3,7 +3,7 @@ from django.contrib.messages import get_messages
 
 from users.models import User, PermisosModulo, Cuenta
 from empresas.models import Empresa
-from .base_test import BaseTests
+from home.tests import BaseTests
 
 
 class CuadranteTests(BaseTests):

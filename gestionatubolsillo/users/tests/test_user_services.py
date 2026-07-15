@@ -4,7 +4,7 @@ from django.contrib.messages import get_messages
 from users.models import User
 from servicios.models import Servicio
 
-from .base_test import BaseTests
+from home.tests import BaseTests
 
 class ServiceTests(BaseTests):
 
