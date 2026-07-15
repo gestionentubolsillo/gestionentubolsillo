@@ -1,5 +1,5 @@
 from typing import TypedDict
-from .models import User,Cuadrante, EncryptedFilePDF, PermisosModulo
+from .models import User,Cuadrante, EncryptedFilePDF, PermisosModulo, Cuenta
 from empresas.models import Empresa
 from decimal import Decimal
 from django.core.files.uploadedfile import UploadedFile
@@ -19,6 +19,7 @@ class UserData(UserCoreData):
     provincia:str
     municipio:str
     empresa:Empresa
+    cuenta:Cuenta
     esInspector:bool
     esInspector_parteTrabajo:bool
     always_track_GPS:bool
@@ -38,7 +39,7 @@ def build_user(data:UserData,user:User|None = None)->User:
 
     else:
         User.objects.filter(UserID=user.UserID).update(
-                                                       **{K:v for K,v in data.items() if K !='password'})
+                                                       **{K:v for K,v in data.items() if K not in ('password','cuenta')})
         
     return user
 
