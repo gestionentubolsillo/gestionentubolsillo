@@ -9,7 +9,10 @@ from django.shortcuts import redirect
 
 def validate_sugerencia(request:HttpRequest, texto, usuario_referente_id)->bool:
     errors = False
-    user_ref = User.objects.filter(UserID=usuario_referente_id).first()
+    try:
+        user_ref = User.objects.filter(UserID=usuario_referente_id,cuenta=request.user.cuenta).first()
+    except ValueError:
+        user_ref = None
     if texto == '':
         messages.error(request, 'El texto de la sugerencia no puede estar vacío.',extra_tags='error')
         errors = True
