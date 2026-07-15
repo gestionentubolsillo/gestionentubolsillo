@@ -4,7 +4,7 @@ from django.contrib.messages import get_messages
 from users.models import User
 from empresas.models import Empresa
 
-from .base_test import BaseTests
+from home.tests import BaseTests
 
 class UserTestsView(BaseTests):
     def test_logged_user_list_users(self):
