@@ -163,8 +163,8 @@ def _create_or_update_servicio(request:HttpRequest,servicio:Servicio | None = No
         descripcion = request.POST.get('descripcion','')
         mail = request.POST.get('mail','')
         dias_semana = request.POST.getlist('dias_semana')
-        hora_inicio = request.POST.get('hora_inicio','')
-        hora_fin = request.POST.get('hora_fin','')
+        hora_inicio = request.POST.get('hora_inicio')
+        hora_fin = request.POST.get('hora_fin')
         precio_hora = Decimal(request.POST.get('precio_hora',0.))
         is_active = request.POST.get('is_active')=='on'
         es_exterior = bool(int(request.POST.get('es_exterior',1)))
