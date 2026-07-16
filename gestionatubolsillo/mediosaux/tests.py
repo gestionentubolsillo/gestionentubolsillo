@@ -67,3 +67,25 @@ class MedioAuxTestsCreate(MedioAuxTest):
         self.assertEqual(response.redirect_chain, [])
         self.assertTemplateUsed(response,template_name='mediosaux/form.html')
         self.assertFalse(MedioAuxiliar.objects.all().count()>2)
+
+class MedioAuxTestsDelete(MedioAuxTest):
+
+    def test_delete_medio_possitive(self):
+        self.assertLogin()
+        response = self.client.post(path=f'/backoffice/medios_auxiliares/delete/{self.medio_auth.MedioAuxiliarID}',follow=True)
+        self.assertRedirects(response,expected_url='/backoffice/medios_auxiliares')
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.context['medios_auxiliares'].paginator.count,0)
+
+    def test_delete_medio_unauth_fails(self):
+        self.assertLogin()
+        response = self.client.post(path=f'/backoffice/medios_auxiliares/delete/{self.medio_not_auth.MedioAuxiliarID}',follow=True)
+        self.assertEqual(response.status_code,404)
+
+    def test_delete_medio_non_existent_fails(self):
+        self.assertLogin()
+        response = self.client.post(path='/backoffice/medios_auxiliares/delete/999',follow=True)
+        self.assertRedirects(response,expected_url='/backoffice/medios_auxiliares')
+        self.assertEqual(response.status_code,200)
+        self.assertFalse(MedioAuxiliar.objects.all().count()<2)
+
