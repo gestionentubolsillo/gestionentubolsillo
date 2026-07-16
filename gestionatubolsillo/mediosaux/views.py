@@ -9,15 +9,11 @@ from django.template import loader
 from django.utils.timezone import now
 from django.contrib import messages
 
-DEFAULT_PAGINATION_MEDIOS_AUXILIARES = 25
+from .paginators import paginate_medios
+from .validators import validate_medio_auxiliar, validate_medio_auth
 # Create your views here.
 
-def validate_medio_auxiliar(request:HttpRequest,nombre)->bool:
-    errors = False
-    if nombre == '':
-        messages.error(request,"Debe indicar un nombre al medio auxiliar",extra_tags='error')
-        errors = True
-    return errors
+
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -25,18 +21,8 @@ def validate_medio_auxiliar(request:HttpRequest,nombre)->bool:
 @require_GET
 def list_medios_auxiliares(request:HttpRequest):
     user:User = request.user
-    medios_auxiliares = MedioAuxiliar.objects.filter(usuario_creador_id = user.UserID)
-    n_pagina = request.GET.get('page',1)
-    global DEFAULT_PAGINATION_MEDIOS_AUXILIARES
-    n_medios_auxiliares = request.GET.get('n_medios_auxiliares', DEFAULT_PAGINATION_MEDIOS_AUXILIARES)
-    paginacion = Paginator(medios_auxiliares,n_medios_auxiliares)
-    page_obj = paginacion.get_page(n_pagina)
-    context = {
-        'medios_auxiliares': page_obj,
-        'page_obj': page_obj,
-        'page':n_pagina,
-        'n_medios_auxiliares':n_medios_auxiliares
-    }
+    medios_auxiliares = MedioAuxiliar.objects.filter(cuenta = user.cuenta)
+    context = paginate_medios(request, medios_auxiliares)
     return render(request,'mediosaux/list.html',context)
 
 @login_required
@@ -69,6 +55,9 @@ def create_medio_auxiliar(request:HttpRequest):
 @require_http_methods(["GET","POST"])
 def edit_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
+    auth_error = validate_medio_auth(request,medio_auxiliar)
+    if auth_error:
+        return auth_error
     if request.method == 'POST':
         nombre = request.POST.get('nombre','')
         errors = validate_medio_auxiliar(request,nombre)
@@ -96,6 +85,9 @@ def edit_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
 @require_POST
 def delete_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
+    auth_error = validate_medio_auth(request,medio_auxiliar)
+    if auth_error:
+        return auth_error
     medio_auxiliar.delete()
     messages.success(request,"Medio auxiliar eliminado correctamente",extra_tags='success')
     return redirect('/backoffice/medios_auxiliares')
@@ -106,9 +98,9 @@ def delete_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
 @require_GET
 def medio_auxiliar_details(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
-    if not medio_auxiliar:
-        messages.error(request,"El medio auxiliar no existe",extra_tags='error')
-        return redirect('/backoffice/medios_auxiliares')
+    auth_error = validate_medio_auth(request,medio_auxiliar)
+    if auth_error:
+        return auth_error
     context = {
         'medio_auxiliar': medio_auxiliar,
         'action':'view'

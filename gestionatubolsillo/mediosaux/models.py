@@ -8,6 +8,7 @@ class MedioAuxiliar(models.Model):
     nombre = models.CharField(max_length=200)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     usuario_creador = models.ForeignKey('users.User', on_delete=models.SET_NULL,related_name='medios_auxiliares_creados',null=True)
+    cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL,related_name='mediosaux',null=True)
 
 
 def can_view_medios_auxiliares(user: User)-> bool:
