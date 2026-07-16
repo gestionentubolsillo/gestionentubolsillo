@@ -61,9 +61,9 @@ def edit_servicio(request:HttpRequest,servicio_id):
 def servicio_details(request:HttpRequest,servicio_id):
     servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
 
-    if not servicio:
-        messages.error(request,"El servicio no existe",extra_tags='error')
-        return redirect('/backoffice/servicios')
+    auth_error = validate_auth_servicio(request,servicio)
+    if auth_error:
+        return auth_error
     
     context = paginate_clientes_de_servicio(request=request,servicio=servicio)
     return render(request,'servicios/form.html',context)
