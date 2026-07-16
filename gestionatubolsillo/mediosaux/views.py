@@ -21,7 +21,7 @@ from .validators import validate_medio_auxiliar, validate_medio_auth
 @require_GET
 def list_medios_auxiliares(request:HttpRequest):
     user:User = request.user
-    medios_auxiliares = MedioAuxiliar.objects.filter(cuenta = user.cuenta)
+    medios_auxiliares = MedioAuxiliar.objects.filter(cuenta = user.cuenta).order_by('MedioAuxiliarID')
     context = paginate_medios(request, medios_auxiliares)
     return render(request,'mediosaux/list.html',context)
 

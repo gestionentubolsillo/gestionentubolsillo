@@ -1,3 +1,4 @@
+from django.contrib.messages import get_messages
 from home.tests import BaseTests
 from .models import MedioAuxiliar
 
@@ -17,3 +18,33 @@ class MedioAuxTest(BaseTests):
         medio_not_auth.save()
 
         self.medio_not_auth = medio_not_auth
+
+class MedioAuxTestsView(MedioAuxTest):
+
+    def test_list_possitive(self):
+        self.assertLogin()
+        response = self.client.get(path='/backoffice/medios_auxiliares',follow=True)
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.context['medios_auxiliares'].paginator.count,1)
+
+    def test_medio_view_possitive(self):
+        self.assertLogin()
+        response = self.client.get(path=f'/backoffice/medios_auxiliares/{self.medio_auth.MedioAuxiliarID}',follow=True)
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.context['medio_auxiliar'].MedioAuxiliarID,self.medio_auth.MedioAuxiliarID)
+
+    def test_medio_view_unauth_fails(self):
+        self.assertLogin()
+        response = self.client.get(path=f'/backoffice/medios_auxiliares/{self.medio_not_auth.MedioAuxiliarID}')
+        self.assertEqual(response.status_code,302)
+
+    def test_medio_view_non_existent_fails(self):
+        self.assertLogin()
+        response = self.client.get(path='/backoffice/medios_auxiliares/999',follow=True)
+        self.assertRedirects(response,expected_url='/backoffice/medios_auxiliares')
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages),1)
+        self.assertEqual(messages[0].extra_tags,'error')
+        self.assertEqual(str(messages[0]),"El medio auxiliar no existe")
+
+
