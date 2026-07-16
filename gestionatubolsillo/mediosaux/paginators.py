@@ -1,5 +1,5 @@
 from django.http import HttpRequest
-from django.db.models import BaseManager
+from django.db.models.manager import BaseManager
 from .models import MedioAuxiliar
 from django.core.paginator import Paginator
 
