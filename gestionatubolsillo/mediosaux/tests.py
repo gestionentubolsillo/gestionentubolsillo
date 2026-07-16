@@ -47,4 +47,23 @@ class MedioAuxTestsView(MedioAuxTest):
         self.assertEqual(messages[0].extra_tags,'error')
         self.assertEqual(str(messages[0]),"El medio auxiliar no existe")
 
+class MedioAuxTestsCreate(MedioAuxTest):
 
+    def test_create_medio_possitive(self):
+        self.assertLogin()
+        response = self.client.post(path='/backoffice/medios_auxiliares/create',data={
+            'nombre':'prueba__'
+        },format='json',follow=True)
+        self.assertRedirects(response,expected_url='/backoffice/medios_auxiliares')
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.context['medios_auxiliares'].paginator.count,2)
+
+    def test_create_medio_nombre_missing_fails(self):
+        self.assertLogin()
+        response = self.client.post(path='/backoffice/medios_auxiliares/create',data={
+            'nombre':''
+        },format='json',follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.redirect_chain, [])
+        self.assertTemplateUsed(response,template_name='mediosaux/form.html')
+        self.assertFalse(MedioAuxiliar.objects.all().count()>2)

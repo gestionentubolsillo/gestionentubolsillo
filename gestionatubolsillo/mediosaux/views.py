@@ -42,6 +42,7 @@ def create_medio_auxiliar(request:HttpRequest):
         medio_auxiliar.nombre = nombre
         medio_auxiliar.fecha_creacion = created_at
         medio_auxiliar.usuario_creador = request.user
+        medio_auxiliar.cuenta = request.user.cuenta
         medio_auxiliar.save()
         return redirect('/backoffice/medios_auxiliares')
     elif request.method == 'GET':
