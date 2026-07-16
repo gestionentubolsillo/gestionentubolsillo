@@ -33,3 +33,5 @@ media/
 
 #Sonar
 .sonar/
+sonar*
+*coverage*
