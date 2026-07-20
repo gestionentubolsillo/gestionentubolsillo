@@ -63,7 +63,7 @@ def client_details(request:HttpRequest,client_id):
 @user_passes_test(can_CRUD_clientes)
 @require_POST
 def delete_client(request:HttpRequest,client_id):
-    cliente = Cliente.objects.filter(id=client_id).first()
+    cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
     if auth_error:
         return auth_error
