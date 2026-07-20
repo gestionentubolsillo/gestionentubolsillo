@@ -1,3 +1,4 @@
+from django.contrib.messages import get_messages
 from home.tests import BaseTests
 from .models import Delegacion
 
@@ -37,3 +38,38 @@ class DelegacionTestsView(DelegacionTest):
         self.assertLogin()
         response = self.client.get(path=f'/backoffice/delegaciones/{self.delegacion_no_auth.DelegacionID}')
         self.assertEqual(response.status_code,302)
+
+class DelegacionTestsCreate(DelegacionTest):
+
+    def test_delegacion_create_possitive(self):
+        self.assertLogin()
+        response = self.client.post(path='/backoffice/delegaciones/create', data={
+            'nombre':'create__'
+        },format='json',follow=True)
+        self.assertRedirects(response,expected_url='/backoffice/delegaciones')
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.context['delegaciones'].paginator.count,2)
+
+class DelegacionTestsDelete(DelegacionTest):
+
+    def test_delegacion_delete_possitive(self):
+        self.assertLogin()
+        response = self.client.post(path=f'/backoffice/delegaciones/delete/{self.delegacion_auth.DelegacionID}',follow=True)
+        self.assertRedirects(response,expected_url='/backoffice/delegaciones')
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.context['delegaciones'].paginator.count,0)
+
+    def test_delegacion_delete_unauth_fails(self):
+        self.assertLogin()
+        response = self.client.post(path=f'/backoffice/delegaciones/delete/{self.delegacion_no_auth.DelegacionID}',follow=True)
+        self.assertEqual(response.status_code,404)
+
+    def test_delegacion_delete_non_existent_fails(self):
+        self.assertLogin()
+        response = self.client.post(path='/backoffice/delegaciones/delete/999',follow=True)
+        self.assertRedirects(response,expected_url='/backoffice/delegaciones')
+        self.assertEqual(response.context['delegaciones'].paginator.count,1)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages),1)
+        self.assertEqual(messages[0].extra_tags,'error')
+        self.assertEqual(str(messages[0]),"La delegación no existe")
