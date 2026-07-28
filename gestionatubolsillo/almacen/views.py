@@ -4,26 +4,16 @@ from django.views.decorators.http import require_POST, require_GET, require_http
 from django.contrib.auth.decorators import login_required, user_passes_test
 from users.models import can_access_backoffice, User
 from .models import Almacen_Item, can_view_almacen, can_CRUD_almacen
-from django.core.paginator import Paginator
+
 from django.template import loader
 from django.utils.timezone import now
 from django.contrib import messages
 
-DEFAULT_PAGINATION_ALMACEN = 25
+from .paginators import paginate_items
+from .validators import validate_almacen_item, validate_auth_item
+from .builders import build_item
+from decimal import Decimal
 # Create your views here.
-
-def validate_almacen_item(request:HttpRequest,nombre,stock,precio_unitario)->bool:
-    errors = False
-    if nombre == '':
-        messages.error(request,"Debe indicar un nombre al item de almacén",extra_tags='error')
-        errors = True
-    if stock and int(stock) < 0:
-        messages.error(request,"El stock no puede ser negativo",extra_tags='error')
-        errors = True
-    if precio_unitario and float(precio_unitario) < 0:
-        messages.error(request,"El precio unitario no puede ser negativo",extra_tags='error')
-        errors = True
-    return errors
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -31,18 +21,9 @@ def validate_almacen_item(request:HttpRequest,nombre,stock,precio_unitario)->boo
 @require_GET
 def list_almacen(request: HttpRequest):
     user:User = request.user
-    almacen_items = Almacen_Item.objects.filter(usuario_creador_id = user.UserID)
-    n_pagina = request.GET.get('page',1)
-    global DEFAULT_PAGINATION_ALMACEN
-    n_almacen_items = request.GET.get('n_almacen_items', DEFAULT_PAGINATION_ALMACEN)
-    paginacion = Paginator(almacen_items,n_almacen_items)
-    page_obj = paginacion.get_page(n_pagina)
-    context = {
-        'almacen_items': page_obj,
-        'page_obj': page_obj,
-        'page':n_pagina,
-        'n_almacen_items':n_almacen_items
-    }
+    almacen_items = Almacen_Item.objects.filter(cuenta=user.cuenta).order_by('AlmacenID')
+    context = paginate_items(request,almacen_items)
+    
     return render(request,'almacen/list.html',context)
 
 @login_required
@@ -50,32 +31,7 @@ def list_almacen(request: HttpRequest):
 @user_passes_test(can_CRUD_almacen)
 @require_http_methods(["GET","POST"])
 def create_almacen_item(request: HttpRequest):
-    if request.method == 'POST':
-        created_at = now()
-        nombre = request.POST.get('nombre','')
-        descripcion = request.POST.get('descripcion','')
-        stock = request.POST.get('stock',0)
-        precio_unitario = request.POST.get('precio_unitario',0.00)
-        proveedor = request.POST.get('proveedor','')
-        errors = validate_almacen_item(request,nombre,stock,precio_unitario)
-        if errors:
-            template = loader.get_template('form.html')
-            context = {'action':'create'}
-            return HttpResponse(template.render(context,request))
-        almacen_item = Almacen_Item()
-        almacen_item.nombre = nombre
-        almacen_item.descripcion = descripcion
-        almacen_item.stock = stock
-        almacen_item.precio_unitario = precio_unitario
-        almacen_item.proveedor = proveedor
-        almacen_item.usuario_creador = request.user
-        almacen_item.fecha_creacion = created_at
-        almacen_item.save()
-        return redirect('/backoffice/almacen')
-    elif request.method == 'GET':
-        template = loader.get_template('almacen/form.html')
-        context = {'action':'create'}
-        return HttpResponse(template.render(context,request))
+    return _create_or_modify_item(request)
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -83,34 +39,11 @@ def create_almacen_item(request: HttpRequest):
 @require_http_methods(["GET","POST"])
 def edit_almacen_item(request: HttpRequest, item_id):
     almacen_item = Almacen_Item.objects.filter(AlmacenID=item_id).first()
-    if request.method == 'POST':
-        nombre = request.POST.get('nombre','')
-        descripcion = request.POST.get('descripcion','')
-        stock = request.POST.get('stock',0)
-        precio_unitario = request.POST.get('precio_unitario',0.00)
-        proveedor = request.POST.get('proveedor','')
-        errors = validate_almacen_item(request,nombre,stock,precio_unitario)
-        if errors:
-            template = loader.get_template('almacen/form.html')
-            context = {
-            'almacen_item': almacen_item,
-            'action':'edit'
-        }
-            return HttpResponse(template.render(context,request))
-        almacen_item.nombre = nombre
-        almacen_item.descripcion = descripcion
-        almacen_item.stock = stock
-        almacen_item.precio_unitario = precio_unitario
-        almacen_item.proveedor = proveedor
-        almacen_item.save()
-        return redirect('/backoffice/almacen')
-    elif request.method == 'GET':
-        context = {
-            'almacen_item': almacen_item,
-            'action':'edit'
-        }
-        template = loader.get_template('almacen/form.html')
-        return HttpResponse(template.render(context,request))
+    auth_error = validate_auth_item(request,almacen_item)
+    if auth_error:
+        return auth_error
+    return _create_or_modify_item(request,almacen_item)
+        
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -118,6 +51,9 @@ def edit_almacen_item(request: HttpRequest, item_id):
 @require_POST
 def delete_almacen_item(request: HttpRequest, item_id):
     almacen_item = Almacen_Item.objects.filter(AlmacenID=item_id).first()
+    auth_error = validate_auth_item(request,almacen_item)
+    if auth_error:
+        return auth_error
     almacen_item.delete()
     messages.success(request,"Item de almacén eliminado correctamente",extra_tags='success')
     return redirect('/backoffice/almacen')
@@ -128,11 +64,44 @@ def delete_almacen_item(request: HttpRequest, item_id):
 @require_GET
 def almacen_item_details(request: HttpRequest, item_id):
     almacen_item = Almacen_Item.objects.filter(AlmacenID=item_id).first()
-    if not almacen_item:
-        messages.error(request,"El item de almacén no existe",extra_tags='error')
-        return redirect('/backoffice/almacen')
+    auth_error = validate_auth_item(request,almacen_item)
+    if auth_error:
+        return auth_error
     context = {
         'almacen_item': almacen_item,
         'action':'view'
     }
     return render(request,'almacen/form.html',context)
+
+
+def _create_or_modify_item(request:HttpRequest,item:Almacen_Item|None=None):
+    user : User = request.user
+    template = loader.get_template('almacen/form.html')
+    if item is None:
+        context = {'action':'create'}
+    else:
+        context = {
+            'almacen_item': item,'action':'edit'}
+        
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre','')
+        descripcion = request.POST.get('descripcion','')
+        stock = request.POST.get('stock',0)
+        precio_unitario = Decimal(request.POST.get('precio_unitario',0.00))
+        proveedor = request.POST.get('proveedor','')
+        errors = validate_almacen_item(request,nombre,stock,precio_unitario)
+        if errors:
+            return HttpResponse(template.render(context,request))
+        created_at = now()
+        build_item(data={
+            'nombre':nombre,
+            'descripcion':descripcion,
+            'stock':stock,
+            'precio_unitario':precio_unitario,
+            'proveedor':proveedor
+        },creador=user,cuenta=user.cuenta,created_at=created_at,item=item)
+        return redirect('/backoffice/almacen')
+
+    elif request.method == 'GET':
+        return HttpResponse(template.render(context,request))
+    
