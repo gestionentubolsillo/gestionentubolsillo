@@ -37,7 +37,7 @@ def paginate_servicios_de_cliente(request:HttpRequest,cliente:Cliente):
     n_pagina = request.GET.get('page', 1)
     global DEFAULT_PAGINATION_CLIENT_SERVICES
     n_services = request.GET.get('n_services', DEFAULT_PAGINATION_CLIENT_SERVICES)
-    servicios = cliente.servicios.all()
+    servicios = cliente.servicios.all().order_by('ServicioID')
     paginacion = Paginator(servicios,n_services)
     page_obj = paginacion.get_page(n_pagina)
     context = {

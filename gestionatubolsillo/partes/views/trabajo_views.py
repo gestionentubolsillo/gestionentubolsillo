@@ -97,7 +97,6 @@ def cerrar_parte_trabajo(request:HttpRequest,parte_id):
     return redirect(f'/backoffice/partes/{parte_id}')
 
 @login_required
-@require_POST
 @user_passes_test(can_CRUD_parte_trabajo)
 @require_POST
 def relevar_usuario_parte_trabajo(request:HttpRequest,parte_id):
@@ -107,7 +106,7 @@ def relevar_usuario_parte_trabajo(request:HttpRequest,parte_id):
         return auth_error
 
     usuario_relevo_id = request.POST.get('usuario_id')
-    fecha_relevo = request.POST.get('fecha_hora_relevo') or request.POST.get('fecha_relevo')
+    fecha_relevo = request.POST.get('fecha_hora_relevo')
 
     usuario_relevo = None
     if usuario_relevo_id:
@@ -124,7 +123,7 @@ def relevar_usuario_parte_trabajo(request:HttpRequest,parte_id):
     parte.save()
 
     if usuario_saliente and usuario_relevo:
-        extra_info = f'{usuario_saliente.username} releva al {usuario_relevo.username}'
+        extra_info = f'{usuario_saliente.username} releva al usuario {usuario_relevo.username}'
     elif usuario_relevo:
         extra_info = f'Relevo asignado a {usuario_relevo.username}'
     else:
@@ -143,7 +142,7 @@ def relevar_usuario_parte_trabajo(request:HttpRequest,parte_id):
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_parte_trabajo)
-@require_http_methods(["GET","POST"])
+@require_POST
 def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
     template = loader.get_template('informes/trabajo/form.html')
     parte = Parte_Trabajo.objects.filter(ParteTrabajoID=p_trabajo_id).first()
@@ -154,26 +153,21 @@ def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
     lineas = parte.lineas_parte_trabajo.all()
     choices = Linea_Parte_Trabajo._meta.get_field('actividad').choices
     context = {'parte':parte,'lineas':lineas, 'action':'view','choices':choices}
-    if request.method == 'POST':
-        actividad = request.POST.get('actividad')
-        fecha_registrada = request.POST.get('fecha')
-        extra_info = request.POST.get('extra')
-        errors = validate_linea_parte_trabajo(request,actividad)
-        if errors:
-            return HttpResponse(template.render(context,request))
-        created_at = now()
-        fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
-
-        build_linea_parte_trabajo(data={
-            'actividad':actividad,
-            'extra_info':extra_info,
-            'fecha_registrada':fecha,
-            'parte_trabajo':parte
-        },created_at=created_at)
-        return redirect(f'/backoffice/partes_trabajo/{p_trabajo_id}/actividades')
-
-    if request.method == 'GET':
+    actividad = request.POST.get('actividad')
+    fecha_registrada = request.POST.get('fecha')
+    extra_info = request.POST.get('extra')
+    errors = validate_linea_parte_trabajo(request,actividad)
+    if errors:
         return HttpResponse(template.render(context,request))
+    created_at = now()
+    fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
+    build_linea_parte_trabajo(data={
+        'actividad':actividad,
+        'extra_info':extra_info,
+        'fecha_registrada':fecha,
+        'parte_trabajo':parte
+    },created_at=created_at)
+    return redirect(f'/backoffice/partes_trabajo/{p_trabajo_id}')
 
 #Necesario indagar más en estas caracteristicas
 @require_GET
@@ -188,3 +182,23 @@ def view_parte_trabajo(request:HttpRequest, parte_id):
 
     context = {'parte': parte, 'lineas': parte.lineas_parte_trabajo.all()}
     return render(request, 'informes/trabajo/pdfview.html', context)
+
+@login_required
+@user_passes_test(can_access_backoffice)
+@user_passes_test(can_view_parte_trabajo)
+@require_GET
+def parte_trabajo_details(request:HttpRequest,parte_id):
+    parte = Parte_Trabajo.objects.filter(ParteTrabajoID=parte_id).select_related(
+        'usuario_creador', 'usuario_asignado', 'cliente', 'empresa', 'servicio'
+    ).first()
+    auth_error = validate_auth_parte(request,parte,ERROR_NOT_FOUND_REDIRECT)
+    if auth_error:
+        return auth_error
+    lineas = parte.lineas_parte_trabajo.all()
+    choices = Linea_Parte_Trabajo._meta.get_field('actividad').choices
+    usuarios_relevo = User.objects.filter(cuenta=request.user.cuenta,servicios=parte.servicio)
+    context = {'parte':parte,'lineas':lineas, 'action':'view','choices':choices,'usuarios':usuarios_relevo}
+    template = loader.get_template('informes/trabajo/form.html')
+    return HttpResponse(template.render(context,request))
+
+    

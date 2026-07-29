@@ -9,6 +9,11 @@ def validate_empresa(request:HttpRequest,nombre,paquete)->bool:
     if nombre == '' or paquete == '':
         messages.error(request,"Todos los campos son obligatorios",extra_tags='error')
         errors = True
+    if paquete != '':
+        paquetes_validos = dict(Empresa._meta.get_field('paquete').choices).keys()
+        if paquete not in paquetes_validos:
+            messages.error(request, "El paquete seleccionado no es válido", extra_tags='error')
+            errors = True
     return errors
 
 

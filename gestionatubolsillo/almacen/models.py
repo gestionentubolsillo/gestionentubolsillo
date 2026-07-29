@@ -15,6 +15,7 @@ class Almacen_Item(models.Model):
     proveedor = models.CharField(max_length=200, blank=True)
 
     usuario_creador = models.ForeignKey('users.User', on_delete=models.SET_NULL,related_name='almacen_items_creados',null=True)
+    cuenta = models.ForeignKey('users.Cuenta',on_delete=models.SET_NULL,related_name='almacen_items',null=True)
 
     def get_precio_total(self)->Decimal:
         return self.stock * self.precio_unitario

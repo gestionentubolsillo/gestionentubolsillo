@@ -4,33 +4,39 @@ from clientes.models import Cliente
 from users.models import User
 from servicios.models import Servicio
 from centrales.models import Central
-from .models import Parte
+from .models import Parte, Linea_Parte_Trabajo
 from django.shortcuts import redirect
 
 
 def validate_parte_trabajo(request: HttpRequest, cliente_id: int, servicio_id: int, usuario_id: int) -> bool:
     errors = _validate_common_partes(request=request,cliente_id=cliente_id,usuario_id=usuario_id)
-    cliente = Cliente.objects.filter(ClienteID=cliente_id).first()
-    usuario = User.objects.filter(UserID=usuario_id).first() 
-    servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
-    if not servicio:
-        messages.error(request, "El servicio no existe.", extra_tags='error')
-        errors = True
-    if servicio.empresa != cliente.empresa:
-        messages.error(request, "El servicio no pertenece a la misma empresa que el cliente.", extra_tags='error')
-        errors = True
-    if usuario.servicios.filter(ServicioID=servicio_id).count() == 0:
-        messages.error(request, "El usuario no está asociado al servicio seleccionado.", extra_tags='error')
-        errors = True
-    if cliente.servicios.filter(ServicioID=servicio_id).count() == 0:
-        messages.error(request, "El cliente no está asociado al servicio seleccionado.", extra_tags='error')
+    logged_user : User = request.user
+    try:
+        cliente = Cliente.objects.filter(ClienteID=cliente_id).first()
+        usuario = User.objects.filter(UserID=usuario_id).first() 
+        servicio = Servicio.objects.filter(ServicioID=servicio_id, cuenta=logged_user.cuenta).first()
+        if not servicio:
+            messages.error(request, "El servicio no existe/ no es válido", extra_tags='error')
+            errors = True
+        if servicio and servicio.empresa != cliente.empresa:
+            messages.error(request, "El servicio no pertenece a la misma empresa que el cliente.", extra_tags='error')
+            errors = True
+        if usuario.servicios.filter(ServicioID=servicio_id).count() == 0:
+            messages.error(request, "El usuario no está asociado al servicio seleccionado.", extra_tags='error')
+            errors = True
+        if cliente.servicios.filter(ServicioID=servicio_id).count() == 0:
+            messages.error(request, "El cliente no está asociado al servicio seleccionado.", extra_tags='error')
+            errors = True
+    except ValueError:
+        messages.error(request, "Error inesperado.¿Está segura que los datos son válidos?",extra_tags='error')
         errors = True
     return errors
 
 
 def validate_linea_parte_trabajo(request:HttpRequest,actividad)->bool:
     errors = False
-    if not actividad or actividad == '':
+    actividades= [val for val,_ in Linea_Parte_Trabajo._meta.get_field('actividad').choices]
+    if not actividad or actividad == '' or actividad not in actividades:
         messages.error(request,"Debe indicar una actividad para el parte", extra_tags='error')
         errors = True
     return errors
@@ -45,13 +51,17 @@ def validate_parte_incidencia(request:HttpRequest,cliente_id:int,usuario_id:int,
 
 def validate_parte_acuda(request:HttpRequest,cliente_id:int, usuario_id:int,central_id:int,texto:str)->bool:
     errors = _validate_common_partes(request,cliente_id,usuario_id)
-    usuario = User.objects.filter(UserID=usuario_id).first()
-    central = Central.objects.filter(CentralID=central_id).first()
-    if not central:
-        messages.error(request, "La central no existe.", extra_tags='error')
-        errors = True
-    if central.cuenta != usuario.cuenta:
-        messages.error(request,"La central no es válida", extra_tags='error')
+    try:
+        usuario = User.objects.filter(UserID=usuario_id).first()
+        central = Central.objects.filter(CentralID=central_id).first()
+        if not central:
+            messages.error(request, "La central no existe.", extra_tags='error')
+            errors = True
+        if central.cuenta != usuario.cuenta:
+            messages.error(request,"La central no es válida", extra_tags='error')
+            errors = True
+    except ValueError:
+        messages.error(request, "Error inesperado.¿Está segura que los datos son válidos?",extra_tags='error')
         errors = True
     if not texto or texto == '':
         messages.error(request,"Debe indicar una descripción para la acuda",extra_tags='error')
@@ -62,16 +72,21 @@ def validate_parte_acuda(request:HttpRequest,cliente_id:int, usuario_id:int,cent
 
 def _validate_common_partes(request:HttpRequest,cliente_id:int,usuario_id:int)->bool:
     errors = False
-    cliente = Cliente.objects.filter(ClienteID=cliente_id).first()
-    if not cliente:
-        messages.error(request, "El cliente no existe.", extra_tags='error')
-        errors = True
-    usuario = User.objects.filter(UserID=usuario_id).first() 
-    if not usuario:
-        messages.error(request, "El usuario no existe.", extra_tags='error')
-        errors = True
-    if usuario.empresa != cliente.empresa:
-        messages.error(request, "El usuario no pertenece a la misma empresa que el cliente.", extra_tags='error')
+    logged_user : User = request.user
+    try:
+        cliente = Cliente.objects.filter(ClienteID=cliente_id, cuenta=logged_user.cuenta).first()
+        if not cliente:
+            messages.error(request, "El cliente no existe/ no es válido.", extra_tags='error')
+            errors = True
+        usuario = User.objects.filter(UserID=usuario_id, cuenta=logged_user.cuenta).first() 
+        if not usuario:
+            messages.error(request, "El usuario no existe/ no es válido.", extra_tags='error')
+            errors = True
+        if usuario and cliente and usuario.empresa != cliente.empresa:
+            messages.error(request, "El usuario no pertenece a la misma empresa que el cliente.", extra_tags='error')
+            errors = True
+    except ValueError:
+        messages.error(request, "Error inesperado.¿Está segura que los datos son válidos?",extra_tags='error')
         errors = True
     return errors
 

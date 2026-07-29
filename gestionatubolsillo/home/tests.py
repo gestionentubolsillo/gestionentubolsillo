@@ -95,3 +95,4 @@ class BaseTests(TestCase):
         response = self.client.post(path='/login',data={'username':'test_user','password':'12345'},format='json', follow=True)
         self.assertRedirects(response,expected_url='/')
         self.assertEqual(response.status_code,200)
+        self.assertTrue(response.wsgi_request.user.is_authenticated)

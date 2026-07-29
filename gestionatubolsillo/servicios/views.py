@@ -61,9 +61,9 @@ def edit_servicio(request:HttpRequest,servicio_id):
 def servicio_details(request:HttpRequest,servicio_id):
     servicio = Servicio.objects.filter(ServicioID=servicio_id).first()
 
-    if not servicio:
-        messages.error(request,"El servicio no existe",extra_tags='error')
-        return redirect('/backoffice/servicios')
+    auth_error = validate_auth_servicio(request,servicio)
+    if auth_error:
+        return auth_error
     
     context = paginate_clientes_de_servicio(request=request,servicio=servicio)
     return render(request,'servicios/form.html',context)
@@ -163,8 +163,8 @@ def _create_or_update_servicio(request:HttpRequest,servicio:Servicio | None = No
         descripcion = request.POST.get('descripcion','')
         mail = request.POST.get('mail','')
         dias_semana = request.POST.getlist('dias_semana')
-        hora_inicio = request.POST.get('hora_inicio','')
-        hora_fin = request.POST.get('hora_fin','')
+        hora_inicio = request.POST.get('hora_inicio')
+        hora_fin = request.POST.get('hora_fin')
         precio_hora = Decimal(request.POST.get('precio_hora',0.))
         is_active = request.POST.get('is_active')=='on'
         es_exterior = bool(int(request.POST.get('es_exterior',1)))

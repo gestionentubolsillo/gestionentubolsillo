@@ -19,7 +19,10 @@ def validate_client(request:HttpRequest,nombre,provincia,municipio,empresa_id)->
     if provincia == '' or municipio == '':
         messages.error(request,"Debe indicar provincia y municipio al que pertenece",extra_tags='error')
         errors = True
-    empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
+    try:
+        empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
+    except ValueError:
+        empresa = None
     if empresa is None:
         messages.error(request,"Debe indicar una empresa válida",extra_tags='error')
         errors = True
@@ -42,10 +45,13 @@ def validate_servicios_cliente(request:HttpRequest,servicios_ids,allowed_service
     if not servicios_ids:
         messages.error(request, "Debe seleccionar al menos un servicio", extra_tags='error')
         errors = True
-    servicios = Servicio.objects.filter(ServicioID__in=servicios_ids)
+    try:
+        servicios = Servicio.objects.filter(ServicioID__in=servicios_ids)
+    except ValueError:
+        servicios = None
     if not servicios:
         messages.error(request, "No se ha podido encontrar ningún servicio", extra_tags='error')
-        errors = True
+        return True
     servicios_no_permitidos = servicios.difference(allowed_services_to_add)
     if servicios_no_permitidos.exists():
         messages.error(request, "No puede añadir servicios no autorizados a este cliente", extra_tags='error')
