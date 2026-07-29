@@ -51,13 +51,17 @@ def validate_parte_incidencia(request:HttpRequest,cliente_id:int,usuario_id:int,
 
 def validate_parte_acuda(request:HttpRequest,cliente_id:int, usuario_id:int,central_id:int,texto:str)->bool:
     errors = _validate_common_partes(request,cliente_id,usuario_id)
-    usuario = User.objects.filter(UserID=usuario_id).first()
-    central = Central.objects.filter(CentralID=central_id).first()
-    if not central:
-        messages.error(request, "La central no existe.", extra_tags='error')
-        errors = True
-    if central.cuenta != usuario.cuenta:
-        messages.error(request,"La central no es válida", extra_tags='error')
+    try:
+        usuario = User.objects.filter(UserID=usuario_id).first()
+        central = Central.objects.filter(CentralID=central_id).first()
+        if not central:
+            messages.error(request, "La central no existe.", extra_tags='error')
+            errors = True
+        if central.cuenta != usuario.cuenta:
+            messages.error(request,"La central no es válida", extra_tags='error')
+            errors = True
+    except ValueError:
+        messages.error(request, "Error inesperado.¿Está segura que los datos son válidos?",extra_tags='error')
         errors = True
     if not texto or texto == '':
         messages.error(request,"Debe indicar una descripción para la acuda",extra_tags='error')
