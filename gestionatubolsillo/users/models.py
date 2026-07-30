@@ -81,7 +81,7 @@ class User(AbstractUser):
     is_admin = models.BooleanField(default=False)
 
     #Relacion N:N el modelo servicio
-    servicios = models.ManyToManyField('servicios.Servicio', related_name='users')
+    servicios = models.ManyToManyField('servicios.Servicio', related_name='users',blank=True)
     delegacion = models.ForeignKey('delegaciones.Delegacion', on_delete=models.SET_NULL,related_name='usuarios', null=True, blank=True)
 
     cuenta = models.ForeignKey(Cuenta,on_delete=models.SET_NULL,related_name='usuarios',null=True,blank=True)
