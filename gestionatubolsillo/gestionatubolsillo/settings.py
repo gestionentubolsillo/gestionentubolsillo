@@ -32,7 +32,8 @@ SALT_KEY = os.getenv(key='FERNET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv(key='DEBUG_MODE') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000').split(',')
 
 
 # Application definition
