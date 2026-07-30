@@ -27,7 +27,7 @@
       max-width: 320px;
     }
 
-    .search-box i {
+    .search-box > i {
       position: absolute;
       left: 0.75rem;
       top: 50%;
