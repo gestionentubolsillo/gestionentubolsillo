@@ -17,8 +17,13 @@
       Centrales Receptoras
     </span>
 
-    {% include "searchforms/by_name.html" %}
-
+    <form method="get" action="" class="search-box mb-0 d-flex gap-2">
+      <i class="bi bi-search"></i>
+      {% include "searchforms/by_name.html" %}
+      <button type="submit" class="btn btn-primary btn-sm">
+            <i class="bi bi-search"></i>
+        </button>
+    </form>
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
     {% if perm_escritura %}
         <a href="/backoffice/centrales/create" class="btn btn-primary btn-sm ms-auto">
