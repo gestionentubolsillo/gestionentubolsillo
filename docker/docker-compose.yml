@@ -1,0 +1,70 @@
+services:
+  db:
+    restart: always
+    container_name: gestion_db
+    image: postgres:18.4
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db:/var/lib/postgresql
+    networks:
+      - gestion_net
+  
+  web:
+    restart: always
+    container_name: gestion_web
+    image: gestion_web:latest
+    build: .
+    command: ash -c "python manage.py makemigrations && python manage.py migrate && gunicorn -w 5 gestionatubolsillo.wsgi --timeout=500 -b 0.0.0.0:5000"
+    expose: 
+      - "5000"
+    volumes:
+      - static:/app/static
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      GEOAPI_API_KEY: ${GEOAPI_API_KEY}
+      FERNET_KEY: ${FERNET_KEY}
+      DJANGO_DEV_KEY: ${DJANGO_DEV_KEY}
+      DEBUG_MODE: ${DEBUG_MODE}
+      CSRF_TRUSTED_ORIGINS: http://localhost:8000
+    networks:
+      - gestion_net
+  
+  nginx:
+    restart: always
+    container_name: gestion_nginx
+    image: gestion_nginx:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    volumes:
+      - static:/app/static
+    ports:
+      - "8000:80"
+    depends_on:
+      - web
+    networks:
+      - gestion_net
+  
+volumes:
+  static:
+    name: gestion_static
+  db:
+    name: gestion_db
+
+networks:
+  gestion_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.5.0.0/16
+
