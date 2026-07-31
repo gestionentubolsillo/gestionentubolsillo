@@ -20,37 +20,37 @@
       <div class="sidebar-group">
         <p class="sidebar-label">Principal</p>
         {% if  user.has_dashboard_access%}
-            <a href="/backoffice" class="sidebar-link active"> Dashboard</a>
+            <a href="/backoffice" class="sidebar-link"><i class="fas fa-th"></i> Dashboard</a>
         {% endif %}
         {% if permiso_user %}
-            <a href="/backoffice/users" class="sidebar-link"> Usuarios</a>
+            <a href="/backoffice/users" class="sidebar-link"><i class="fas fa-users"></i> Usuarios</a>
         {% endif %}
-        <a href="#" class="sidebar-link"> Configuración</a>
+        <a href="#" class="sidebar-link"><i class="fas fa-cogs"></i> Configuración</a>
       </div>
       <div class="sidebar-group">
         <p class="sidebar-label">Módulos</p>
         {% if permiso_empresas %}
-            <a href="/backoffice/empresas" class="sidebar-link"> Empresas</a>
+            <a href="/backoffice/empresas" class="sidebar-link"><i class="fas fa-building"></i> Empresas</a>
         {% endif %}
         {% if permiso_clientes %}
-            <a href="/backoffice/clientes" class="sidebar-link">Clientes</a>
+            <a href="/backoffice/clientes" class="sidebar-link"><i class="fas fa-address-book"></i> Clientes</a>
         {% endif %}
         {% if permiso_servicios_nfc %}
-            <a href="/backoffice/servicios" class="sidebar-link"> Servicios</a>
+            <a href="/backoffice/servicios" class="sidebar-link"><i class="fas fa-handshake"></i> Servicios</a>
         {% endif %}
         {% if permiso_almacen %}
-            <a href="/backoffice/almacen" class="sidebar-link"> Almacén</a>
+            <a href="/backoffice/almacen" class="sidebar-link"><i class="fas fa-warehouse"></i> Almacén</a>
         {% endif %}
         
         {% if permiso_centrales %}
-            <a href="/backoffice/centrales" class="sidebar-link"> Centrales Receptoras</a>
+            <a href="/backoffice/centrales" class="sidebar-link"><i class="fas fa-landmark"></i> Centrales Receptoras</a>
         {% endif %}
         {% if permiso_medios_auxiliares %}
-            <a href="/backoffice/medios_auxiliares" class="sidebar-link"> Medios Auxiliares</a>
+            <a href="/backoffice/medios_auxiliares" class="sidebar-link"><i class="fas fa-toolbox"></i> Medios Auxiliares</a>
         {% endif %}
-        <a href="/backoffice/delegaciones" class="sidebar-link"> Delegaciones</a>
+        <a href="/backoffice/delegaciones" class="sidebar-link"><i class="fas fa-globe"></i> Delegaciones</a>
         {% if permiso_servicios_nfc %}
-            <a href="#" class="sidebar-link"> NFC</a>
+            <a href="#" class="sidebar-link"><i class="fas fa-tags"></i> NFC</a>
         {% endif %}
         
         
@@ -58,30 +58,29 @@
       <div class="sidebar-group">
         <p class="sidebar-label">Notificaciones</p>
         {% if permiso_tareas %}
-            <a href="/backoffice/tareas" class="sidebar-link"> Tareas</a>
+            <a href="/backoffice/tareas" class="sidebar-link"><i class="fas fa-clipboard-list"></i> Tareas</a>
         {% endif %}
         {% if permiso_sugerencias %}
-            <a href="/backoffice/sugerencias" class="sidebar-link"></i> Sugerencias</a>
+            <a href="/backoffice/sugerencias" class="sidebar-link"><i class="fas fa-comments"></i> Sugerencias</a>
         {% endif %}
       </div>
       <div class="sidebar-group">
         <p class="sidebar-label">Informes</p>
-        <a href="/backoffice/informes" class="sidebar-link"> Informes</a>
-        <a href="/backoffice/partes_trabajo" class="sidebar-link"> Partes de trabajo</a>
-        <a href="/backoffice/partes_incidencia" class="sidebar-link"> Partes de Incidencia</a>
-        <a href="/backoffice/partes_inspeccion" class="sidebar-link"> Partes de Inspeccion</a>
-        <a href="/backoffice/informes_acuda" class="sidebar-link"> Informes de acuda</a>
+        <a href="/backoffice/informes" class="sidebar-link"><i class="fas fa-folder"></i> Informes</a>
+        <a href="/backoffice/partes_trabajo" class="sidebar-link"><i class="fas fa-file-invoice"></i> Partes de trabajo</a>
+        <a href="/backoffice/partes_incidencia" class="sidebar-link"><i class="fas fa-exclamation-triangle"></i> Partes de Incidencia</a>
+        <a href="/backoffice/partes_inspeccion" class="sidebar-link"><i class="fas fa-shield-alt"></i> Partes de Inspeccion</a>
+        <a href="/backoffice/informes_acuda" class="sidebar-link"><i class="fas fa-bullhorn"></i> Informes de acuda</a>
         
       </div>
       {% if user.is_admin %}
       <div class="sidebar-group">
         <p class="sidebar-label">Administración</p>
-        <a href="#" class="sidebar-link"> Registro de actividades</a>
+        <a href="#" class="sidebar-link"><i class="fas fa-user-clock"></i> Registro de actividades</a>
       </div>
       {% endif %}
       
     </nav>
-    <div class="sidebar-footer">v1.0.0</div>
 </aside>
 
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
