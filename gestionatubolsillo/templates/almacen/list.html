@@ -11,15 +11,15 @@
   <!-- TOOLBAR: título + búsqueda + botón crear -->
   <div class="list-toolbar">
     <span class="list-title">
-      <i class="bi bi-building me-1 text-primary"></i>
+      <i class="fas fa-building me-1 text-primary"></i>
       Productos de Almacén
     </span>
 
     <form method="get" action="" class="search-box mb-0 d-flex gap-2">
-      <i class="bi bi-search"></i>
+      <i class="fas fa-search"></i>
       {% include "searchforms/by_name.html" %}
       <button type="submit" class="btn btn-primary btn-sm">
-            <i class="bi bi-search"></i>
+            <i class="fas fa-search"></i>
         </button>
     </form>
 
@@ -28,7 +28,7 @@
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
     {% if perm_escritura %}
         <a href="/backoffice/almacen/create" class="btn btn-primary btn-sm ms-auto">
-            <i class="bi bi-plus-lg me-1"></i> Nuevo Producto
+            <i class="fas fa-plus-lg me-1"></i> Nuevo Producto
         </a>
     {% endif %}
   </div>
@@ -63,20 +63,20 @@
               <!-- Ver: permiso view_only o create_modify -->
               {% if perm_lectura %}
                 <a href="/backoffice/almacen/{{item.AlmacenID}}" class="action-btn" title="Ver">
-                    <i class="bi bi-eye"></i>
+                    <i class="fas fa-eye"></i>
                 </a>
               {% endif %}
 
               <!-- Editar: solo create_modify -->
               {% if perm_escritura %}
                 <a href="/backoffice/almacen/edit/{{item.AlmacenID}}" class="action-btn" title="Editar">
-                    <i class="bi bi-pencil"></i>
+                    <i class="fas fa-pencil-alt"></i>
                 </a>
 
               <!-- Eliminar: solo create_modify -->
                 <button class="action-btn delete" title="Eliminar"
                       data-bs-toggle="modal" data-bs-target="#deleteModal-{{item.AlmacenID}}">
-                    <i class="bi bi-trash"></i>
+                    <i class="fas fa-trash"></i>
                 </button>
                 <!-- MODAL CONFIRMACIÓN ELIMINAR -->
                 <div class="modal fade" id="deleteModal-{{item.AlmacenID}}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -84,7 +84,7 @@
                         <div class="modal-content" style="border-radius:14px;border:none;">
                             <div class="modal-header border-0 pb-0">
                                 <h5 class="modal-title fw-bold" id="deleteModalLabel">
-                                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Eliminar Producto
+                                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>Eliminar Producto
                                 </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>

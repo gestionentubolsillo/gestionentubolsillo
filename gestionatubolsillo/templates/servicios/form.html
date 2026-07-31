@@ -13,7 +13,7 @@
         <div class="form-card">
  
             <div class="form-card-header">
-                <i class="bi bi-building text-primary"></i>
+                <i class="fas fa-building text-primary"></i>
                 <span class="form-card-title">Nuevo Servicio</span>
             </div>
  
@@ -118,10 +118,10 @@
  
             <div class="form-card-footer">
                 <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i>Volver
+                    <i class="fas fa-arrow-left me-1"></i>Volver
                 </a>
                 <button type="submit" form="form-servicio" class="btn btn-primary btn-sm">
-                    <i class="bi bi-check-lg me-1"></i>Crear Servicio
+                    <i class="fas fa-check-lg me-1"></i>Crear Servicio
                 </button>
             </div>
  
@@ -133,7 +133,7 @@
         <div class="form-card">
  
             <div class="form-card-header">
-                <i class="bi bi-building text-primary"></i>
+                <i class="fas fa-building text-primary"></i>
                 <span class="form-card-title">Editar Servicio</span>
             </div>
  
@@ -238,10 +238,10 @@
  
             <div class="form-card-footer">
                 <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i>Volver
+                    <i class="fas fa-arrow-left me-1"></i>Volver
                 </a>
                 <button type="submit" form="form-servicio" class="btn btn-primary btn-sm">
-                    <i class="bi bi-check-lg me-1"></i>Editar
+                    <i class="fas fa-check-lg me-1"></i>Editar
                 </button>
             </div>
  
@@ -255,7 +255,7 @@
             
  
             <div class="form-card-header">
-                <i class="bi bi-building text-primary"></i>
+                <i class="fas fa-building text-primary"></i>
                 <span class="form-card-title">Detalles Servicio</span>
             </div>
  
@@ -340,7 +340,7 @@
             </div>
             <div class="form-card-footer">
                 <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i>Volver
+                    <i class="fas fa-arrow-left me-1"></i>Volver
                 </a>
             </div>
  
@@ -349,7 +349,7 @@
 
         <div class="form-card">
             <div class="form-card-header">
-                <i class="bi bi-people me-1 text-primary"></i>
+                <i class="fas fa-users me-1 text-primary"></i>
                 Clientes del servicio
                 <span class="badge bg-primary ms-1">{{ servicio.clientes.count }}</span>
             </div>
@@ -358,22 +358,22 @@
                     <div class="list-toolbar">
                         <!--Busqueda por Nombre (Añadir en futuro busqueda por select de provincia y municipio)-->
                         <form method="get" action="" class="search-box mb-0 d-flex gap-2">
-                            {% include "searchforms/by_name.html" %} scope="col"
+                            {% include "searchforms/by_name.html" %}
                             <button type="submit" class="btn btn-primary btn-sm">
-                                <i class="bi bi-search"></i>
+                                <i class="fas fa-search"></i>
                             </button>
                         </form>
                             {% if perm_escritura %}
                                 <div class="d-flex gap-2 ms-auto">
                                 <a href="/backoffice/servicios/{{servicio.ServicioID}}/clientes/add"
                                    class="btn btn-primary btn-sm">
-                                    <i class="bi bi-person-plus me-1"></i>Añadir clientes
+                                    <i class="fas fa-user-plus me-1"></i>Añadir clientes
                                 </a>
                                 <button class="btn btn-outline-danger btn-sm"
                                         id="btn-remove-bulk"
                                         data-servicio-id="{{servicio.ServicioID}}"
                                         disabled>
-                                    <i class="bi bi-person-dash me-1"></i>Eliminar seleccionados
+                                    <i class="fas fa-users-slash me-1"></i>Eliminar seleccionados
                                 </button>
                                 </div>
                             {% endif %}
@@ -422,7 +422,7 @@
                                                     <!-- Ver: permiso view_only o create_modify -->
                                                     {% if perm_lectura %}
                                                         <a href="/backoffice/clientes/{{cliente.ClienteID}}" class="action-btn" title="Ver">
-                                                            <i class="bi bi-eye"></i>
+                                                            <i class="fas fa-eye"></i>
                                                         </a>
                                                     {% endif %}
                                                     </div>
@@ -431,7 +431,7 @@
                                             {% empty %}
                                             <tr>
                                                 <td colspan="6" class="text-center text-muted py-3">
-                                                    <i class="bi bi-people me-1"></i>Este servicio no tiene clientes asignados
+                                                    <i class="fas fa-users me-1"></i>Este servicio no tiene clientes asignados
                                                 </td>
                                             </tr>
                                         {% endfor %}

@@ -1,4 +1,4 @@
-<select name="empresa" class="form-select form-select-sm" style="min-width: 160px;">
+<select name="empresa" class="form-select form-select-sm" style="min-width: 160px;max-height:32px;">
   <option value="" disabled selected> Seleccione una empresa...</option>
   {% for empresa in empresas %}
     <option value="{{empresa.EmpresaID}}" {% if empresa.EmpresaID|stringformat:"s" == filtro_empresa|stringformat:"s" %}selected{% endif %}>

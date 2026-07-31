@@ -13,35 +13,37 @@
   <!-- TOOLBAR: título + búsqueda + botón crear -->
   <div class="list-toolbar">
     <span class="list-title">
-      <i class="bi bi-building me-1 text-primary"></i>
+      <i class="fas fa-comments me-1 text-primary"></i>
       Sugerencias
     </span>
 
-    <form method="get" action="" class="search-box mb-0 d-flex gap-2">
-      <i class="bi bi-search"></i>
+    <form method="get" action="" class="search-box mb-0 d-flex align-items-center gap-2">
       {% include "searchforms/by_user.html" %}
+      <div class="d-flex flex-wrap align-items-end gap-2">
       {% include "searchforms/by_range_of_dates.html" %}
+      </div>
       {% include "searchforms/by_estado.html" %}
       {% include "searchforms/by_referente.html" %}
       {% include "searchforms/by_empresa.html" %}
-      <button type="submit" class="btn btn-primary btn-sm">
-        <i class="bi bi-search"></i>
+
+      <button type="submit" class="btn btn-primary btn-sm" style="max-height:32px;">
+        <i class="fas fa-search"></i>
       </button>
     </form>
     <!-- Botón ver listados - mostrar solo si tiene permiso minimo de vista-->
      {% if  perm_lectura%}
         <a href="/backoffice/sugerencias" class="btn btn-primary btn-sm ms-auto">
-            <i class="bi bi-plus-lg me-1"></i> Ver Todas
+            <i class="fas fa-comments me-1"></i> Ver Todas
         </a>
 
         <a href="/backoffice/sugerencias/self" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i> Ver Propias
+            <i class="fas fa-comment me-1"></i> Ver Propias
         </a>
      {% endif %}
     <!-- Botón crear — mostrar solo si tiene permiso create_modify -->
     {% if perm_escritura %}
         <a href="/backoffice/sugerencias/create" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i> Nueva Sugerencia
+            <i class="fas fa-comment-dots me-1"></i> Nueva Sugerencia
         </a>
     {% endif %}
   </div>
@@ -79,7 +81,7 @@
               <!-- Ver: permiso view_only o create_modify -->
               {% if perm_lectura %}
                 <a href="/backoffice/sugerencias/{{sugerencia.SugerenciaID}}" class="action-btn" title="Ver">
-                    <i class="bi bi-eye"></i>
+                    <i class="fas fa-eye"></i>
                 </a>
               {% endif %}
 
@@ -88,7 +90,7 @@
               <!-- Eliminar: solo create_modify -->
                 <button class="action-btn delete" title="Eliminar"
                       data-bs-toggle="modal" data-bs-target="#deleteModal-{{sugerencia.SugerenciaID}}">
-                    <i class="bi bi-trash"></i>
+                    <i class="fas fa-trash"></i>
                 </button>
                 <!-- MODAL CONFIRMACIÓN ELIMINAR -->
                 <div class="modal fade" id="deleteModal-{{sugerencia.SugerenciaID}}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -96,7 +98,7 @@
                         <div class="modal-content" style="border-radius:14px;border:none;">
                             <div class="modal-header border-0 pb-0">
                                 <h5 class="modal-title fw-bold" id="deleteModalLabel">
-                                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Eliminar sugerencia
+                                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>Eliminar sugerencia
                                 </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
