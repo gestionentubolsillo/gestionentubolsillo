@@ -10,7 +10,7 @@
         <div class="form-card">
  
             <div class="form-card-header">
-                <i class="bi bi-building text-primary"></i>
+                <i class="fas fa-building text-primary"></i>
                 <span class="form-card-title">Nuevo Cliente</span>
             </div>
  
@@ -88,10 +88,10 @@
  
             <div class="form-card-footer">
                 <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i>Volver
+                    <i class="fas fa-arrow-left me-1"></i>Volver
                 </a>
                 <button type="submit" form="form-cliente" class="btn btn-primary btn-sm">
-                    <i class="bi bi-check-lg me-1"></i>Crear Cliente
+                    <i class="fas fa-check-lg me-1"></i>Crear Cliente
                 </button>
             </div>
  
@@ -103,7 +103,7 @@
         <div class="form-card">
  
             <div class="form-card-header">
-                <i class="bi bi-building text-primary"></i>
+                <i class="fas fa-building text-primary"></i>
                 <span class="form-card-title">Nuevo Cliente</span>
             </div>
  
@@ -181,10 +181,10 @@
  
             <div class="form-card-footer">
                 <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i>Volver
+                    <i class="fas fa-arrow-left me-1"></i>Volver
                 </a>
                 <button type="submit" form="form-cliente" class="btn btn-primary btn-sm">
-                    <i class="bi bi-check-lg me-1"></i>Editar
+                    <i class="fas fa-check-lg me-1"></i>Editar
                 </button>
             </div>
  
@@ -198,7 +198,7 @@
             
  
             <div class="form-card-header">
-                <i class="bi bi-building text-primary"></i>
+                <i class="fas fa-building text-primary"></i>
                 <span class="form-card-title">Detalles cliente</span>
             </div>
  
@@ -246,7 +246,7 @@
             </div>
             <div class="form-card-footer">
                 <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i>Volver
+                    <i class="fas fa-arrow-left me-1"></i>Volver
                 </a>
             </div>
  
@@ -255,7 +255,7 @@
 
         <div class="form-card">
             <div class="form-card-header">
-                <i class="bi bi-people me-1 text-primary"></i>
+                <i class="fas fa-handshake me-1 text-primary"></i>
                 Servicios del Cliente
                 <span class="badge bg-primary ms-1">{{ cliente.servicios.count }}</span>
             </div>
@@ -266,20 +266,20 @@
                         <form method="get" action="" class="search-box mb-0 d-flex gap-2">
                             {% include "searchforms/by_name.html" %}
                             <button type="submit" class="btn btn-primary btn-sm">
-                                <i class="bi bi-search"></i>
+                                <i class="fas fa-search"></i>
                             </button>
                         </form>
                             {% if perm_escritura %}
                                 <div class="d-flex gap-2 ms-auto">
                                 <a href="/backoffice/clientes/{{cliente.ClienteID}}/servicios/add"
                                    class="btn btn-primary btn-sm">
-                                    <i class="bi bi-person-plus me-1"></i>Añadir Servicios
+                                    <i class="fas fa-person-plus me-1"></i>Añadir Servicios
                                 </a>
                                 <button class="btn btn-outline-danger btn-sm"
                                         id="btn-remove-bulk"
                                         data-servicio-id="{{cliente.clienteID}}"
                                         disabled>
-                                    <i class="bi bi-person-dash me-1"></i>Eliminar seleccionados
+                                    <i class="fas fa-person-dash me-1"></i>Eliminar seleccionados
                                 </button>
                                 </div>
                             {% endif %}

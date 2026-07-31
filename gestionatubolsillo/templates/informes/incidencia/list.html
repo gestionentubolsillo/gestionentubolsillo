@@ -7,13 +7,13 @@
         <div class="list-card">
             <div class="list-toolbar">
                 <span class="list-title">
-                    <i class="bi bi-file-earmark-text me-1 text-primary"></i>
+                    <i class="fas fa-file-earmark-text me-1 text-primary"></i>
                     Informes de Partes de Incidencia
                 </span>
                 {% include "informes/incidencia/search_form.html" %}
 
                 <a href="/backoffice/partes_incidencia/create" class="btn btn-primary btn-sm ms-auto">
-                    <i class="bi bi-plus-lg me-1"></i> Nueva Incidencia
+                    <i class="fas fa-plus-lg me-1"></i> Nueva Incidencia
                 </a>
             </div>
 
@@ -38,10 +38,10 @@
                                 <td class="text-end">
                                     <div class="d-flex gap-1 justify-content-end">
                                         <a href="/backoffice/partes_incidencia/{{ parte.ParteIncidenciaID }}" class="action-btn" title="Ver parte">
-                                            <i class="bi bi-eye"></i>
+                                            <i class="fas fa-eye"></i>
                                         </a>
                                         <a href="/backoffice/incidencias/{{ parte.ParteIncidenciaID }}" class="action-btn" title="Ver PDF" target="_blank" rel="noopener noreferrer">
-                                            <i class="bi bi-file-earmark-pdf"></i>
+                                            <i class="fas fa-file-pdf"></i>
                                         </a>
                                     </div>
                                 </td>

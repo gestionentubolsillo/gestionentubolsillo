@@ -1,4 +1,4 @@
-<select name="user_ref_id" class="form-select form-select-sm" style="min-width: 160px;">
+<select name="user_ref_id" class="form-select form-select-sm" style="min-width: 160px; max-height:32px;">
     <option value="" selected>Filtro por referente...</option>
     {% for usuario in  usuarios%}
         <option value="{{usuario.UserID}}">{{usuario.username}}</option>

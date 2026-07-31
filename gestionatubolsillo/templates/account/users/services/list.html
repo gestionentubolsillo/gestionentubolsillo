@@ -9,34 +9,32 @@
 
 <main id='main'>
     <div class="main-content">
-        <div class="form-card">
-            <div class="form-card-header">
-                <i class="bi bi-people me-1 text-primary"></i>
-                Servicios asignados al Usuario
-                <span class="badge bg-primary ms-1">{{ servicio.servicios.count }}</span>
-            </div>
-            <div class="form-card-body">
+        <div class="list-card">
                 <!--Seccion servicios-->
                     <div class="list-toolbar">
+                        <span class="list-tittle">
+                            <i class="fas fa-handshake me-1 text-primary"></i>
+                            Servicios asignados al Usuario
+                        </span>
                         <!--Busqueda por Nombre (Añadir en futuro busqueda por select de provincia y municipio)-->
                         <form method="get" action="" class="search-box mb-0 d-flex gap-2">
-                            <i class="bi bi-search"></i>
+                            <i class="fas fa-search"></i>
                             {% include "searchforms/by_name.html" %}
                             <button type="submit" class="btn btn-primary btn-sm">
-                                <i class="bi bi-search"></i>
+                                <i class="fas fa-search"></i>
                             </button>
                         </form>
                             {% if perm_escritura %}
                                 <div class="d-flex gap-2 ms-auto">
                                 <a href="/backoffice/users/{{usuario.UserID}}/services/assign"
                                    class="btn btn-primary btn-sm">
-                                    <i class="bi bi-person-plus me-1"></i>Añadir Servicios
+                                    <i class="fas fa-hands-helping me-1"></i>Añadir Servicios
                                 </a>
                                 <button class="btn btn-outline-danger btn-sm"
                                         id="btn-remove-bulk"
                                         data-servicio-id="{{servicio.ServicioID}}"
                                         disabled>
-                                    <i class="bi bi-person-dash me-1"></i>Eliminar seleccionados
+                                    <i class="fas fa-handshake-slash me-1"></i>Eliminar seleccionados
                                 </button>
                                 </div>
                             {% endif %}
@@ -52,7 +50,7 @@
                                 
             <div class="form-card-footer">
                 <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-arrow-left me-1"></i>Volver
+                    <i class="fas fa-arrow-left me-1"></i>Volver
                 </a>
             </div>
                             </form>
@@ -62,7 +60,6 @@
                          {% include "footers/pagination.html" %}
                     </div>
             </div>
-        </div>
     </div>
 </main>
 

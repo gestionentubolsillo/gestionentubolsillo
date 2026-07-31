@@ -1,4 +1,4 @@
-<select name="usuario_creador_id" class="form-select form-select-sm" style="min-width: 160px;">
+<select name="usuario_creador_id" class="form-select form-select-sm align-items-center" style="min-width: 160px; max-height:32px;">
     <option value="" selected>Filtro por usuario...</option>
     {% for usuario in  usuarios%}
         <option value="{{usuario.UserID}}">{{usuario.username}}</option>
