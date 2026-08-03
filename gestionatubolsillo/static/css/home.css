@@ -9,7 +9,16 @@ body { scroll-behavior: smooth; }
     .btn-nav-cta:hover { background: #60a5fa; color: #fff; }
 
     /* Hero */
-    #inicio { background: linear-gradient(145deg, #0f1d35 0%, #1a2f52 60%, #1e3a6e 100%); min-height: 100vh; padding-top: 72px; }
+    #inicio {
+        background: linear-gradient(145deg, #0f1d35 0%, #17395f 30%, #5f87b8 65%, #eef5ff 100%);
+        min-height: 100vh;
+        padding-top: 72px;
+    }
+
+    #get-started,
+    #faq {
+        background: linear-gradient(180deg, rgba(233, 242, 255, 0.95) 0%, rgba(255, 255, 255, 1) 100%);
+    }
 
     /* Carousel móvil hero */
     .hero-carousel .carousel-inner { border-radius: 20px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
