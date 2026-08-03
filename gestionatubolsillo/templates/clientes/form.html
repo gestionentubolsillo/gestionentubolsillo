@@ -10,7 +10,7 @@
         <div class="form-card">
  
             <div class="form-card-header">
-                <i class="fas fa-building text-primary"></i>
+                <i class="fas fa-address-book text-primary"></i>
                 <span class="form-card-title">Nuevo Cliente</span>
             </div>
  
@@ -20,6 +20,7 @@
  
                     <div class="mb-3">
                         <label class="form-label" for="nombre_cliente">
+                            <i class="fas fa-user me-1"></i>
                           Nombre del cliente <span class="text-danger">*</span>
                         </label>
                         <input type="text" id="nombre" name="nombre" class="form-control form-control-sm" placeholder="Ej: Cliente Ejemplo" required/>
@@ -27,6 +28,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="email">
+                            <i class="fas fa-envelope me-1"></i>
                           Correo Electrónico
                         </label>
                         <input type="text" id="mail" name="mail" class="form-control form-control-sm" placeholder="Ej: example@mail.com"/>
@@ -34,6 +36,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="contacto">
+                            <i class="fas fa-user-tie me-1"></i>
                           Persona de contacto
                         </label>
                         <input type="text" id="contacto" name="contacto" class="form-control form-control-sm" placeholder="Ej: John Doe"/>
@@ -41,6 +44,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="direccion">
+                            <i class="fas fa-map-marker-alt me-1"></i>
                           Dirección
                         </label>
                         <input type="text" id="direccion" name="direccion" class="form-control form-control-sm" placeholder="Ej: C. example no. 1"/>
@@ -48,6 +52,7 @@
  
                     <div class="mb-3">
                         <label class="form-label" for="provincia">
+                            <i class="fas fa-map me-1"></i>
                             Provincia <span class="text-danger">*</span>
                         </label>
                         <!--De momento lo voy a poner como un input de texto. Necesito indagar en la api para hacerlo mejor-->
@@ -58,6 +63,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="municipio">
+                            <i class="fas fa-city me-1"></i>
                             Municipio <span class="text-danger">*</span>
                         </label>
                         <!--Mismo Caso aqui-->
@@ -68,12 +74,14 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="telefono">
+                            <i class="fas fa-phone me-1"></i>
                           Teléfono
                         </label>
                         <input type="text" id="telefono" name="telefono" class="form-control form-control-sm" placeholder="Ej: 9000000" value="{{cliente.telefono}}"/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="empresa">
+                            <i class="fas fa-building me-1"></i>
                             Empresa <span class="text-danger">*</span>
                         </label>
                         <select id="empresa" name="empresa" class="form-select form-select-sm" required>
@@ -91,7 +99,7 @@
                     <i class="fas fa-arrow-left me-1"></i>Volver
                 </a>
                 <button type="submit" form="form-cliente" class="btn btn-primary btn-sm">
-                    <i class="fas fa-check-lg me-1"></i>Crear Cliente
+                    Crear Cliente
                 </button>
             </div>
  
@@ -113,6 +121,7 @@
  
                     <div class="mb-3">
                         <label class="form-label" for="nombre_cliente">
+                            <i class="fas fa-user me-1"></i>
                           Nombre del cliente <span class="text-danger">*</span>
                         </label>
                         <input type="text" id="nombre" name="nombre" class="form-control form-control-sm" placeholder="Ej: Cliente Ejemplo" value="{{cliente.nombre}}" required/>
@@ -120,6 +129,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="email">
+                            <i class="fas fa-envelope me-1"></i>
                           Correo Electrónico
                         </label>
                         <input type="text" id="mail" name="mail" class="form-control form-control-sm" placeholder="Ej: example@mail.com" value="{{cliente.email}}"/>
@@ -127,6 +137,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="contacto">
+                            <i class="fas fa-user-tie me-1"></i>
                           Persona de contacto
                         </label>
                         <input type="text" id="contacto" name="contacto" class="form-control form-control-sm" placeholder="Ej: John Doe" value="{{cliente.persona_contacto}}"/>
@@ -134,6 +145,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="direccion">
+                            <i class="fas fa-map-marker-alt me-1"></i>
                           Dirección
                         </label>
                         <input type="text" id="direccion" name="direccion" class="form-control form-control-sm" placeholder="Ej: C. example no. 1" value="{{cliente.direccion}}"/>
@@ -141,6 +153,7 @@
  
                     <div class="mb-3">
                         <label class="form-label" for="provincia">
+                            <i class="fas fa-map me-1"></i>
                             Provincia <span class="text-danger">*</span>
                         </label>
                         <!--De momento lo voy a poner como un input de texto. Necesito indagar en la api para hacerlo mejor-->
@@ -151,6 +164,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="municipio">
+                            <i class="fas fa-city me-1"></i>
                             Municipio <span class="text-danger">*</span>
                         </label>
                         <!--Mismo Caso aqui-->
@@ -161,12 +175,14 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="telefono">
+                            <i class="fas fa-phone me-1"></i>
                           Teléfono
                         </label>
                         <input type="text" id="telefono" name="telefono" class="form-control form-control-sm" placeholder="Ej: 9000000" value="{{cliente.telefono}}"/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="empresa">
+                            <i class="fas fa-building me-1"></i>
                             Empresa <span class="text-danger">*</span>
                         </label>
                         <select id="empresa" name="empresa" class="form-select form-select-sm" required>
@@ -184,7 +200,7 @@
                     <i class="fas fa-arrow-left me-1"></i>Volver
                 </a>
                 <button type="submit" form="form-cliente" class="btn btn-primary btn-sm">
-                    <i class="fas fa-check-lg me-1"></i>Editar
+                    Editar
                 </button>
             </div>
  
@@ -198,48 +214,48 @@
             
  
             <div class="form-card-header">
-                <i class="fas fa-building text-primary"></i>
+                <i class="fas fa-address-book text-primary"></i>
                 <span class="form-card-title">Detalles cliente</span>
             </div>
  
             <div class="form-card-body">
                     <div class="mb-3">
-                        <p class="form-label">Nombre del cliente</p>
+                        <p class="form-label"><i class="fas fa-user me-1"></i>Nombre del cliente</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ cliente.nombre }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Correo Electrónico</p>
+                        <p class="form-label"><i class="fas fa-envelope me-1"></i>Correo Electrónico</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ cliente.email }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Persona de contacto</p>
+                        <p class="form-label"><i class="fas fa-user-tie me-1"></i>Persona de contacto</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ cliente.persona_contacto }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Dirección</p>
+                        <p class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Dirección</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ cliente.direccion }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Provincia</p>
+                        <p class="form-label"><i class="fas fa-map me-1"></i>Provincia</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ cliente.provincia }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Municipio</p>
+                        <p class="form-label"><i class="fas fa-city me-1"></i>Municipio</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ cliente.municipio }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Teléfono</p>
+                        <p class="form-label"><i class="fas fa-phone me-1"></i>Teléfono</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ cliente.telefono }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Empresa</p>
+                        <p class="form-label"><i class="fas fa-building me-1"></i>Empresa</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ cliente.empresa.nombre }}</p>
                     </div>
  
@@ -273,13 +289,13 @@
                                 <div class="d-flex gap-2 ms-auto">
                                 <a href="/backoffice/clientes/{{cliente.ClienteID}}/servicios/add"
                                    class="btn btn-primary btn-sm">
-                                    <i class="fas fa-person-plus me-1"></i>Añadir Servicios
+                                    <i class="fas fa-hands-helping me-1"></i>Añadir Servicios
                                 </a>
                                 <button class="btn btn-outline-danger btn-sm"
                                         id="btn-remove-bulk"
                                         data-servicio-id="{{cliente.clienteID}}"
                                         disabled>
-                                    <i class="fas fa-person-dash me-1"></i>Eliminar seleccionados
+                                    <i class="fas fa-handshake-slash me-1"></i>Eliminar seleccionados
                                 </button>
                                 </div>
                             {% endif %}
