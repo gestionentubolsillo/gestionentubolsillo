@@ -90,8 +90,10 @@
                             </div>
                             <div class="modal-footer border-0 pt-0">
                                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                                <!-- Apunta al endpoint de borrado con el id del Producto -->
-                                <a href="/backoffice/centrales/delete/{{central.CentralID}}" class="btn btn-danger btn-sm">Eliminar</a>
+                                <form method="post" action="/backoffice/centrales/delete/{{central.CentralID}}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                                </form>
                             </div>
                         </div>
                     </div>
