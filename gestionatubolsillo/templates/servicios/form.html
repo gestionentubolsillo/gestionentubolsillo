@@ -13,7 +13,7 @@
         <div class="form-card">
  
             <div class="form-card-header">
-                <i class="fas fa-building text-primary"></i>
+                <i class="fas fa-handshake text-primary"></i>
                 <span class="form-card-title">Nuevo Servicio</span>
             </div>
  
@@ -23,6 +23,7 @@
  
                     <div class="mb-3">
                         <label class="form-label" for="nombre_servicio">
+                            <i class="fas fa-handshake me-1"></i>
                           Nombre del servicio <span class="text-danger">*</span>
                         </label>
                         <input type="text" id="nombre" name="nombre" class="form-control form-control-sm" placeholder="Ej: Cliente Ejemplo" required/>
@@ -30,6 +31,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="descripcion">
+                            <i class="fas fa-scroll me-1"></i>
                           Descripción
                         </label>
                         <input type="text" id="descripcion" name="descripcion" class="form-control form-control-sm" placeholder="Ej: Cliente Ejemplo" required/>
@@ -37,6 +39,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="email">
+                            <i class="fas fa-envelope me-1"></i>
                           Correo Electrónico
                         </label>
                         <input type="text" id="mail" name="mail" class="form-control form-control-sm" placeholder="Ej: example@mail.com"/>
@@ -45,6 +48,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="dias">
+                            <i class="fas fa-calendar-week me-1"></i>
                             Dias a la semana <span class="text-danger">*</span>
                         </label>
                         <!--TODO: Cambiar para que al seleccionar aparezca tipo bloque con cruz para eliminar del bloque-->
@@ -57,30 +61,35 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="hora_inicio">
+                            <i class="fas fa-clock me-1"></i>
                           Hora inicio del servicio
                         </label>
                         <input type="time" id="hora_inicio" name="hora_inicio" class="form-control form-control-sm"/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="hora_fin">
+                            <i class="fas fa-clock me-1"></i>
                           Hora finalización del servicio
                         </label>
                         <input type="time" id="hora_fin" name="hora_fin" class="form-control form-control-sm"/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="precio_hora">
+                            <i class="fas fa-coins me-1"></i>
                           Precio por hora (en €)
                         </label>
                         <input type="number" step="0.01" id="precio_hora" name="precio_hora" class="form-control form-control-sm" placeholder="Ej: 00.00"/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="is_active">
+                            <i class="fas fa-toggle-on me-1"></i>
                           Activo
                         </label>
                         <input type="checkbox" id="is_active" name="is_active" class="form-check-input" checked/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="gps_on">
+                            <i class="fas fa-location-arrow me-1"></i>
                           Obligatorio GPS
                         </label>
                         <input type="checkbox" id="gps_on" name="gps_on" class="form-check-input"/>
@@ -88,6 +97,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="tipo_servicio">
+                            <i class="fas fa-concierge-bell me-1"></i>
                             Tipo de Servicio
                         </label>
                         <select id="es_exterior" name="es_exterior" class="form-select form-select-sm">
@@ -98,6 +108,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="empresa">
+                            <i class="fas fa-building me-1"></i>
                             Empresa <span class="text-danger">*</span>
                         </label>
                         <select id="empresa_id" name="empresa_id" class="form-select form-select-sm" required>
@@ -121,7 +132,7 @@
                     <i class="fas fa-arrow-left me-1"></i>Volver
                 </a>
                 <button type="submit" form="form-servicio" class="btn btn-primary btn-sm">
-                    <i class="fas fa-check-lg me-1"></i>Crear Servicio
+                    Crear Servicio
                 </button>
             </div>
  
@@ -133,7 +144,7 @@
         <div class="form-card">
  
             <div class="form-card-header">
-                <i class="fas fa-building text-primary"></i>
+                <i class="fas fa-handshake text-primary"></i>
                 <span class="form-card-title">Editar Servicio</span>
             </div>
  
@@ -143,6 +154,7 @@
  
                     <div class="mb-3">
                         <label class="form-label" for="nombre_servicio">
+                            <i class="fas fa-handshake me-1"></i>
                           Nombre del servicio <span class="text-danger">*</span>
                         </label>
                         <input type="text" id="nombre" name="nombre" class="form-control form-control-sm" placeholder="Ej: Cliente Ejemplo" required value="{{servicio.nombre}}"/>
@@ -150,6 +162,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="descripcion">
+                            <i class="fas fa-scroll me-1"></i>
                           Descripción
                         </label>
                         <input type="text" id="descripcion" name="descripcion" class="form-control form-control-sm" placeholder="Ej: Cliente Ejemplo" required value="{{servicio.descripcion}}"/>
@@ -157,6 +170,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="email">
+                            <i class="fas fa-envelope me-1"></i>
                           Correo Electrónico
                         </label>
                         <input type="text" id="mail" name="mail" class="form-control form-control-sm" placeholder="Ej: example@mail.com" value="{{servicio.mail_de_contacto}}"/>
@@ -165,6 +179,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="dias">
+                            <i class="fas fa-calendar-week me-1"></i>
                             Dias a la semana <span class="text-danger">*</span>
                         </label>
                         <!--TODO: Cambiar para que al seleccionar aparezca tipo bloque con cruz para eliminar del bloque-->
@@ -177,30 +192,35 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="hora_inicio">
+                            <i class="fas fa-clock me-1"></i>
                           Hora inicio del servicio
                         </label>
                         <input type="time" id="hora_inicio" name="hora_inicio" class="form-control form-control-sm" value="{{servicio.hora_inicio|time:'H:i'}}"/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="hora_fin">
+                            <i class="fas fa-clock me-1"></i>
                           Hora finalización del servicio
                         </label>
                         <input type="time" id="hora_fin" name="hora_fin" class="form-control form-control-sm" value="{{servicio.hora_fin|time:'H:i'}}"/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="precio_hora">
+                            <i class="fas fa-coins me-1"></i>
                           Precio por hora (en €)
                         </label>
                         <input type="number" step="0.01" id="precio_hora" name="precio_hora" class="form-control form-control-sm" placeholder="Ej: 00.00" value="{{servicio.precio_por_hora}}"/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="is_active">
+                            <i class="fas fa-toggle-on me-1"></i>
                           Activo
                         </label>
                         <input type="checkbox" id="is_active" name="is_active" class="form-check-input" {% if servicio.is_active %}checked{% endif %} />
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="gps_on">
+                            <i class="fas fa-location-arrow me-1"></i>
                           Obligatorio GPS
                         </label>
                         <input type="checkbox" id="gps_on" name="gps_on" class="form-check-input" {% if servicio.requiere_gps %}checked{% endif %} />
@@ -208,6 +228,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="tipo_servicio">
+                            <i class="fas fa-concierge-bell me-1"></i>
                             Tipo de Servicio
                         </label>
                         <select id="es_exterior" name="es_exterior" class="form-select form-select-sm">
@@ -218,6 +239,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="empresa">
+                            <i class="fas fa-building me-1"></i>
                             Empresa <span class="text-danger">*</span>
                         </label>
                         <select id="empresa_id" name="empresa_id" class="form-select form-select-sm" required>
@@ -241,7 +263,7 @@
                     <i class="fas fa-arrow-left me-1"></i>Volver
                 </a>
                 <button type="submit" form="form-servicio" class="btn btn-primary btn-sm">
-                    <i class="fas fa-check-lg me-1"></i>Editar
+                    Editar
                 </button>
             </div>
  
@@ -255,28 +277,28 @@
             
  
             <div class="form-card-header">
-                <i class="fas fa-building text-primary"></i>
+                <i class="fas fa-handshake text-primary"></i>
                 <span class="form-card-title">Detalles Servicio</span>
             </div>
  
             <div class="form-card-body">
                     <div class="mb-3">
-                        <p class="form-label">Nombre del servicio</p>
+                        <p class="form-label"><i class="fas fa-handshake me-1"></i>Nombre del servicio</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ servicio.nombre }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Descripción</p>
+                        <p class="form-label"><i class="fas fa-scroll me-1"></i>Descripción</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ servicio.descripcion }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Correo Electrónico</p>
+                        <p class="form-label"><i class="fas fa-envelope me-1"></i>Correo Electrónico</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ servicio.mail_de_contacto }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Dias a la semana</p>
+                        <p class="form-label"><i class="fas fa-calendar-week me-1"></i>Días a la semana</p>
                         {% for dia_valor,dia_etiqueta in dias_choices  %}
                             {% if dia_valor in  servicio.dias_semana%}
                                 <p class="form-control form-control-sm bg-light mb-0">{{ dia_etiqueta }}</p>
@@ -285,22 +307,22 @@
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Hora inicio del servicio</p>
+                        <p class="form-label"><i class="fas fa-clock me-1"></i>Hora inicio del servicio</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ servicio.hora_inicio|time:'H:i'}}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Hora finalización del servicio</p>
+                        <p class="form-label"><i class="fas fa-clock me-1"></i>Hora finalización del servicio</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ servicio.hora_fin|time:'H:i'}}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Precio por hora (en €)</p>
+                        <p class="form-label"><i class="fas fa-coins me-1"></i>Precio por hora (en €)</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ servicio.precio_por_hora }}</p>
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Activo</p>
+                        <p class="form-label"><i class="fas fa-toggle-on me-1"></i>Activo</p>
                         <p class="form-control form-control-sm bg-light mb-0">
                             {% if  servicio.is_active %}
                                 El Servicio está activo
@@ -311,7 +333,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Obligatorio GPS</p>
+                        <p class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Obligatorio GPS</p>
                         <p class="form-control form-control-sm bg-light mb-0">
                             {% if  servicio.requiere_gps %}
                                 El Servicio requiere del uso de GPS para su funcionamiento
@@ -322,7 +344,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Tipo de Servicio</p>
+                        <p class="form-label"><i class="fas fa-concierge-bell me-1"></i>Tipo de Servicio</p>
                         <p class="form-control form-control-sm bg-light mb-0">
                             {% if servicio.es_exterior %}
                                 Servicio de Exterior
@@ -333,7 +355,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <p class="form-label">Empresa</p>
+                        <p class="form-label"><i class="fas fa-building me-1"></i>Empresa</p>
                         <p class="form-control form-control-sm bg-light mb-0">{{ servicio.empresa.nombre }}</p>
                     </div>
  
