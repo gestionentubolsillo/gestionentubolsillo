@@ -19,6 +19,8 @@ from .validators import validate_servicio, validate_clientes_servicio,validate_a
 from .builders import build_Servicio
 from enum import Enum
 
+from auditloggers.handlers import save_log
+
 # Create your views here.
 
 
@@ -78,7 +80,8 @@ def delete_servicio(request:HttpRequest,servicio_id):
     auth_error = validate_auth_servicio(request,servicio)
     if auth_error:
         return auth_error
-    
+
+    save_log(request, apartado='SERVICIO', accion='DELETE', id_user=request.user.pk, id_cuenta=servicio.cuenta.pk,info=f'Servicio eliminado con ID: {servicio.ServicioID}')
     servicio.delete()
     messages.success(request,"El servicio ha sido eliminado con éxito",extra_tags='success')
     return redirect('/backoffice/servicios')
@@ -133,13 +136,16 @@ def _change_clientes_Servicio(request:HttpRequest,servicio:Servicio,action:Servi
         
         errors = validate_clientes_servicio(request,clientes_ids, clientes_allowed)
         if errors:
+            save_log(request, apartado='SERVICIO', accion='ERROR', id_user=request.user.pk, id_cuenta=servicio.cuenta.pk,info=f'Error al modificar clientes del servicio con ID: {servicio.ServicioID}')
             return HttpResponse(template.render(context,request))
         
         clientes = Cliente.objects.filter(ClienteID__in=clientes_ids)
 
         if action == ServicioAccionClientes.ADD:
+            save_log(request, apartado='SERVICIO', accion='ADD_CLIENTE', id_user=request.user.pk, id_cuenta=servicio.cuenta.pk,info=f'Clientes añadidos al servicio con ID: {servicio.ServicioID}')
             servicio.clientes.add(*clientes)
         elif action == ServicioAccionClientes.REMOVE:
+            save_log(request, apartado='SERVICIO', accion='REMOVE_CLIENTE', id_user=request.user.pk, id_cuenta=servicio.cuenta.pk,info=f'Clientes eliminados del servicio con ID: {servicio.ServicioID}')
             servicio.clientes.remove(*clientes)
 
         return redirect('/backoffice/servicios/'+str(servicio.ServicioID))
@@ -173,11 +179,12 @@ def _create_or_update_servicio(request:HttpRequest,servicio:Servicio | None = No
         errors = validate_servicio(request,nombre,dias_semana,hora_inicio,hora_fin,empresa_id)
 
         if errors:
+            save_log(request, apartado='SERVICIO', accion='ERROR', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info='Errores de validación al crear/editar servicio')
             return HttpResponse(template.render(context,request))
         
         created_at = now()
         empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
-        build_Servicio(data={
+        servicio_builded = build_Servicio(data={
             'nombre':nombre,
             'descripcion':descripcion,
             'dias_semana':dias_semana,
@@ -190,6 +197,10 @@ def _create_or_update_servicio(request:HttpRequest,servicio:Servicio | None = No
             'mail':mail,
             'need_gps':requiere_gps
         },servicio=servicio,created_at=created_at,user=user)
+        if servicio is None:
+            save_log(request, apartado='SERVICIO', accion='CREATE', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info=f'Servicio creado con ID: {servicio_builded.ServicioID}')
+        else:
+            save_log(request, apartado='SERVICIO', accion='UPDATE', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info=f'Servicio actualizado con ID: {servicio_builded.ServicioID}')
 
         return redirect('/backoffice/servicios')
     elif request.method == 'GET':

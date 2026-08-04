@@ -9,6 +9,7 @@ from .models import Servicio
 from users.models import User
 from django.shortcuts import redirect
 
+from auditloggers.handlers import save_log
 
 
 
@@ -66,9 +67,11 @@ def validate_clientes_servicio(request:HttpRequest, clientes_ids,allowed_clients
 
 def validate_auth_servicio(request:HttpRequest,servicio:Servicio):
     if not servicio:
+        save_log(request, apartado='SERVICIO', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Intento de acceder a un servicio que no existe')
         messages.error(request,"El servicio no existe",extra_tags='error')
         return redirect('/backoffice/servicios')
     logged_user : User = request.user
     if logged_user.cuenta != servicio.cuenta:
+        save_log(request, apartado='SERVICIO', accion='ERROR', id_user=request.user.pk, id_cuenta=servicio.cuenta.pk,info='Intento de acceder a un servicio sin autorización')
         return redirect("/AuthError")
     return None
