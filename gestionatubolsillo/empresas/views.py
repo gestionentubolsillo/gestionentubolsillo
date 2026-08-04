@@ -13,6 +13,8 @@ from .paginators import paginate_empresas
 from .validators import validate_empresa, validate_auth_empresa
 from .builders import build_empresa
 
+from auditloggers.handlers import save_log
+
 # Create your views here.
 
 @login_required
@@ -41,6 +43,7 @@ def details_empresa(request,empresa_id):
 
     auth_error = validate_auth_empresa(request,empresa)
     if auth_error:
+        save_log(request, apartado='EMPRESA', accion='UNAUTH', id_user=request.user.pk, id_cuenta=empresa.cuenta.pk,info=f'Intento de ver detalles de empresa con ID: {empresa.EmpresaID} sin autorización')
         return auth_error
     
     context = {
@@ -57,6 +60,7 @@ def edit_empresa(request : HttpRequest,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
     auth_error = validate_auth_empresa(request,empresa)
     if auth_error:
+        save_log(request, apartado='EMPRESA', accion='UNAUTH', id_user=request.user.pk, id_cuenta=empresa.cuenta.pk,info=f'Intento de editar empresa con ID: {empresa.EmpresaID} sin autorización')
         return auth_error
     return _create_or_modify_empresa(request,empresa)
     
@@ -69,7 +73,9 @@ def delete_empresa(request:HttpRequest,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
     auth_error = validate_auth_empresa(request,empresa)
     if auth_error:
+        save_log(request, apartado='EMPRESA', accion='UNAUTH', id_user=request.user.pk, id_cuenta=empresa.cuenta.pk,info=f'Intento de eliminar empresa con ID: {empresa.EmpresaID} sin autorización')
         return auth_error
+    save_log(request, apartado='EMPRESA', accion='DELETE', id_user=request.user.pk, id_cuenta=empresa.cuenta.pk,info=f'Empresa eliminada con ID: {empresa.EmpresaID}')
     empresa.delete()
     messages.success(request,"La empresa se ha eliminado con éxito",extra_tags='success')
     return redirect('/backoffice/empresas')
@@ -87,9 +93,14 @@ def _create_or_modify_empresa(request:HttpRequest,empresa:Empresa | None = None)
         paquete = request.POST.get('paquete','')
         errors = validate_empresa(request,nombre,paquete)
         if errors:
+            save_log(request, apartado='EMPRESA', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Error al crear/editar empresa')
             return HttpResponse(template.render(context,request))
         user:User = request.user
-        build_empresa(data={'nombre':nombre,'paquete':paquete},creador=user,empresa=empresa)
+        empresa_builded = build_empresa(data={'nombre':nombre,'paquete':paquete},creador=user,empresa=empresa)
+        if empresa is None:
+            save_log(request, apartado='EMPRESA', accion='CREATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Empresa creada con ID: {empresa_builded.EmpresaID}')
+        else:
+            save_log(request, apartado='EMPRESA', accion='UPDATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Empresa editada con ID: {empresa_builded.EmpresaID}')
         return redirect('/backoffice/empresas')
         
 

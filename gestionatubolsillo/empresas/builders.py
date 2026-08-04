@@ -14,3 +14,4 @@ def build_empresa(data:EmpresaData,creador:User | None = None, empresa:Empresa|N
     empresa.nombre = data.get('nombre')
     empresa.paquete = data.get('paquete')
     empresa.save()
+    return empresa
