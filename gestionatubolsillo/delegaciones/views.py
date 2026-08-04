@@ -14,6 +14,7 @@ from .paginators import paginate_delegaciones
 from .builders import build_delegacion
 from .validators import validate_delegacion, validate_auth_delegacion
 
+from auditloggers.handlers import save_log
 
 # Create your views here.
 @login_required
@@ -37,7 +38,9 @@ def delete_delegacion(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
     auth_error = validate_auth_delegacion(request,delegacion)
     if auth_error:
+        save_log(request, apartado='DELEGACION', accion='UNAUTH', id_user=request.user.pk, id_cuenta=delegacion.cuenta.pk,info=f'Intento de eliminar delegación con ID: {delegacion.DelegacionID} sin autorización')
         return auth_error
+    save_log(request, apartado='DELEGACION', accion='DELETE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Delegación eliminada con ID: {delegacion.DelegacionID}')
     delegacion.delete()
     messages.success(request, 'La delegación ha sido borrada exitosamente.',extra_tags='success')
     return redirect('/backoffice/delegaciones')
@@ -49,6 +52,7 @@ def edit_delegacion(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
     auth_error = validate_auth_delegacion(request,delegacion)
     if auth_error:
+        save_log(request, apartado='DELEGACION', accion='UNAUTH', id_user=request.user.pk, id_cuenta=delegacion.cuenta.pk,info=f'Intento de editar delegación con ID: {delegacion.DelegacionID} sin autorización')
         return auth_error
     return _create_or_modify_delegacion(request,delegacion)
     
@@ -60,6 +64,7 @@ def delegacion_details(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
     auth_error = validate_auth_delegacion(request,delegacion)
     if auth_error:
+        save_log(request, apartado='DELEGACION', accion='UNAUTH', id_user=request.user.pk, id_cuenta=delegacion.cuenta.pk,info=f'Intento de ver detalles de delegación con ID: {delegacion.DelegacionID} sin autorización')
         return auth_error
     context={
         'delegacion':delegacion,
@@ -81,12 +86,17 @@ def _create_or_modify_delegacion(request:HttpRequest,delegacion:Delegacion|None 
         user : User = request.user
         errors = validate_delegacion(request,nombre)
         if errors:
+            save_log(request, apartado='DELEGACION', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Error al crear/editar delegación')
             return HttpResponse(template.render(context,request))
         created_at = now()
-        build_delegacion(data={
+        delegacion_builded = build_delegacion(data={
             'nombre':nombre,
             'user':user
         },created_at=created_at,delegacion=delegacion)
+        if delegacion is None:
+            save_log(request, apartado='DELEGACION', accion='CREATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Delegación creada con ID: {delegacion_builded.DelegacionID}')
+        else:
+            save_log(request, apartado='DELEGACION', accion='UPDATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Delegación editada con ID: {delegacion_builded.DelegacionID}')
         return redirect('/backoffice/delegaciones')
         
     elif request.method == 'GET':

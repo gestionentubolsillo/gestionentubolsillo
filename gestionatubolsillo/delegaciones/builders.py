@@ -16,3 +16,4 @@ def build_delegacion(data:DelegacionData,created_at:datetime|None = None,delegac
         delegacion.fecha_creacion = created_at
     delegacion.nombre = data.get('nombre')
     delegacion.save()
+    return delegacion
