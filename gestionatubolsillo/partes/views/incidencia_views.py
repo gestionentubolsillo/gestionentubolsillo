@@ -17,6 +17,8 @@ from partes.validators import validate_parte_incidencia, validate_auth_parte
 from datetime import datetime
 from clientes.models import Cliente
 
+from auditloggers.handlers import save_log
+
 ERROR_NOT_FOUND_REDIRECT = '/backoffice/partes_incidencia'
 
 @login_required
@@ -46,11 +48,12 @@ def create_parte_incidencia(request:HttpRequest):
         fecha_registrada = request.POST.get('fecha_registrada',None)
         errors = validate_parte_incidencia(request,cliente_id,usuario_id,observaciones)
         if errors:
+            save_log(request, apartado='PARTE', accion='ERROR', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info='Error al crear parte de incidencia')
             return HttpResponse(template.render(context,request))
         created_at = now()
         fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
 
-        build_parte_incidencia(data={
+        parte = build_parte_incidencia(data={
             'general':{
                 'usuario_asignado':User.objects.get(UserID=usuario_id),
                 'cliente':Cliente.objects.get(ClienteID=cliente_id),
@@ -59,6 +62,7 @@ def create_parte_incidencia(request:HttpRequest):
             'fecha_hora_incidencia':fecha,
             'texto_incidencia':observaciones
         },user=user,created_at=created_at)
+        save_log(request, apartado='PARTE', accion='CREATE', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info=f'Parte de incidencia creado con ID: {parte.ParteIncidenciaID}')
 
         return redirect('/backoffice/partes_incidencia')
     elif request.method == 'GET':

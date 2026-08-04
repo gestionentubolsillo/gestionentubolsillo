@@ -17,6 +17,8 @@ from partes.builders import build_parte_acuda
 from clientes.models import Cliente
 from centrales.models import Central
 
+from auditloggers.handlers import save_log
+
 ERROR_NOT_FOUND_REDIRECT = '/backoffice/informes_acuda'
 
 @login_required
@@ -51,9 +53,10 @@ def create_inf_acuda(request:HttpRequest):
         descripcion = request.POST.get('descripcion','')
         errors = validate_parte_acuda(request,cliente_id,usuario_id,central_id,descripcion)
         if errors:
+            save_log(request, apartado='PARTE', accion='ERROR', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info='Error al crear informe acuda')
             return HttpResponse(template.render(context,request))
         created_at = now()
-        build_parte_acuda(data={
+        parte =build_parte_acuda(data={
             'general':{
                 'usuario_asignado':User.objects.get(UserID=usuario_id),
                 'cliente':Cliente.objects.get(ClienteID=cliente_id),
@@ -62,6 +65,7 @@ def create_inf_acuda(request:HttpRequest):
             'central':Central.objects.get(CentralID=central_id),
             'descripcion':descripcion
         },user=user,created_at=created_at)
+        save_log(request, apartado='PARTE', accion='CREATE', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info=f'Informe acuda creado con ID: {parte.InformeAcudaID}')
         return redirect('/backoffice/informes_acuda')
     elif request.method == 'GET':
         return HttpResponse(template.render(context,request))
