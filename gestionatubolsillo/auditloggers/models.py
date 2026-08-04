@@ -22,10 +22,14 @@ class AuditLog(models.Model):
 
     ACCIONES = [
         ('CREATE','Crear'),
-        ('REMOVE','Borrar')
+        ('REMOVE','Borrar'),
         ('UPDATE','Editar'),
         ('DELETE','Eliminar'),
-        ('AUTH','Autenticacion')
+        ('AUTH','Autenticacion'),
+        ('UNAUTH','No autorizado'),
+        ('ERROR','Error'),
+        ('PERMISSION','Cambio de permisos'),
+        ('OUT','Cierre de sesion')
     ]
 
     apartado = models.CharField(max_length=20,choices=APARTADOS)
@@ -40,6 +44,7 @@ class AuditLog(models.Model):
     #Empresa determina quien puede ver el registro de actividad de la empresa
     #IMPORTANTE: si un usuario perteneciente a dicha empresa crea otra, las actividades que se realicen en la empresa hija, deben ser mostradas en la empresa padre
     empresa_id = models.IntegerField(null=True,blank=True)
+    cuenta_id = models.IntegerField(null=True,blank=True)
     #Informacion relativa al dispositivo de la sesion
     ip_sesion = models.GenericIPAddressField(null=True,blank=True)
     device_name = models.CharField(max_length=30,null=True,blank=True)

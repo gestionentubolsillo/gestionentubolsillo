@@ -33,4 +33,5 @@ urlpatterns = [
     path('', include('centrales.urls')),
     path('', include('mediosaux.urls')),
     path('',include('delegaciones.urls')),
+    path('',include('auditloggers.urls')),
 ]

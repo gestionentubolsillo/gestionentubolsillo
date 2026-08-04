@@ -50,7 +50,7 @@
         {% endif %}
         <a href="/backoffice/delegaciones" class="sidebar-link"><i class="fas fa-globe"></i> Delegaciones</a>
         {% if permiso_servicios_nfc %}
-            <a href="#" class="sidebar-link"><i class="fas fa-tags"></i> NFC</a>
+            <a href="#" class="sidebar-link" style="display:none;"><i class="fas fa-tags"></i> NFC</a>
         {% endif %}
         
         
@@ -69,14 +69,14 @@
         <a href="/backoffice/informes" class="sidebar-link"><i class="fas fa-folder"></i> Informes</a>
         <a href="/backoffice/partes_trabajo" class="sidebar-link"><i class="fas fa-file-invoice"></i> Partes de trabajo</a>
         <a href="/backoffice/partes_incidencia" class="sidebar-link"><i class="fas fa-exclamation-triangle"></i> Partes de Incidencia</a>
-        <a href="/backoffice/partes_inspeccion" class="sidebar-link"><i class="fas fa-shield-alt"></i> Partes de Inspeccion</a>
+        <a href="#" class="sidebar-link" style="display:none;"><i class="fas fa-shield-alt"></i> Partes de Inspeccion</a>
         <a href="/backoffice/informes_acuda" class="sidebar-link"><i class="fas fa-bullhorn"></i> Informes de acuda</a>
         
       </div>
       {% if user.is_admin %}
       <div class="sidebar-group">
         <p class="sidebar-label">Administración</p>
-        <a href="#" class="sidebar-link"><i class="fas fa-user-clock"></i> Registro de actividades</a>
+        <a href="/backoffice/admin" class="sidebar-link"><i class="fas fa-user-clock"></i> Registro de actividades</a>
       </div>
       {% endif %}
       
