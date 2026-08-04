@@ -45,7 +45,6 @@ def edit_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
     if auth_error:
-        save_log(request, apartado='CLIENTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cliente.cuenta.pk,info=f'Intento de editar cliente con ID: {cliente.ClienteID} sin autorización')
         return auth_error
     return _create_or_modify_cliente(request,cliente)
 
@@ -57,7 +56,6 @@ def client_details(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
     if auth_error:
-        save_log(request, apartado='CLIENTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cliente.cuenta.pk,info=f'Intento de ver detalles de cliente con ID: {cliente.ClienteID} sin autorización')
         return auth_error
     context = paginate_servicios_de_cliente(request,cliente)
     return render(request,'clientes/form.html',context)
@@ -70,7 +68,6 @@ def delete_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
     if auth_error:
-        save_log(request, apartado='CLIENTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cliente.cuenta.pk,info=f'Intento de eliminar cliente con ID: {cliente.ClienteID} sin autorización')
         return auth_error
     save_log(request, apartado='CLIENTE', accion='DELETE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Cliente eliminado con ID: {cliente.ClienteID}')
     cliente.delete()

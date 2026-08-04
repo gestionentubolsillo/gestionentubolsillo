@@ -22,7 +22,6 @@ def add_servicios_to_cliente(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
     if auth_error:
-        save_log(request, apartado='CLIENTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cliente.cuenta.pk,info=f'Intento de agregar servicios a cliente con ID: {cliente.ClienteID} sin autorización')
         return auth_error
     return _change_servicios_de_cliente(request,cliente,action=ClienteAccionServicios.ADD)
 
@@ -34,7 +33,6 @@ def remove_servicios_to_cliente(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
     if auth_error:
-        save_log(request, apartado='CLIENTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cliente.cuenta.pk,info=f'Intento de eliminar servicios a cliente con ID: {cliente.ClienteID} sin autorización')
         return auth_error
     return _change_servicios_de_cliente(request,cliente,action=ClienteAccionServicios.REMOVE)
 

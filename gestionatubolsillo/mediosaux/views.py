@@ -61,7 +61,6 @@ def edit_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     auth_error = validate_medio_auth(request,medio_auxiliar)
     if auth_error:
-        save_log(request, apartado='MEDIO_AUXILIAR', accion='UNAUTH', id_user=request.user.pk, id_cuenta=medio_auxiliar.cuenta.pk,info=f'Intento de editar medio auxiliar con ID: {medio_auxiliar.MedioAuxiliarID} sin autorización')
         return auth_error
     if request.method == 'POST':
         nombre = request.POST.get('nombre','')
@@ -94,7 +93,6 @@ def delete_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     auth_error = validate_medio_auth(request,medio_auxiliar)
     if auth_error:
-        save_log(request, apartado='MEDIO_AUXILIAR', accion='UNAUTH', id_user=request.user.pk, id_cuenta=medio_auxiliar.cuenta.pk,info=f'Intento de eliminar medio auxiliar con ID: {medio_auxiliar.MedioAuxiliarID} sin autorización')
         return auth_error
     save_log(request, apartado='MEDIO_AUXILIAR', accion='DELETE', id_user=request.user.pk, id_cuenta=medio_auxiliar.cuenta.pk,info=f'Medio auxiliar eliminado con ID: {medio_auxiliar.MedioAuxiliarID}')
     medio_auxiliar.delete()
@@ -109,7 +107,6 @@ def medio_auxiliar_details(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     auth_error = validate_medio_auth(request,medio_auxiliar)
     if auth_error:
-        save_log(request, apartado='MEDIO_AUXILIAR', accion='UNAUTH', id_user=request.user.pk, id_cuenta=medio_auxiliar.cuenta.pk,info=f'Intento de ver detalles de medio auxiliar con ID: {medio_auxiliar.MedioAuxiliarID} sin autorización')
         return auth_error
     context = {
         'medio_auxiliar': medio_auxiliar,

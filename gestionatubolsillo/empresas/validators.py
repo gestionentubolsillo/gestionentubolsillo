@@ -4,6 +4,8 @@ from .models import Empresa
 from users.models import User
 from django.shortcuts import redirect
 
+from auditloggers.handlers import save_log
+
 def validate_empresa(request:HttpRequest,nombre,paquete)->bool:
     errors = False
     if nombre == '' or paquete == '':
@@ -20,7 +22,9 @@ def validate_empresa(request:HttpRequest,nombre,paquete)->bool:
 def validate_auth_empresa(request:HttpRequest,empresa:Empresa):
     logged_user : User = request.user
     if not empresa:
+        save_log(request, apartado='EMPRESA', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Intento de acceder a una empresa que no existe')
         messages.error(request,"La empresa no existe",extra_tags='error')
         return redirect('/backoffice/empresas')
     if logged_user.cuenta != empresa.cuenta:
+        save_log(request, apartado='EMPRESA', accion='UNAUTH', id_user=request.user.pk, id_cuenta=empresa.cuenta.pk,info=f'Intento de acceder a empresa con ID: {empresa.EmpresaID} sin autorización')
         return redirect('/AuthError')

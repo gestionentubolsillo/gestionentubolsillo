@@ -9,6 +9,8 @@ from users.models import User
 
 from django.shortcuts import redirect
 
+from auditloggers.handlers import save_log
+
 MIN_CHARS_PASSWORD = 8
 
 def validate_client(request:HttpRequest,nombre,provincia,municipio,empresa_id)->bool:
@@ -75,8 +77,10 @@ def can_client_access_user_cli(request:HttpRequest,cliente:Cliente,user_cli:user
 def validate_auth_client(request:HttpRequest,cliente:Cliente):
     logged_user : User = request.user
     if not cliente:
+        save_log(request, apartado='CLIENTE', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='El cliente no existe')
         messages.error(request,"El cliente no existe",extra_tags='error')
         return redirect('/backoffice/clientes')
     if logged_user.cuenta != cliente.cuenta:
+        save_log(request, apartado='CLIENTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cliente.cuenta.pk,info='El usuario no tiene acceso al cliente')
         return redirect('/AuthError')
     return None
