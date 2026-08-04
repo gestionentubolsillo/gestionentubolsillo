@@ -49,5 +49,6 @@ class AuditLog(models.Model):
     ip_sesion = models.GenericIPAddressField(null=True,blank=True)
     device_name = models.CharField(max_length=30,null=True,blank=True)
     browser_name_version = models.CharField(max_length=40,null=True,blank=True)
+    extra_info = models.CharField(max_length=75,null=True,blank=True)
 
     

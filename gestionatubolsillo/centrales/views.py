@@ -13,6 +13,8 @@ from .paginators import paginate_centrales
 from .builders import build_central
 from .validators import validate_central, validate_auth_central
 
+from auditloggers.handlers import save_log
+
 
 # Create your views here.
 
@@ -42,6 +44,7 @@ def edit_central(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
     auth_error = validate_auth_central(request,central)
     if auth_error:
+        save_log(request, apartado='CENTRAL', accion='UNAUTH', id_user=request.user.pk, id_cuenta=central.cuenta.pk,info=f'Intento de editar central con ID: {central.CentralID} sin autorización')
         return auth_error
     return _create_or_modify_central(request,central)
 
@@ -53,7 +56,9 @@ def delete_central(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
     auth_error = validate_auth_central(request,central)
     if auth_error:
+        save_log(request, apartado='CENTRAL', accion='UNAUTH', id_user=request.user.pk, id_cuenta=central.cuenta.pk,info=f'Intento de eliminar central con ID: {central.CentralID} sin autorización')
         return auth_error
+    save_log(request, apartado='CENTRAL', accion='DELETE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Central eliminada con ID: {central.CentralID}')
     central.delete()
     messages.success(request,"Central receptora eliminada correctamente",extra_tags='success')
     return redirect('/backoffice/centrales')
@@ -66,6 +71,7 @@ def central_details(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
     auth_error = validate_auth_central(request,central)
     if auth_error:
+        save_log(request, apartado='CENTRAL', accion='UNAUTH', id_user=request.user.pk, id_cuenta=central.cuenta.pk,info=f'Intento de ver detalles de central con ID: {central.CentralID} sin autorización')
         return auth_error
     context = {
         'central': central,
@@ -90,17 +96,23 @@ def _create_or_modify_central(request:HttpRequest,central:Central | None = None)
         observaciones = request.POST.get('observaciones','')
         errors = validate_central(request,nombre)
         if errors:
+            save_log(request, apartado='CENTRAL', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Errores de validación al crear/editar central')
             return HttpResponse(template.render(context,request))
         created_at = now()
         logged_user : User = request.user
 
-        build_central(data={
+        central_builded = build_central(data={
             'nombre':nombre,
             'contacto':persona_de_contacto,
             'mail':mail,
             'observaciones':observaciones,
             'telefono':telefono
         },created_at=created_at,central=central,cuenta=logged_user.cuenta)
+
+        if central is None:
+            save_log(request, apartado='CENTRAL', accion='CREATE', id_user=logged_user.pk, id_cuenta=logged_user.cuenta.pk,info=f'Central creada con ID: {central_builded.CentralID}')
+        else:
+            save_log(request, apartado='CENTRAL', accion='UPDATE', id_user=logged_user.pk, id_cuenta=logged_user.cuenta.pk,info=f'Central actualizada con ID: {central_builded.CentralID}')
 
         return redirect('/backoffice/centrales')
 
