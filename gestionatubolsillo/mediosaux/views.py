@@ -11,6 +11,8 @@ from django.contrib import messages
 
 from .paginators import paginate_medios
 from .validators import validate_medio_auxiliar, validate_medio_auth
+
+from auditloggers.handlers import save_log
 # Create your views here.
 
 
@@ -44,6 +46,7 @@ def create_medio_auxiliar(request:HttpRequest):
         medio_auxiliar.usuario_creador = request.user
         medio_auxiliar.cuenta = request.user.cuenta
         medio_auxiliar.save()
+        save_log(request, apartado='MEDIO_AUXILIAR', accion='CREATE', id_user=request.user.pk, id_cuenta=medio_auxiliar.cuenta.pk,info=f'Medio auxiliar creado con ID: {medio_auxiliar.MedioAuxiliarID}')
         return redirect('/backoffice/medios_auxiliares')
     elif request.method == 'GET':
         template = loader.get_template('mediosaux/form.html')
@@ -58,11 +61,13 @@ def edit_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     auth_error = validate_medio_auth(request,medio_auxiliar)
     if auth_error:
+        save_log(request, apartado='MEDIO_AUXILIAR', accion='UNAUTH', id_user=request.user.pk, id_cuenta=medio_auxiliar.cuenta.pk,info=f'Intento de editar medio auxiliar con ID: {medio_auxiliar.MedioAuxiliarID} sin autorización')
         return auth_error
     if request.method == 'POST':
         nombre = request.POST.get('nombre','')
         errors = validate_medio_auxiliar(request,nombre)
         if errors:
+            save_log(request, apartado='MEDIO_AUXILIAR', accion='ERROR', id_user=request.user.pk, id_cuenta=medio_auxiliar.cuenta.pk,info=f'Error al editar medio auxiliar con ID: {medio_auxiliar.MedioAuxiliarID}')
             template = loader.get_template('mediosaux/form.html')
             context = {
                 'medio_auxiliar': medio_auxiliar,
@@ -71,6 +76,7 @@ def edit_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
             return HttpResponse(template.render(context,request))
         medio_auxiliar.nombre = nombre
         medio_auxiliar.save()
+        save_log(request, apartado='MEDIO_AUXILIAR', accion='UPDATE', id_user=request.user.pk, id_cuenta=medio_auxiliar.cuenta.pk,info=f'Medio auxiliar editado con ID: {medio_auxiliar.MedioAuxiliarID}')
         return redirect('/backoffice/medios_auxiliares')
     elif request.method == 'GET':
         template = loader.get_template('mediosaux/form.html')
@@ -88,7 +94,9 @@ def delete_medio_auxiliar(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     auth_error = validate_medio_auth(request,medio_auxiliar)
     if auth_error:
+        save_log(request, apartado='MEDIO_AUXILIAR', accion='UNAUTH', id_user=request.user.pk, id_cuenta=medio_auxiliar.cuenta.pk,info=f'Intento de eliminar medio auxiliar con ID: {medio_auxiliar.MedioAuxiliarID} sin autorización')
         return auth_error
+    save_log(request, apartado='MEDIO_AUXILIAR', accion='DELETE', id_user=request.user.pk, id_cuenta=medio_auxiliar.cuenta.pk,info=f'Medio auxiliar eliminado con ID: {medio_auxiliar.MedioAuxiliarID}')
     medio_auxiliar.delete()
     messages.success(request,"Medio auxiliar eliminado correctamente",extra_tags='success')
     return redirect('/backoffice/medios_auxiliares')
@@ -101,6 +109,7 @@ def medio_auxiliar_details(request:HttpRequest, medio_auxiliar_id):
     medio_auxiliar = MedioAuxiliar.objects.filter(MedioAuxiliarID=medio_auxiliar_id).first()
     auth_error = validate_medio_auth(request,medio_auxiliar)
     if auth_error:
+        save_log(request, apartado='MEDIO_AUXILIAR', accion='UNAUTH', id_user=request.user.pk, id_cuenta=medio_auxiliar.cuenta.pk,info=f'Intento de ver detalles de medio auxiliar con ID: {medio_auxiliar.MedioAuxiliarID} sin autorización')
         return auth_error
     context = {
         'medio_auxiliar': medio_auxiliar,
