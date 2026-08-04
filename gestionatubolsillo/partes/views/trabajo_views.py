@@ -18,6 +18,8 @@ from clientes.models import Cliente
 from servicios.models import Servicio
 from datetime import datetime
 
+from auditloggers.handlers import save_log
+
 ERROR_NOT_FOUND_REDIRECT = '/backoffice/partes_trabajo'
 
 @login_required
@@ -52,10 +54,11 @@ def create_parte_trabajo(request:HttpRequest):
 
         errors = validate_parte_trabajo(request, cliente_id, servicio_id, usuario_id)
         if errors:
+            save_log(request, apartado='PARTE', accion='ERROR', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info='Error al crear parte de trabajo')
             return HttpResponse(template.render(context,request))
         created_at = now()
         fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
-        build_parte_trabajo(data={
+        parte = build_parte_trabajo(data={
             'general':{
                 'usuario_asignado': User.objects.get(UserID=usuario_id),
                 'cliente': Cliente.objects.get(ClienteID=cliente_id),
@@ -64,6 +67,7 @@ def create_parte_trabajo(request:HttpRequest):
             'servicio': Servicio.objects.get(ServicioID=servicio_id),
             'observaciones': observaciones
         }, user=user,created_at=created_at, fecha_inicio_registrada=fecha)
+        save_log(request, apartado='PARTE', accion='CREATE', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info=f'Parte de trabajo creado con ID: {parte.ParteTrabajoID}')
 
         return redirect('/backoffice/partes_trabajo')
 
@@ -94,6 +98,7 @@ def cerrar_parte_trabajo(request:HttpRequest,parte_id):
     linea_fin.fecha_registrada = fecha_fin_registrada
     linea_fin.parte_trabajo = parte
     linea_fin.save()
+    save_log(request, apartado='PARTE', accion='UPDATE', id_user=request.user.pk, id_cuenta=parte.cuenta.pk,info=f'Parte de trabajo cerrado con ID: {parte.ParteTrabajoID}')
     return redirect(f'/backoffice/partes/{parte_id}')
 
 @login_required
@@ -136,6 +141,7 @@ def relevar_usuario_parte_trabajo(request:HttpRequest,parte_id):
         fecha_registrada=relevo_at,
         parte_trabajo=parte,
     )
+    save_log(request, apartado='PARTE', accion='UPDATE', id_user=request.user.pk, id_cuenta=parte.cuenta.pk,info=f'Parte de trabajo con ID: {parte.ParteTrabajoID} relevado a usuario {usuario_relevo.username if usuario_relevo else "N/A"}')
 
     return redirect(f'/backoffice/partes/{parte_id}')
 
@@ -158,6 +164,7 @@ def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
     extra_info = request.POST.get('extra')
     errors = validate_linea_parte_trabajo(request,actividad)
     if errors:
+        save_log(request, apartado='PARTE', accion='ERROR', id_user=request.user.pk, id_cuenta=parte.cuenta.pk,info=f'Error al agregar actividad al parte de trabajo con ID: {parte.ParteTrabajoID}')
         return HttpResponse(template.render(context,request))
     created_at = now()
     fecha = datetime.strptime(fecha_registrada, '%Y-%m-%dT%H:%M') if fecha_registrada else None
@@ -167,6 +174,7 @@ def add_actividad_to_parte_trabajo(request:HttpRequest,p_trabajo_id):
         'fecha_registrada':fecha,
         'parte_trabajo':parte
     },created_at=created_at)
+    save_log(request, apartado='PARTE', accion='UPDATE', id_user=request.user.pk, id_cuenta=parte.cuenta.pk,info=f'Actividad {actividad} agregada al parte de trabajo con ID: {parte.ParteTrabajoID}')
     return redirect(f'/backoffice/partes_trabajo/{p_trabajo_id}')
 
 #Necesario indagar más en estas caracteristicas

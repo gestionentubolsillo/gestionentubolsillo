@@ -7,6 +7,8 @@ from centrales.models import Central
 from .models import Parte, Linea_Parte_Trabajo
 from django.shortcuts import redirect
 
+from auditloggers.handlers import save_log
+
 
 def validate_parte_trabajo(request: HttpRequest, cliente_id: int, servicio_id: int, usuario_id: int) -> bool:
     errors = _validate_common_partes(request=request,cliente_id=cliente_id,usuario_id=usuario_id)
@@ -94,7 +96,9 @@ def validate_auth_parte(request:HttpRequest,parte:Parte, not_found_route:str):
     logged_user : User = request.user
     if not parte:
         messages.error(request, 'No se encontró el informe solicitado.', extra_tags='error')
+        save_log(request, apartado='PARTE', accion='ERROR', id_user=request.user.pk, id_cuenta=logged_user.cuenta.pk,info='Error al acceder a parte: no se encontró el informe solicitado')
         return redirect(not_found_route)
     if logged_user.cuenta != parte.cuenta:
+        save_log(request, apartado='PARTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=logged_user.cuenta.pk,info=f'Intento de acceder a parte con ID: {parte.pk} sin autorización')
         return redirect("/AuthError")
     return None
