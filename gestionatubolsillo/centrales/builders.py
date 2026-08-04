@@ -21,3 +21,5 @@ def build_central(data:CentralData,cuenta: Cuenta,created_at:datetime |None = No
     central.persona_de_contacto = data.get('contacto')
     central.observaciones = data.get('observaciones')
     central.save()
+
+    return central

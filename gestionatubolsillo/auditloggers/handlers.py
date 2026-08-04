@@ -10,7 +10,7 @@ def get_client_ip(request:HttpRequest):
     return ip
 
 
-def save_log(request:HttpRequest,apartado,accion,id_user=None,id_client=None,id_cuenta=None)->None:
+def save_log(request:HttpRequest,apartado,accion,id_user=None,id_client=None,id_cuenta=None,info=None)->None:
     if id_cuenta is None:
         return # No se puede guardar el log sin una cuenta asociada
     ip = get_client_ip(request)
@@ -35,6 +35,7 @@ def save_log(request:HttpRequest,apartado,accion,id_user=None,id_client=None,id_
         ip_sesion=ip,
         device_name=device_name,
         browser_name_version=browser_name_version,
+        extra_info=info
     )
     log.save()
 
