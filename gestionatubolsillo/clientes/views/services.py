@@ -12,6 +12,7 @@ from users.models import can_access_backoffice
 from empresas.models import Empresa
 
 from clientes.validators import validate_servicios_cliente, validate_auth_client
+from auditloggers.handlers import save_log
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -21,6 +22,7 @@ def add_servicios_to_cliente(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
     if auth_error:
+        save_log(request, apartado='CLIENTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cliente.cuenta.pk,info=f'Intento de agregar servicios a cliente con ID: {cliente.ClienteID} sin autorización')
         return auth_error
     return _change_servicios_de_cliente(request,cliente,action=ClienteAccionServicios.ADD)
 
@@ -32,6 +34,7 @@ def remove_servicios_to_cliente(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
     if auth_error:
+        save_log(request, apartado='CLIENTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cliente.cuenta.pk,info=f'Intento de eliminar servicios a cliente con ID: {cliente.ClienteID} sin autorización')
         return auth_error
     return _change_servicios_de_cliente(request,cliente,action=ClienteAccionServicios.REMOVE)
 
@@ -55,12 +58,15 @@ def _change_servicios_de_cliente(request:HttpRequest,cliente:Cliente,action:Clie
         servicios_ids = request.POST.getlist('servicios_ids')
         errors = validate_servicios_cliente(request,servicios_ids,servicios_allowed)
         if errors:
+            save_log(request, apartado='CLIENTE', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Error al agregar/eliminar servicios a cliente')
             return HttpResponse(template.render(context,request))
         servicios = Servicio.objects.filter(ServicioID__in=servicios_ids)
 
         if action == ClienteAccionServicios.ADD:
+            save_log(request, apartado='CLIENTE', accion='UPDATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Servicios agregados al cliente con ID: {cliente.ClienteID}')
             cliente.servicios.add(*servicios)
         elif action == ClienteAccionServicios.REMOVE:
+            save_log(request, apartado='CLIENTE', accion='UPDATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Servicios eliminados del cliente con ID: {cliente.ClienteID}')
             cliente.servicios.remove(*servicios)
         return redirect('/backoffice/clientes/'+str(cliente.ClienteID))
     elif request.method == 'GET':

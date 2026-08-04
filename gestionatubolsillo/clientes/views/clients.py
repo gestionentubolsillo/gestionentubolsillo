@@ -16,6 +16,8 @@ from clientes.paginators import paginate_clientes, paginate_servicios_de_cliente
 from clientes.validators import validate_client, validate_auth_client
 from clientes.builders import build_cliente
 
+from auditloggers.handlers import save_log
+
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_clientes)
@@ -43,6 +45,7 @@ def edit_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
     if auth_error:
+        save_log(request, apartado='CLIENTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cliente.cuenta.pk,info=f'Intento de editar cliente con ID: {cliente.ClienteID} sin autorización')
         return auth_error
     return _create_or_modify_cliente(request,cliente)
 
@@ -54,6 +57,7 @@ def client_details(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
     if auth_error:
+        save_log(request, apartado='CLIENTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cliente.cuenta.pk,info=f'Intento de ver detalles de cliente con ID: {cliente.ClienteID} sin autorización')
         return auth_error
     context = paginate_servicios_de_cliente(request,cliente)
     return render(request,'clientes/form.html',context)
@@ -66,7 +70,9 @@ def delete_client(request:HttpRequest,client_id):
     cliente = Cliente.objects.filter(ClienteID=client_id).first()
     auth_error = validate_auth_client(request,cliente)
     if auth_error:
+        save_log(request, apartado='CLIENTE', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cliente.cuenta.pk,info=f'Intento de eliminar cliente con ID: {cliente.ClienteID} sin autorización')
         return auth_error
+    save_log(request, apartado='CLIENTE', accion='DELETE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Cliente eliminado con ID: {cliente.ClienteID}')
     cliente.delete()
     messages.success(request,"El cliente ha sido eliminado con éxito",extra_tags='success')
     return redirect('/backoffice/clientes')
@@ -93,10 +99,11 @@ def _create_or_modify_cliente(request:HttpRequest,cliente:Cliente|None = None):
         
         errors = validate_client(request,nombre,provincia,municipio,empresa_id)
         if errors:
+            save_log(request, apartado='CLIENTE', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Error al crear/editar cliente')
             return HttpResponse(template.render(context,request))
         created_at = now()
         empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
-        build_cliente(data={'nombre':nombre,
+        cliente_builded = build_cliente(data={'nombre':nombre,
             'mail':mail,
             'contacto':contacto,
             'direccion':direccion,
@@ -104,6 +111,11 @@ def _create_or_modify_cliente(request:HttpRequest,cliente:Cliente|None = None):
             'municipio':municipio,
             'telefono':telefono,
             'empresa':empresa},created_at=created_at,cliente=cliente,cuenta=user.cuenta)
+
+        if cliente is None:
+            save_log(request, apartado='CLIENTE', accion='CREATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Cliente creado con ID: {cliente_builded.ClienteID}')
+        else:
+            save_log(request, apartado='CLIENTE', accion='UPDATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Cliente editado con ID: {cliente_builded.ClienteID}')
         
         return redirect('/backoffice/clientes')
         
