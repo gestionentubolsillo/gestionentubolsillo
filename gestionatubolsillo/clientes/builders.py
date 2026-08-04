@@ -32,6 +32,8 @@ def build_cliente(data:ClienteData,cuenta:Cuenta,created_at:datetime | None = No
     cliente.empresa = data.get('empresa')
     cliente.save()
 
+    return cliente
+
 
 class UserClientData(TypedDict):
     username:str
