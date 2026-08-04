@@ -30,3 +30,5 @@ def build_sugerencia(data:SugerenciaData, fecha_creacion:datetime,cuenta:Cuenta)
     sugerencia.estado = 'pendiente'
     sugerencia.cuenta = cuenta
     sugerencia.save()
+
+    return sugerencia
