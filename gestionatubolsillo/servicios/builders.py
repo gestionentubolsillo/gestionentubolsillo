@@ -37,6 +37,8 @@ def build_Servicio(data:ServicioData,user:User,created_at:datetime | None = None
     servicio.requiere_gps = data.get('need_gps')
     servicio.save()
 
+    return servicio
+
 
 
 
