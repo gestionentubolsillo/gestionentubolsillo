@@ -17,6 +17,8 @@ from users.paginators import paginate_cuadrantes_users
 from users.builders import build_cuadrante
 from users.validators import can_user_access_cuadrante, validate_cuadrante,validate_account_access
 
+from auditloggers.handlers import save_log
+
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_view_users)
@@ -45,6 +47,7 @@ def cuadrante_details(request:HttpRequest,user_id,cuadrante_id):
     cuadrante = Cuadrante.objects.filter(id=cuadrante_id).first()
     auth_errors = can_user_access_cuadrante(request,user,cuadrante)
     if auth_errors:
+        save_log(request, apartado='USUARIO', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cuadrante.user.cuenta.pk,info='El usuario no tiene acceso al cuadrante')
         return redirect(f"/backoffice/users/{user.UserID}/cuadrantes")
     context = {'usuario':user,'cuadrante':cuadrante,'action':'view'}
     return render(request,'account/users/cuadrantes/form.html',context)
@@ -60,11 +63,13 @@ def show_cuadrante_pdf(request:HttpRequest,user_id,cuadrante_id):
     cuadrante = Cuadrante.objects.filter(id=cuadrante_id).first()
     auth_errors = can_user_access_cuadrante(request,user,cuadrante)
     if auth_errors:
+        save_log(request, apartado='USUARIO', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cuadrante.user.cuenta.pk,info='El usuario no tiene acceso al cuadrante')
         return redirect(f"/backoffice/users/{user.UserID}/cuadrantes")
     
     cuenta:Cuenta = user.cuenta
     plaintext = file_decrypt(enc_file=cuadrante.file, cuenta=cuenta)
     if plaintext is None:
+        save_log(request, apartado='USUARIO', accion='ERROR', id_user=request.user.pk, id_cuenta=cuadrante.user.cuenta.pk,info='Error descifrando el archivo')
         return HttpResponse('Error descifrando el archivo',status=500)
 
     return FileResponse(io.BytesIO(plaintext), content_type='application/pdf',filename=cuadrante.file.tag)
@@ -87,8 +92,8 @@ def create_cuadrante(request:HttpRequest,user_id):
         nombre = request.POST.get('nombre','')
         archivo = request.FILES.get('archivo')
         errors = validate_cuadrante(request,nombre,archivo)
-        print(f"errors={errors}")
         if errors:
+            save_log(request, apartado='USUARIO', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Error al validar cuadrante')
             return HttpResponse(template.render(context,request))
         
         #Cifrar el archivo, guardarlo y crear cuadrante
@@ -96,11 +101,13 @@ def create_cuadrante(request:HttpRequest,user_id):
         encrypted_file = file_encrypt(file=archivo,cuenta=cuenta)
         if encrypted_file is None:
             context['error'] = 'Error cifrando el archivo'
+            save_log(request, apartado='USUARIO', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Error cifrando el archivo')
             return HttpResponse(template.render(context, request))
         file = EncryptedFilePDF.from_cipher(cipher_result=encrypted_file,
             upload_path=f'users-{user.UserID}/cuadrantes/{base64.b64encode(encrypted_file.HMAC).decode()}')
         file.save()
         cuadrante = build_cuadrante(data={'file':file,'nombre':nombre,'user':user})
+        save_log(request, apartado='USUARIO', accion='CREATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Creado cuadrante {cuadrante.nombre} con ID {cuadrante.pk}')
         return redirect(f"/backoffice/users/{user.UserID}/cuadrantes/{cuadrante.pk}")
 
     elif request.method == 'GET':
@@ -120,7 +127,9 @@ def delete_cuadrante(request:HttpRequest,user_id,cuadrante_id):
     cuadrante = Cuadrante.objects.filter(id=cuadrante_id).first()
     auth_errors = can_user_access_cuadrante(request,user,cuadrante)
     if auth_errors:
+        save_log(request, apartado='USUARIO', accion='UNAUTH', id_user=request.user.pk, id_cuenta=cuadrante.user.cuenta.pk,info='El usuario no tiene acceso al cuadrante')
         return redirect(f"/backoffice/users/{user.UserID}/cuadrantes")
     cuadrante.fecha_borrado = now()
     cuadrante.save()
+    save_log(request, apartado='USUARIO', accion='REMOVE', id_user=request.user.pk, id_cuenta=cuadrante.user.cuenta.pk,info=f'Borrado cuadrante {cuadrante.nombre} con ID {cuadrante.pk}')
     return redirect(f"/backoffice/users/{user.UserID}/cuadrantes")
