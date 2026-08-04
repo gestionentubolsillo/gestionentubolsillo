@@ -13,6 +13,8 @@ from enum import Enum
 from users.paginators import paginate_servicios_users
 from users.validators import validate_services_of_user,validate_account_access
 
+from auditloggers.handlers import save_log
+
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
@@ -75,13 +77,16 @@ def _change_user_servicios(request:HttpRequest,user:User,action:ServicioAccionUs
             servicios = Servicio.objects.none()
         errors = validate_services_of_user(request,user,servicios,len(servicios_ids))
         if errors:
+            save_log(request, apartado='USUARIO', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Error al validar servicios del usuario')
             return  HttpResponse(template.render(context,request)) if action == ServicioAccionUser.ADD else redirect(f"/backoffice/users/{str(user.UserID)}/services")
         
 
         if action == ServicioAccionUser.ADD:
+            save_log(request, apartado='USUARIO', accion='UPDATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Asignados servicios al usuario {user.username} con ID {user.UserID}')
             user.servicios.add(*servicios)
         elif action == ServicioAccionUser.REMOVE:
-             user.servicios.remove(*servicios)
+            save_log(request, apartado='USUARIO', accion='UPDATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Removidos servicios del usuario {user.username} con ID {user.UserID}')
+            user.servicios.remove(*servicios)
 
         return redirect(f"/backoffice/users/{str(user.UserID)}/services")
 

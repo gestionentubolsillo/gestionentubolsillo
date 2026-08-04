@@ -7,6 +7,7 @@ from servicios.models import  Servicio
 from .models import User,Cuadrante, PermisosModulo
 from django.shortcuts import redirect
 
+from auditloggers.handlers import save_log
 
 
 MIN_CHARS_PASSWORD = 8
@@ -114,10 +115,13 @@ def validate_cuadrante(request:HttpRequest,nombre,archivo:UploadedFile)->bool:
 
 def validate_account_access(request: HttpRequest, user: User | None):
     if not user:
-        return redirect("/AuthError")
+        save_log(request, apartado='USUARIO', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Intento de acceder a usuario inexistente')
+        messages.error(request,"El usuario no existe",extra_tags='error')
+        return redirect('/backoffice/users')
 
     logged_user: User = request.user
     if logged_user.cuenta != user.cuenta:
+        save_log(request, apartado='USUARIO', accion='UNAUTH', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info='Intento de acceder a usuario de otra cuenta')
         return redirect("/AuthError")
 
     return None

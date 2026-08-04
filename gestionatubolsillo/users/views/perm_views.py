@@ -12,6 +12,8 @@ from django.views.decorators.http import require_GET, require_http_methods
 from users.builders import build_permissions
 from users.validators import validate_perms,validate_account_access
 
+from auditloggers.handlers import save_log
+
 @login_required
 @user_passes_test(can_access_backoffice)
 @user_passes_test(can_CRUD_users)
@@ -57,6 +59,7 @@ def alter_user_permissions(request:HttpRequest,user_id):
         }
         errors = validate_perms(request,permisos)
         if errors:
+            save_log(request, apartado='USUARIO', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Error al validar permisos del usuario')
             return HttpResponse(template.render(context,request))
 
         user = build_permissions(data={
@@ -65,6 +68,7 @@ def alter_user_permissions(request:HttpRequest,user_id):
             'has_login_access':p_login,
             'permisos':permisos
         },user=user)
+        save_log(request, apartado='USUARIO', accion='PERMISSION', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Actualizados permisos del usuario {user.username} con ID {user.UserID}')
         return redirect("/backoffice/users")
 
     elif request.method == 'GET':
@@ -76,9 +80,6 @@ def alter_user_permissions(request:HttpRequest,user_id):
 @require_GET
 def view_user_permissions(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
-    if not user:
-        messages.error(request,"El usuario no existe",extra_tags='error')
-        return redirect('/backoffice/users')
 
     auth_error = validate_account_access(request, user)
     if auth_error:

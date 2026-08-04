@@ -14,6 +14,8 @@ from users.paginators import paginate_users
 from users.builders import build_user
 from users.validators import validate_user,validate_user_edit,validate_account_access
 
+from auditloggers.handlers import save_log
+
 
 @login_required
 @user_passes_test(can_access_backoffice)
@@ -40,9 +42,6 @@ def lista_users(request:HttpRequest):
 @require_GET
 def user_details(request:HttpRequest,user_id):
     user = User.objects.filter(UserID=user_id).first()
-    if not user:
-        messages.error(request,"El usuario no existe",extra_tags='error')
-        return redirect('/backoffice/users')
 
     auth_error = validate_account_access(request, user)
     if auth_error:
@@ -72,7 +71,7 @@ def delete_user(request:HttpRequest,user_id):
     auth_error = validate_account_access(request, user)
     if auth_error:
         return auth_error
-
+    save_log(request, apartado='USUARIO', accion='DELETE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Eliminado usuario {user.username} con ID {user.UserID}')
     user.delete()
     messages.success(request,"El usuario ha sido eliminado correctamente",extra_tags='success')
     return redirect('/backoffice/users')
@@ -116,10 +115,11 @@ def _create_or_modify_user(request:HttpRequest,user:User|None = None):
         else:
             errors = validate_user_edit(request,usuario,nombre,apellidos,provincia,municipio, empresa)
         if errors:
+            save_log(request, apartado='USUARIO', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Error al validar usuario')
             return HttpResponse(template.render(context,request))
         
         user_empresa = Empresa.objects.filter(EmpresaID=empresa).first()
-        user = build_user(data={
+        user_builded = build_user(data={
             'username':usuario,
             'password':password,
             'first_name':nombre,
@@ -139,7 +139,11 @@ def _create_or_modify_user(request:HttpRequest,user:User|None = None):
             'precio_hora':precio_hora,
             'cuenta':logged_user.cuenta
         },user=user)
-        return redirect("/backoffice/users/"+str(user.UserID))
+        if user is None:
+            save_log(request, apartado='USUARIO', accion='CREATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Creado usuario {user_builded.username} con ID {user_builded.UserID}')
+        else:
+            save_log(request, apartado='USUARIO', accion='UPDATE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Editado usuario {user_builded.username} con ID {user_builded.UserID}')
+        return redirect("/backoffice/users/"+str(user_builded.UserID))
 
 
     elif request.method == 'GET':
