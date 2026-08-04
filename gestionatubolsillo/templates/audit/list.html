@@ -1,0 +1,59 @@
+{% extends "navbar.html" %}
+{% load query_filters %}
+{% block body %}
+{% include "backoffice/sidemenu.html" %}
+<main id="main">
+    <div class="main-content">
+        <div class="list-card">
+
+            <div class="list-toolbar">
+                <span class="list-title">
+                    <i class="fas fa-user-clock me-1 text-primary"></i>
+                    Registro de Actividades
+                </span>
+                <form method="get" action="" class="search-box mb-0 d-flex gap-2">
+                    <i class="fas fa-search"></i>
+                    {% include "searchforms/by_name.html" %}
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">ID Usuario</th>
+                            <th scope="col">IP Asociada</th>
+                            <th scope="col">Dispositivo</th>
+                            <th scope="col">Apartado</th>
+                            <th scope="col">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in logs %}
+                        <tr>
+                            <td class="text-muted">{{ item.fecha|date:"d/m/Y H:i" }}</td>
+                            <td class="fw-medium">{{ item.id_usuario_cuenta }}</td>
+                            <td class="text-muted">{{ item.ip_sesion }}</td>
+                            <td class="text-muted">{{ item.browser_name_version }}</td>
+                            <td class="text-muted">{{ item.get_apartado_display }}</td>
+                            <td class="text-muted">{{ item.get_accion_display }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">No hay registros de auditoría.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% include "footers/pagination.html" %}
+
+        </div>
+    </div>
+</main>
+{% endblock body %}

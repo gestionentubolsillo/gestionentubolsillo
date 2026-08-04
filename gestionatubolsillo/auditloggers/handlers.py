@@ -1,9 +1,6 @@
-from django.db.models.signals import post_save,post_delete
-from django.dispatch import receiver
 from django.http import HttpRequest
 from .models import AuditLog
 
-from almacen.models import Almacen_Item
 
 def get_client_ip(request:HttpRequest):
     ip = request.META.get('REMOTE_ADDR')
@@ -13,7 +10,9 @@ def get_client_ip(request:HttpRequest):
     return ip
 
 
-def save_log(request:HttpRequest,apartado,accion,id_user=None,id_client=None)->None:
+def save_log(request:HttpRequest,apartado,accion,id_user=None,id_client=None,id_cuenta=None)->None:
+    if id_cuenta is None:
+        return # No se puede guardar el log sin una cuenta asociada
     ip = get_client_ip(request)
     user_agent = request.META.get('HTTP_USER_AGENT', '') if request is not None else ''
 
@@ -32,6 +31,7 @@ def save_log(request:HttpRequest,apartado,accion,id_user=None,id_client=None)->N
         accion=accion,
         id_usuario_cuenta=id_user,
         id_usuario_cliente=id_client,
+        cuenta_id=id_cuenta,
         ip_sesion=ip,
         device_name=device_name,
         browser_name_version=browser_name_version,
