@@ -15,6 +15,8 @@ from .validators import validate_query_filters, QueryFilterData, parse_datetime,
 from .paginators import paginate_tareas, paginate_listados
 from .filters import filtra_tareas
 from .builders import create_bulk_tareas, build_listado_users
+
+from auditloggers.handlers import save_log
 # Create your views here.
 
 
@@ -59,6 +61,7 @@ def create_tarea(request:HttpRequest):
 
         errors = validate_tarea(request,texto)
         if errors:
+            save_log(request, apartado='TAREA', accion='ERROR', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info='Errores de validación al crear tarea')
             return HttpResponse(template.render(context,request))
         
         created_at = now()
@@ -70,19 +73,24 @@ def create_tarea(request:HttpRequest):
             if empresas_ids:
                 users = User.objects.filter(empresa_id__in=empresas_ids,cuenta=user.cuenta).distinct()
                 create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)
+                save_log(request, apartado='TAREA', accion='CREATE', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info=f'Tarea creada para usuarios de empresas con IDs: {empresas_ids}')
 
             elif listas_usuarios_ids:
                 users = User.objects.filter(listados__id__in=listas_usuarios_ids,cuenta=user.cuenta).distinct()
-                create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)                  
+                create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)
+                save_log(request, apartado='TAREA', accion='CREATE', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info=f'Tarea creada para usuarios de listados con IDs: {listas_usuarios_ids}')
             else:
                 errors = validate_users_assigned(request)
                 if errors:
+                    save_log(request, apartado='TAREA', accion='ERROR', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info='Errores de validación al crear tarea')
                     return HttpResponse(template.render(context,request))
                 users_asigned_id :list[int] = [uid for uid in request.POST.getlist('users_id') if uid]
                 users = User.objects.filter(UserID__in=users_asigned_id,cuenta=user.cuenta)
             
                 create_bulk_tareas(data={'texto':texto,'es_urgente':es_urgente,'usuario_creador':user,'usuarios':users},created_at=created_at,cuenta=user.cuenta)
+                save_log(request, apartado='TAREA', accion='CREATE', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info=f'Tarea creada para usuarios asignados: {users_asigned_id}')
         except ValueError:
+            save_log(request, apartado='TAREA', accion='ERROR', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info='Error inesperado al crear tarea')
             messages.error(request,"Error Inesperado, intente de nuevo", extra_tags='error')
             return HttpResponse(template.render(context,request))
         return redirect('/backoffice/tareas')
@@ -99,6 +107,7 @@ def delete_tarea(request:HttpRequest,tarea_id):
     auth_error = validate_auth_tarea(request,tarea)
     if auth_error:
         return auth_error
+    save_log(request, apartado='TAREA', accion='DELETE', id_user=request.user.pk, id_cuenta=tarea.cuenta.pk,info=f'Tarea eliminada con ID: {tarea.TareaID}')
     tarea.delete()
     messages.success(request,"La tarea se ha eliminado con éxito",extra_tags='success')
     return redirect('/backoffice/tareas')
@@ -116,6 +125,7 @@ def change_state_tarea(request:HttpRequest,tarea_id):
     estado = request.POST.get('estado','pendiente')
     tarea.estado = estado
     tarea.save()
+    save_log(request, apartado='TAREA', accion='UPDATE', id_user=request.user.pk, id_cuenta=tarea.cuenta.pk,info=f'Estado de la tarea con ID: {tarea.TareaID} actualizado a {estado}')
     messages.success(request,"Se acaba de actualizar la tarea correspondiente",extra_tags='success')
     return redirect('/backoffice/tareas')
 
@@ -149,10 +159,12 @@ def create_list_usuarios(request:HttpRequest):
         users_ids = request.POST.getlist('users_ids')
         errors = validate_list_users(request,nombre,users_ids)
         if errors:
+            save_log(request, apartado='TAREA', accion='ERROR', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info='Errores de validación al crear listado de usuarios')
             return HttpResponse(template.render(context,request))
         
         users = User.objects.filter(UserID__in=users_ids)
-        build_listado_users(data={'nombre':nombre,'usuarios':users},cuenta=user.cuenta)
+        listado = build_listado_users(data={'nombre':nombre,'usuarios':users},cuenta=user.cuenta)
+        save_log(request, apartado='TAREA', accion='CREATE', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info=f'Listado de usuarios creado con ID: {listado.pk}')
         return redirect('/backoffice/tareas/listados')
 
     elif request.method == 'GET':
@@ -176,6 +188,7 @@ def edit_list_usuarios(request:HttpRequest,lista_id):
         users_ids = request.POST.getlist('users_ids')
         users = User.objects.filter(UserID__in=users_ids)
         listado.usuarios.set(users)
+        save_log(request, apartado='TAREA', accion='UPDATE', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info=f'Listado de usuarios con ID: {listado.pk} actualizado')
         return redirect('/backoffice/tareas/listados')
     elif request.method == 'GET':
         return HttpResponse(template.render(context,request))

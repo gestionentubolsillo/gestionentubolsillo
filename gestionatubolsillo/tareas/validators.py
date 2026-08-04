@@ -7,6 +7,8 @@ from django.shortcuts import redirect
 from users.models import User
 from .models import Tarea,ListadoUsers
 
+from auditloggers.handlers import save_log
+
 class QueryFilterData(TypedDict):
     usuario_id: str |None
     fecha_inicio: datetime | None
@@ -82,16 +84,20 @@ def validate_users_assigned(request:HttpRequest)->bool:
 def validate_auth_tarea(request:HttpRequest,tarea:Tarea):
     logged_user : User = request.user
     if not tarea:
+        save_log(request, apartado='TAREA', accion='ERROR', id_user=request.user.pk, id_cuenta=logged_user.cuenta.pk,info='Intento de acceder a tarea inexistente')
         messages.error(request,"La tarea no existe",extra_tags='error')
         return redirect('/backoffice/tareas')
     if logged_user.cuenta != tarea.cuenta:
+        save_log(request, apartado='TAREA', accion='UNAUTH', id_user=request.user.pk, id_cuenta=tarea.cuenta.pk,info='Intento de acceder a tarea de otra cuenta')
         return redirect('/AuthError')
     return None
 
 def validate_auth_listado(request:HttpRequest,listado:ListadoUsers):
     logged_user : User = request.user
     if not listado:
+        save_log(request, apartado='TAREA', accion='ERROR', id_user=request.user.pk, id_cuenta=logged_user.cuenta.pk,info='Intento de acceder a listado inexistente')
         return redirect('/backoffice/tareas/listados')
     if logged_user.cuenta != listado.cuenta:
+        save_log(request, apartado='TAREA', accion='UNAUTH', id_user=request.user.pk, id_cuenta=listado.cuenta.pk,info='Intento de acceder a listado de otra cuenta')
         return redirect('/AuthError')
     return None

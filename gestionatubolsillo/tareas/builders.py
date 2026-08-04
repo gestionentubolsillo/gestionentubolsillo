@@ -40,3 +40,5 @@ def build_listado_users(data:ListaUserData,cuenta:Cuenta):
     listado.cuenta = cuenta
     listado.save()
     listado.usuarios.set(data.get('usuarios'))
+
+    return listado
