@@ -38,7 +38,6 @@ def delete_delegacion(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
     auth_error = validate_auth_delegacion(request,delegacion)
     if auth_error:
-        save_log(request, apartado='DELEGACION', accion='UNAUTH', id_user=request.user.pk, id_cuenta=delegacion.cuenta.pk,info=f'Intento de eliminar delegación con ID: {delegacion.DelegacionID} sin autorización')
         return auth_error
     save_log(request, apartado='DELEGACION', accion='DELETE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Delegación eliminada con ID: {delegacion.DelegacionID}')
     delegacion.delete()
@@ -52,7 +51,6 @@ def edit_delegacion(request: HttpRequest, delegacion_id):
     delegacion = Delegacion.objects.filter(DelegacionID=delegacion_id).first()
     auth_error = validate_auth_delegacion(request,delegacion)
     if auth_error:
-        save_log(request, apartado='DELEGACION', accion='UNAUTH', id_user=request.user.pk, id_cuenta=delegacion.cuenta.pk,info=f'Intento de editar delegación con ID: {delegacion.DelegacionID} sin autorización')
         return auth_error
     return _create_or_modify_delegacion(request,delegacion)
     

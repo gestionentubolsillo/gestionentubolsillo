@@ -44,7 +44,6 @@ def edit_central(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
     auth_error = validate_auth_central(request,central)
     if auth_error:
-        save_log(request, apartado='CENTRAL', accion='UNAUTH', id_user=request.user.pk, id_cuenta=central.cuenta.pk,info=f'Intento de editar central con ID: {central.CentralID} sin autorización')
         return auth_error
     return _create_or_modify_central(request,central)
 
@@ -56,7 +55,6 @@ def delete_central(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
     auth_error = validate_auth_central(request,central)
     if auth_error:
-        save_log(request, apartado='CENTRAL', accion='UNAUTH', id_user=request.user.pk, id_cuenta=central.cuenta.pk,info=f'Intento de eliminar central con ID: {central.CentralID} sin autorización')
         return auth_error
     save_log(request, apartado='CENTRAL', accion='DELETE', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info=f'Central eliminada con ID: {central.CentralID}')
     central.delete()
@@ -71,7 +69,6 @@ def central_details(request: HttpRequest, central_id):
     central = Central.objects.filter(CentralID=central_id).first()
     auth_error = validate_auth_central(request,central)
     if auth_error:
-        save_log(request, apartado='CENTRAL', accion='UNAUTH', id_user=request.user.pk, id_cuenta=central.cuenta.pk,info=f'Intento de ver detalles de central con ID: {central.CentralID} sin autorización')
         return auth_error
     context = {
         'central': central,

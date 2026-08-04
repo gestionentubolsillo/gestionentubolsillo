@@ -43,7 +43,6 @@ def details_empresa(request,empresa_id):
 
     auth_error = validate_auth_empresa(request,empresa)
     if auth_error:
-        save_log(request, apartado='EMPRESA', accion='UNAUTH', id_user=request.user.pk, id_cuenta=empresa.cuenta.pk,info=f'Intento de ver detalles de empresa con ID: {empresa.EmpresaID} sin autorización')
         return auth_error
     
     context = {
@@ -60,7 +59,6 @@ def edit_empresa(request : HttpRequest,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
     auth_error = validate_auth_empresa(request,empresa)
     if auth_error:
-        save_log(request, apartado='EMPRESA', accion='UNAUTH', id_user=request.user.pk, id_cuenta=empresa.cuenta.pk,info=f'Intento de editar empresa con ID: {empresa.EmpresaID} sin autorización')
         return auth_error
     return _create_or_modify_empresa(request,empresa)
     
@@ -73,7 +71,6 @@ def delete_empresa(request:HttpRequest,empresa_id):
     empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
     auth_error = validate_auth_empresa(request,empresa)
     if auth_error:
-        save_log(request, apartado='EMPRESA', accion='UNAUTH', id_user=request.user.pk, id_cuenta=empresa.cuenta.pk,info=f'Intento de eliminar empresa con ID: {empresa.EmpresaID} sin autorización')
         return auth_error
     save_log(request, apartado='EMPRESA', accion='DELETE', id_user=request.user.pk, id_cuenta=empresa.cuenta.pk,info=f'Empresa eliminada con ID: {empresa.EmpresaID}')
     empresa.delete()

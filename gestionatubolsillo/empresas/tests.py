@@ -28,6 +28,11 @@ class EmpresaTestsView(EmpresaTest):
         response = self.client.get(path=f'/backoffice/empresas/{self.other_user.empresa.EmpresaID}')
         self.assertEqual(response.status_code,302)
 
+    def test_view_empresa_not_found_fails(self):
+        self.assertLogin()
+        response = self.client.get(path=f'/backoffice/empresas/999')
+        self.assertRedirects(response,expected_url='/backoffice/empresas')
+
 class EmpresaTestsCreate(EmpresaTest):
 
     def test_create_empresa_possitive(self):
