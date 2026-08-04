@@ -15,6 +15,7 @@ from .paginators import paginate_sugerencias
 from .validators import validate_sugerencia, validate_auth_sugerencia
 from .builders import build_sugerencia
 
+from auditloggers.handlers import save_log
 
 
 # Create your views here.
@@ -62,10 +63,11 @@ def create_sugerencia(request:HttpRequest):
 
         errors = validate_sugerencia(request,texto,usuario_referente_id)
         if errors:
+            save_log(request, apartado='SUGERENCIA', accion='ERROR', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info='Errores de validación al crear sugerencia')
             return HttpResponse(template.render(context,request))
         
         user_ref = User.objects.filter(UserID=usuario_referente_id).first()
-        build_sugerencia(
+        sugerencia = build_sugerencia(
             data={
                 'texto':texto,
                 'departamento':departamento,
@@ -73,6 +75,7 @@ def create_sugerencia(request:HttpRequest):
                 'usuario_referente':user_ref
             },fecha_creacion=created_at,cuenta=user.cuenta
         )
+        save_log(request, apartado='SUGERENCIA', accion='CREATE', id_user=request.user.pk, id_cuenta=user.cuenta.pk,info=f'Sugerencia creada con ID: {sugerencia.SugerenciaID}')
         return redirect('/backoffice/sugerencias')
     elif request.method == 'GET':
         return HttpResponse(template.render(context,request))
@@ -90,6 +93,7 @@ def update_estado_sugerencia(request:HttpRequest, sugerencia_id):
     estado = request.POST.get('estado','pendiente')
     sugerencia.estado = estado
     sugerencia.save()
+    save_log(request, apartado='SUGERENCIA', accion='UPDATE_ESTADO', id_user=request.user.pk, id_cuenta=sugerencia.cuenta.pk,info=f'Estado de la sugerencia con ID: {sugerencia.SugerenciaID} actualizado a {estado}')
     messages.success(request, 'El estado de la sugerencia ha sido actualizado exitosamente.',extra_tags='success')
     return redirect('/backoffice/sugerencias')
 
@@ -104,6 +108,7 @@ def delete_sugerencia(request:HttpRequest, sugerencia_id):
         return auth_error
     sugerencia.estado = 'borrada'
     sugerencia.save()
+    save_log(request, apartado='SUGERENCIA', accion='REMOVE', id_user=request.user.pk, id_cuenta=sugerencia.cuenta.pk,info=f'Sugerencia con ID: {sugerencia.SugerenciaID} borrada')
     messages.success(request, 'La sugerencia ha sido borrada exitosamente.',extra_tags='success')
     return redirect('/backoffice/sugerencias')
 

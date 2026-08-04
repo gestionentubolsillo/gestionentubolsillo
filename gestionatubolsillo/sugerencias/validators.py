@@ -4,7 +4,7 @@ from users.models import User
 from .models import Sugerencia
 from django.shortcuts import redirect
 
-
+from auditloggers.handlers import save_log
 
 
 def validate_sugerencia(request:HttpRequest, texto, usuario_referente_id)->bool:
@@ -24,8 +24,10 @@ def validate_sugerencia(request:HttpRequest, texto, usuario_referente_id)->bool:
 def validate_auth_sugerencia(request:HttpRequest,sugerencia:Sugerencia):
     logged_user : User = request.user
     if not sugerencia:
+        save_log(request, apartado='SUGERENCIA', accion='UNAUTH', id_user=request.user.pk, id_cuenta=logged_user.cuenta.pk,info=f'Intento de acceder a sugerencia inexistente')
         messages.error(request,"La Sugerencia no existe", extra_tags='error')
         return redirect('/backoffice/sugerencias')
     if logged_user.cuenta != sugerencia.cuenta:
+        save_log(request, apartado='SUGERENCIA', accion='UNAUTH', id_user=request.user.pk, id_cuenta=sugerencia.cuenta.pk,info=f'Intento de acceder a sugerencia de otra cuenta')
         return redirect('/AuthError')
     return None
