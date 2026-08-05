@@ -79,7 +79,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'clientes.middleware.ClientSessionMiddleware'
+    'clientes.middleware.ClientSessionMiddleware',
+    'authentication.middleware.JWTAuthenticationMiddleware',  # Middleware para JWT
 ]
 
 ROOT_URLCONF = 'gestionatubolsillo.urls'
