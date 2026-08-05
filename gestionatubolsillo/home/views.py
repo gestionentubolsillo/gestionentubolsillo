@@ -7,3 +7,7 @@ from django.template import loader
 def home(request):
     template = loader.get_template('home/home.html')
     return HttpResponse(template.render({}, request))
+
+def robots_txt(request):
+    content = "User-agent: *\nDisallow: /backoffice/\nDisallow: /login\nDisallow: /logout\nDisallow: /admin/\n"
+    return HttpResponse(content, content_type="text/plain")
