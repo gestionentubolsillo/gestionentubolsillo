@@ -71,6 +71,7 @@ class User(AbstractUser):
     esInspector_parteTrabajo = models.BooleanField(default=False)
     has_login_access = models.BooleanField(default=True)
     has_dashboard_access = models.BooleanField(default=False)
+    token_version = models.IntegerField(default=0)  # Campo para la versión del token
     
 
     can_view_own_partes_trabajo = models.BooleanField(default=False)  # Permiso adicional para ver solo sus propios registros

@@ -1,3 +1,5 @@
+from datetime import timedelta, timezone, datetime
+
 from django.shortcuts import redirect
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as auth_login
@@ -10,6 +12,9 @@ from clientes.models import user_client
 from auditloggers.handlers import save_log
 from users.models import User
 
+import jwt
+from django.conf import settings
+
 # Create your views here.
 @require_http_methods(["GET","POST"])
 def login(request:HttpRequest):
@@ -20,12 +25,26 @@ def login(request:HttpRequest):
         if user is not None:
             auth_login(request, user)
             save_log(request, apartado='LOGIN', accion='AUTH', id_user=user.pk, id_cuenta=user.cuenta.pk)
-            return redirect(reverse('home'))
+
+            #JWT Token Generation
+            payload = {
+                'user_id': user.pk,
+                'token_version': user.token_version,
+                'exp':datetime.now(timezone.utc) + timedelta(hours=1),  # Token válido por 1 hora
+                'iat': datetime.now(timezone.utc),
+            }
+            token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+            response = redirect(reverse('home'))
+            response.set_cookie('jwt_token', token, httponly=True, secure=not settings.DEBUG, samesite='Lax')
+            return response
         else:
             # Credenciales inválidas, mostrar mensaje de error
             messages.error(request, "Credenciales inválidas. Por favor, inténtalo de nuevo.", extra_tags='error')
-            intento_usuario = User.objects.get(username=username)
-            save_log(request, apartado='LOGIN', accion='ERROR', id_cuenta=intento_usuario.cuenta.pk if intento_usuario else None, id_user=intento_usuario.pk if intento_usuario else None)
+            try:
+                intento_usuario = User.objects.get(username=username)
+                save_log(request, apartado='LOGIN', accion='ERROR', id_cuenta=intento_usuario.cuenta.pk if intento_usuario else None, id_user=intento_usuario.pk if intento_usuario else None)
+            except User.DoesNotExist:
+                pass
             return redirect('/login')
     else:
         template = loader.get_template('account/login.html')
@@ -73,7 +92,9 @@ def login_cli(request:HttpRequest):
 def logout_view(request:HttpRequest):
     save_log(request, apartado='LOGIN', accion='OUT', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk)
     logout(request)
-    return redirect('/')
+    response = redirect('/')
+    response.delete_cookie('jwt_token')  # Eliminar la cookie del token JWT
+    return response
 
 def logout_cli(request:HttpRequest):
     pass
