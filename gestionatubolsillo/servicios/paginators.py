@@ -10,7 +10,7 @@ DEFAULT_PAGINATION_SERVICIOS_CLIENTES = 25
 
 def paginate_servicios(request:HttpRequest,servicios:BaseManager[Servicio]):
     user:User = request.user
-    empresas = Empresa.objects.filter(usuario_creador_id=user.UserID)
+    empresas = Empresa.objects.filter(cuenta=user.cuenta)
     n_pagina = request.GET.get('page', 1)
     global DEFAULT_PAGINATION_SERVICIOS
     n_servicios = request.GET.get('n_servicios', DEFAULT_PAGINATION_SERVICIOS)

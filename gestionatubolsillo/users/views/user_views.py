@@ -80,7 +80,7 @@ def _create_or_modify_user(request:HttpRequest,user:User|None = None):
 
     template = loader.get_template('account/users/form.html')
     logged_user:User=request.user
-    empresas = Empresa.objects.filter(usuario_creador_id=logged_user.UserID)
+    empresas = Empresa.objects.filter(cuenta=logged_user.cuenta)
     categorias = User._meta.get_field('categoria').choices
     if user is None:
         context = {'action':'create','empresas':empresas,'categorias_choices':categorias}
@@ -118,7 +118,7 @@ def _create_or_modify_user(request:HttpRequest,user:User|None = None):
             save_log(request, apartado='USUARIO', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Error al validar usuario')
             return HttpResponse(template.render(context,request))
         
-        user_empresa = Empresa.objects.filter(EmpresaID=empresa).first()
+        user_empresa = Empresa.objects.filter(EmpresaID=empresa, cuenta=logged_user.cuenta).first()
         user_builded = build_user(data={
             'username':usuario,
             'password':password,

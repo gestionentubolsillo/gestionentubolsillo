@@ -157,7 +157,7 @@ def _change_clientes_Servicio(request:HttpRequest,servicio:Servicio,action:Servi
 def _create_or_update_servicio(request:HttpRequest,servicio:Servicio | None = None):
     user:User = request.user
     dias_choices = Servicio._meta.get_field('dias_semana').choices
-    empresas = Empresa.objects.filter(usuario_creador_id = user.UserID)
+    empresas = Empresa.objects.filter(cuenta=user.cuenta)
     template = loader.get_template('servicios/form.html')
     if servicio is None:
         context = {'action':'create','dias_choices':dias_choices,'empresas':empresas}
@@ -183,7 +183,7 @@ def _create_or_update_servicio(request:HttpRequest,servicio:Servicio | None = No
             return HttpResponse(template.render(context,request))
         
         created_at = now()
-        empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
+        empresa = Empresa.objects.filter(EmpresaID=empresa_id, cuenta=user.cuenta).first()
         servicio_builded = build_Servicio(data={
             'nombre':nombre,
             'descripcion':descripcion,
