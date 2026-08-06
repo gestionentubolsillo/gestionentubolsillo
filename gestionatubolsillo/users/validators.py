@@ -50,6 +50,34 @@ def validate_user(request : HttpRequest,
         errors = True
     return errors
 
+def validate_register(request : HttpRequest,
+                  usuario,password,confirm_password,nombre,apellidos,
+                  provincia,municipio)->bool:
+    errors = False
+    global MIN_CHARS_PASSWORD
+    if usuario == '':
+        messages.error(request,"El nombre de usuario no puede estar vacío", extra_tags='error')
+        errors = True
+    if password == '':
+        messages.error(request,"La contraseña no puede estar vacía",extra_tags='error')
+        errors = True
+    if password != confirm_password:
+        messages.error(request,"Las contraseñas no coinciden",extra_tags='error')
+        errors = True
+    if len(password) < MIN_CHARS_PASSWORD:
+        messages.error(request,f"La contraseña debe tener al menos {MIN_CHARS_PASSWORD} caracteres",extra_tags='error')
+        errors = True
+    if nombre == '' or apellidos == '':
+        messages.error(request,"El nombre o apellidos no pueden estar vacíos",extra_tags='error')
+        errors = True
+    if provincia == '':
+        messages.error(request,"Debe indicar la provincia a la que pertenece",extra_tags='error')
+        errors = True
+    if municipio == '':
+        messages.error(request,"Debe indicar el municipio al que pertenece",extra_tags='error')
+        errors = True
+    return errors
+
 def validate_user_edit(request : HttpRequest,
                   usuario,nombre,apellidos,
                   provincia,municipio,empresa)->bool:
