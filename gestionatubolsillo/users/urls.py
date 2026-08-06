@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import user_views, cuadrante_views, perm_views, service_views, tarea_views
+from .views import user_views, cuadrante_views, perm_views, service_views, tarea_views, register_view
 urlpatterns = [
     # Aquí puedes agregar las rutas de tu aplicación
     #User
@@ -22,5 +22,7 @@ urlpatterns = [
     path('backoffice/users/<int:user_id>/cuadrantes/<int:cuadrante_id>/pdf',cuadrante_views.show_cuadrante_pdf,name='show_pdf'),
     path('backoffice/users/<int:user_id>/cuadrantes/<int:cuadrante_id>/delete',cuadrante_views.delete_cuadrante),
     #Tareas
-    path('backoffice/users/<int:user_id>/tareas',tarea_views.list_tareas_user)
+    path('backoffice/users/<int:user_id>/tareas',tarea_views.list_tareas_user),
+    #Registro de usuarios
+    path('register',register_view.register_new_user,name='register'),
 ]
