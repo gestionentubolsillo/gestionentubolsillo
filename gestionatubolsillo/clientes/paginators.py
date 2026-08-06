@@ -11,7 +11,7 @@ DEFAULT_PAGINATION_USER_CLI = 25
 
 def paginate_clientes(request:HttpRequest,clientes:BaseManager[Cliente]):
     user:User = request.user
-    empresas = Empresa.objects.filter(usuario_creador_id=user.UserID)
+    empresas = Empresa.objects.filter(cuenta=user.cuenta)
     empresa:Empresa = user.empresa
     n_pagina = request.GET.get('page', 1)
     global DEFAULT_PAGINATION_CLIENTS

@@ -77,7 +77,7 @@ def delete_client(request:HttpRequest,client_id):
 def _create_or_modify_cliente(request:HttpRequest,cliente:Cliente|None = None):
     template = loader.get_template('clientes/form.html')
     user:User = request.user
-    empresas = Empresa.objects.filter(usuario_creador_id=user.UserID)
+    empresas = Empresa.objects.filter(cuenta=user.cuenta)
 
     if cliente is None:
         context = {'action':'create','empresas':empresas}
@@ -99,7 +99,7 @@ def _create_or_modify_cliente(request:HttpRequest,cliente:Cliente|None = None):
             save_log(request, apartado='CLIENTE', accion='ERROR', id_user=request.user.pk, id_cuenta=request.user.cuenta.pk,info='Error al crear/editar cliente')
             return HttpResponse(template.render(context,request))
         created_at = now()
-        empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
+        empresa = Empresa.objects.filter(EmpresaID=empresa_id, cuenta=user.cuenta).first()
         cliente_builded = build_cliente(data={'nombre':nombre,
             'mail':mail,
             'contacto':contacto,

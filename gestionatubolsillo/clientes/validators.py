@@ -22,7 +22,7 @@ def validate_client(request:HttpRequest,nombre,provincia,municipio,empresa_id)->
         messages.error(request,"Debe indicar provincia y municipio al que pertenece",extra_tags='error')
         errors = True
     try:
-        empresa = Empresa.objects.filter(EmpresaID=empresa_id).first()
+        empresa = Empresa.objects.filter(EmpresaID=empresa_id, cuenta=request.user.cuenta).first()
     except ValueError:
         empresa = None
     if empresa is None:
